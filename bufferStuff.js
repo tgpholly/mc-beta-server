@@ -1,7 +1,10 @@
 module.exports.Writer = class {
 	constructor() {
 		this.buffer = Buffer.alloc(0);
-		this.offset = 0;
+	}
+
+	reset() {
+		this.buffer = Buffer.alloc(0);
 	}
 
 	writeBuffer(buff = Buffer.alloc(0)) {
