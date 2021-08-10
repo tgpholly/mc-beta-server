@@ -45,8 +45,8 @@ module.exports = class {
 			}
 			for(let i4 = l1; i4 <= j2; i4++)
 			{
-				let j4 = k - i4 * 16;
-				let k4 = (k + j1) - i4 * 16;
+				let j4 = zPos - i4 * 16;
+				let k4 = (zPos + j1) - i4 * 16;
 				if(j4 < 0)
 				{
 					j4 = 0;
@@ -55,7 +55,7 @@ module.exports = class {
 				{
 					k4 = 16;
 				}
-				k2 = getChunkFromChunkCoords(j3, i4).getChunkData(abyte0, k3, l2, j4, l3, i3, k4, k2);
+				k2 = 1;//getChunkFromChunkCoords(j3, i4).getChunkData(abyte0, k3, l2, j4, l3, i3, k4, k2);
 			}
 	
 		}

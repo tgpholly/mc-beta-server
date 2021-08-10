@@ -1,11 +1,17 @@
 const net = require('net');
 const port = 25565;
 
-const { createGzip, deflate } = require("zlib");
+const { createGzip, deflateSync } = require("zlib");
 
 const chunk = require("./chunk.js");
 
 const myman = require("./bufferStuff.js");
+
+const users = [];
+
+function addUser(socket, username) {
+	users.push([users.length + 1, socket, username]);
+}
 
 const server = new net.Server();
 
@@ -39,6 +45,10 @@ server.on('connection', function(socket) {
 
 			case 2:
 				handshake(socket, reader);
+				break;
+
+			case 3:
+				sendChat(socket, reader);
 				break;
 
 			case 0x0B:
@@ -95,6 +105,16 @@ function loginRequest(socket, reader = new myman.Reader) {
 	socket.write(writer.buffer);
 
 	preChunk(socket, 0, 0, true);
+
+	//writeChunk(socket);
+
+	writer.buffer = Buffer.alloc(0);
+
+	writer.writeByte(0x0A);
+
+	writer.writeBool(true);
+
+	socket.write(writer.buffer);
 }
 
 function handshake(socket, reader = new myman.Reader) {
@@ -107,6 +127,20 @@ function handshake(socket, reader = new myman.Reader) {
 	writer.writeString("-");
 
 	socket.write(writer.buffer);
+}
+
+function sendChat(socket, reader = new myman.Reader) {
+	const message = reader.readString();
+
+	if (message.length < 120) {
+		const writer = new myman.Writer();
+
+		writer.writeByte(0x03);
+
+		writer.writeString(message);
+
+		socket.write(writer.buffer);
+	}
 }
 
 function playerLook(socket, reader = new myman.Reader) {
@@ -136,14 +170,29 @@ function preChunk(socket, x, y, load = false) {
 	socket.write(writer.buffer);
 }
 
-function writeChunk() {
+function writeChunk(socket) {
 	const writer = new myman.Writer();
 
 	writer.writeByte(0x33); // ID
+	
+	const chank = new chunk(0, 0);
+
+	const buf = Buffer.alloc((15 * 127 * 15 * 5) / 2);
+
+	const defl = deflateSync(chank.getChunkData(0, 0, 0, 15, 127, 15), {level:-1});
+
 	writer.writeInt(0);		// Chunk X
 	writer.writeShort(0);	// Chunk Y
-	writer.writeByte(15);	// Chunk Z
-	writer.writeByte(127);	// Chunk Size X
-	writer.writeByte(15);	// Chunk Size Y
-	writer.writeInt(5);		// Chunk Size Z
+	writer.writeInt(0);		// Chunk Z
+	writer.writeByte(15);	// Chunk Size X	
+	writer.writeByte(127);	// Chunk Size Y
+	writer.writeByte(15);	// Chunk Size Z
+	writer.writeInt(defl.length);	// Compressed size
+	console.log(defl.length);
+	console.log(defl.toString());
+	for (let i = 0; i < defl.length; i++) {
+		writer.writeByte(defl[i] - 128);	// Compressed data
+	}
+
+	socket.write(writer.buffer);
 }
