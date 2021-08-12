@@ -49,12 +49,19 @@ module.exports.init = function(config) {
     console.log(`Up! Running at 0.0.0.0:${config.port}`);
 
 	tickInterval = setInterval(() => {
+		if (tickCounter % tickRate == 0) {
+			for (let key of netUserKeys) {
+				netUsers[key].socket.write(new PacketMappingTable[NamedPackets.KeepAlive]().writePacket());
+			}
+		}
 		// Update Chunks
 		if (!global.generatingChunks) {
 			let itemsToRemove = [];
 			for (let i = 0; i < Math.min(global.chunkManager.queuedBlockUpdates.getLength(), 128); i++) {
 				const chunkUpdateKey = global.chunkManager.queuedBlockUpdates.itemKeys[i];
 				const chunkUpdate = global.chunkManager.queuedBlockUpdates.items[chunkUpdateKey];
+				if (global.chunkManager.chunks[chunkUpdate[1]] == null) continue;
+				if (global.chunkManager.chunks[chunkUpdate[1]][chunkUpdate[2]] == null) continue;
 				itemsToRemove.push(chunkUpdateKey);
 				
 				try {
@@ -117,7 +124,12 @@ module.exports.connection = async function(socket = new Socket) {
 					}
 				}
 				console.log("Chunk packet generation took " + (new Date().getTime() - dt) + "ms");
-				socket.write(new PacketMappingTable[NamedPackets.BlockChange](8, 64, 8, 20, 0).writePacket());
+				
+				for (let x = 0; x < 16; x++) {
+					for (let z = 0; z < 16; z++) {
+						socket.write(new PacketMappingTable[NamedPackets.BlockChange](x, 64, z, 20, 0).writePacket());
+					}
+				}
 
 				socket.write(new PacketMappingTable[NamedPackets.Player](true).writePacket());
 

@@ -1,7 +1,9 @@
 const FunkyArray = require("./Util/funkyArray.js");
 const bufferStuff = require("./bufferStuff.js");
 
-const { Worker, isMainThread, parentPort } = require('worker_threads');
+const config = require("../config.json");
+
+const { Worker } = require('worker_threads');
 
 const workerPath = __dirname + "/Workers/ChunkPacketGenerator.js";
 
@@ -18,17 +20,37 @@ module.exports = class {
 
 		this.toRemove = [];
 
-		for (let i = 0; i < 4; i++) {
+		for (let i = 0; i < config.threadPoolCount; i++) {
 			const worker = new Worker(workerPath);
 			this.threadPool.push([false, worker]);
 			const myID = i;
-			worker.on("message", (message) => {
-				const user = global.getUserByKey(message[0]);
+			worker.on("message", (data) => {
+				/*const user = global.getUserByKey(message[0]);
 				for (let square of message[1]) { user.chunksToSend.add(Buffer.from(square)); }
 				this.threadPool[myID][0] = false;
-				this.toRemove.push(message[2]);
+				this.toRemove.push(message[2]);*/
+				switch (data[0]) {
+					case "chunk":
+						const user = global.getUserByKey(data[2]);
+						user.chunksToSend.add(Buffer.from(data[1]));
+						//this.threadPool[myID][0] = false;
+					break;
+
+					case "generate":
+						this.chunks[data[2]][data[3]] = data[1];
+						this.toRemove.push(data[4]);
+						this.threadPool[myID][0] = false;
+					break;
+
+					case "remove":
+						this.toRemove.push(data[1]);
+						this.threadPool[myID][0] = false;
+					break;
+				}
 			});
 		}
+
+		console.log("Created thread pool with " + this.threadPool.length + " threads");
 
 		setInterval(() => {
 			if (this.workPool.getLength() > 0) {
@@ -46,8 +68,7 @@ module.exports = class {
 								break;
 							}
 							item[0] = true;
-							item[1][4] = key;
-							item[1][5] = i1;
+							item[1][3] = key;
 							thread[1].postMessage(item[1]);
 							thread[0] = true;
 							break;
@@ -63,13 +84,11 @@ module.exports = class {
 			}
 		}, 1000 / 20);
 
-		const chunkStartTime = new Date().getTime();
 		for (let x = -3; x < 4; x++) {
 			for (let z = -3; z < 4; z++) {
 				this.createChunk(x, z);
 			}
 		}
-		console.log("Chunk generation took " + (new Date().getTime() - chunkStartTime) + "ms");
 
 		global.generatingChunks = false;
 	}
@@ -77,46 +96,12 @@ module.exports = class {
 	// TODO: Store metadata!
 	createChunk(cx = 0, cz = 0) {
 		if (this.chunks[cx] == null) this.chunks[cx] = {};
-		this.chunks[cx][cz] = {};
 
-		let chunkQueuedBlocks = [];
-
-		for (let y = 0; y < 128; y++) {
-			this.chunks[cx][cz][y] = {};
-			for (let x = 0; x < 16; x++) {
-				this.chunks[cx][cz][y][x] = {};
-				for (let z = 0; z < 16; z++) {
-					if (y == 64) {
-						// Make a tree :)
-						if (Math.random() <= 0.01) {
-							this.chunks[cx][cz][y][x][z] = 3;
-
-							const newX = x + (16 * cx), newZ = z + (16 * cz);
-							// trunk
-							this.setBlock(17, newX, y + 1, newZ);
-							this.setBlock(17, newX, y + 2, newZ);
-							this.setBlock(17, newX, y + 3, newZ);
-							this.setBlock(17, newX, y + 4, newZ);
-							// leaves
-							// left
-							this.setBlock(18, newX, y + 5, newZ);
-							// right line
-						} else {
-							this.chunks[cx][cz][y][x][z] = 2;
-						}
-					}
-					else if (y == 63 || y == 62) this.chunks[cx][cz][y][x][z] = 3;
-					else if (y == 0) this.chunks[cx][cz][y][x][z] = 7;
-					else if (y < 62) this.chunks[cx][cz][y][x][z] = 1;
-					else this.chunks[cx][cz][y][x][z] = 0;
-				}
-			}
-		}
+		this.workPool.add([false, ["generate", cx, cz, null]]);
 	}
 
-	async multiBlockChunk(chunkX = 0, chunkZ = 0, user) {
-		//worker.postMessage([chunkX, chunkZ, this.chunks[chunkX][chunkZ]]);
-		this.workPool.add([false, [chunkX, chunkZ, this.chunks[chunkX][chunkZ], user.id, null, null]]);
+	multiBlockChunk(chunkX = 0, chunkZ = 0, user) {
+		this.workPool.add([false, ["chunk", [chunkX, chunkZ, this.chunks[chunkX][chunkZ]], user.id, null]]);
 	}
 
 	setBlock(id = 0, x = 0, y = 0, z = 0) {

@@ -5,36 +5,59 @@ const bufferStuff = require("../bufferStuff.js");
 let chunkY = 0;
 let busyInterval = null;
 
-parentPort.on("message", (chunk) => {
-	if (busyInterval == null) {
-		busyInterval = setInterval(() => {}, 86400000);
+parentPort.on("message", (data) => {
+	// This stops the thread from stopping :)
+	if (busyInterval == null) busyInterval = setInterval(() => {}, 86400000);
+
+	switch (data[0]) {
+		case "chunk":
+			chunkY = 0;
+
+			parentPort.postMessage([data[0], doSquareChunk(data[1]), data[2]]);
+			chunkY += 16;
+			parentPort.postMessage([data[0], doSquareChunk(data[1]), data[2]]);
+			chunkY += 16;
+			parentPort.postMessage([data[0], doSquareChunk(data[1]), data[2]]);
+			chunkY += 16;
+			parentPort.postMessage([data[0], doSquareChunk(data[1]), data[2]]);
+			chunkY += 16;
+			parentPort.postMessage([data[0], doSquareChunk(data[1]), data[2]]);
+			chunkY += 16;
+			parentPort.postMessage([data[0], doSquareChunk(data[1]), data[2]]);
+			chunkY += 16;
+			parentPort.postMessage([data[0], doSquareChunk(data[1]), data[2]]);
+			chunkY += 16;
+			parentPort.postMessage([data[0], doSquareChunk(data[1]), data[2]]);
+			
+			parentPort.postMessage(["remove", data[3]]);
+		break;
+
+		case "generate":
+			parentPort.postMessage([data[0], generateChunk(), data[1], data[2], data[3]]);
+		break;
+	}
+});
+
+function generateChunk() {
+	let chunk = {};
+	for (let y = 0; y < 128; y++) {
+		chunk[y] = {};
+		for (let x = 0; x < 16; x++) {
+			chunk[y][x] = {};
+			for (let z = 0; z < 16; z++) {
+				if (y == 64) {
+					chunk[y][x][z] = 2;
+				}
+				else if (y == 63 || y == 62) chunk[y][x][z] = 3;
+				else if (y == 0) chunk[y][x][z] = 7;
+				else if (y < 62) chunk[y][x][z] = 1;
+				else chunk[y][x][z] = 0;
+			}
+		}
 	}
 
-	chunkY = 0;
-	// I couldn't figure out how to construct a chunk lmao
-	// __ima just send each block individually__ 
-	// Using multi block chunks now!
-	// TODO: yknow, figure out how to chunk.
-	let chunksToSend = [];
-
-	chunksToSend.push(doSquareChunk(chunk));
-	chunkY += 16;
-	chunksToSend.push(doSquareChunk(chunk));
-	chunkY += 16;
-	chunksToSend.push(doSquareChunk(chunk));
-	chunkY += 16;
-	chunksToSend.push(doSquareChunk(chunk));
-	chunkY += 16;
-	chunksToSend.push(doSquareChunk(chunk));
-	chunkY += 16;
-	chunksToSend.push(doSquareChunk(chunk));
-	chunkY += 16;
-	chunksToSend.push(doSquareChunk(chunk));
-	chunkY += 16;
-	chunksToSend.push(doSquareChunk(chunk));
-
-	parentPort.postMessage([chunk[3], chunksToSend, chunk[4], chunk[5]]);
-});
+	return chunk;
+}
 
 function doSquareChunk(chunk) {
 	let blocksToSend = [];
@@ -46,7 +69,10 @@ function doSquareChunk(chunk) {
 			}
 		}
 	}
-	
+
+	// I couldn't figure out how to construct a chunk lmao
+	// Using multi block chunks for now
+	// TODO: yknow, figure out how to actually chunk.
 	const writer = new bufferStuff.Writer();
 	writer.writeByte(0x34);
 	writer.writeInt(chunk[0]);
@@ -65,7 +91,5 @@ function doSquareChunk(chunk) {
 		writer.writeByte(0);
 	}
 
-	//user.chunksToSend.add(writer.buffer) // so we don't flood the client queue these
-	//parentPort.postMessage(writer.buffer);
 	return writer.buffer;
 }
