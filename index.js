@@ -1,20 +1,8 @@
 const server = new (require('net').Server)();
 const config = require("./config.json");
 
-server.listen(config.port, function() {
+const mcServer = require("./server/server.js");
 
-});
+server.listen(config.port, () => mcServer.init(config));
 
-server.on('connection', function(socket) {
-	socket.on('data', function(chunk) {
-
-	});
-
-	socket.on('end', function() {
-
-	});
-
-	socket.on('error', function(err) {
-
-	});
-});
+server.on('connection', mcServer.connection);
