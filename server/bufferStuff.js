@@ -22,9 +22,31 @@ module.exports.Writer = class {
 		this.writeBuffer(buff);
 	}
 
+	writeByteArray(data = [0]) {
+		const buff = Buffer.alloc(data.length);
+
+		for (let byte of data) {
+			buff.writeInt8(byte);
+		}
+
+		this.writeBuffer(buff);
+	}
+
 	writeShort(data = 0) {
 		const buff = Buffer.alloc(2);
 		buff.writeIntBE(data, 0, 2);
+
+		this.writeBuffer(buff);
+	}
+
+	writeShortArray(data = [0]) {
+		const buff = Buffer.alloc(data.length * 2);
+		let offset = 0;
+
+		for (let short of data) {
+			buff.writeIntBE(short, offset, 2);
+			offset += 2;
+		}
 
 		this.writeBuffer(buff);
 	}
