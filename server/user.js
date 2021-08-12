@@ -11,6 +11,8 @@ module.exports = class {
 
 		this.loginFinished = false;
 
+		this.entityRef = null;
+
 		this.chunksToSend = new funkyArray();
 	}
 }
