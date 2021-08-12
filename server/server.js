@@ -78,7 +78,7 @@ module.exports.init = function(config) {
 			const user = netUsers[netUserKeys];
 
 			let itemsToRemove = [];
-			for (let i = 0; i < Math.min(user.chunksToSend.getLength(), 32); i++) {
+			for (let i = 0; i < Math.min(user.chunksToSend.getLength(), 128); i++) {
 				const chunkKey = user.chunksToSend.itemKeys[i];
 				itemsToRemove.push(chunkKey);
 				user.socket.write(user.chunksToSend.items[chunkKey]);

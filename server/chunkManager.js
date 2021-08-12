@@ -18,7 +18,7 @@ module.exports = class {
 
 		this.toRemove = [];
 
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 4; i++) {
 			const worker = new Worker(workerPath);
 			this.threadPool.push([false, worker]);
 			const myID = i;
