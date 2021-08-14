@@ -1,3 +1,10 @@
+/*
+	===========- bufferStuff.js -===========
+	  Created by Holly (tgpethan) (c) 2021
+	  Licensed under MIT
+	========================================
+*/
+
 module.exports.Writer = class {
 	constructor() {
 		this.buffer = Buffer.alloc(0);
@@ -60,7 +67,8 @@ module.exports.Writer = class {
 
 	writeLong(data = 0) {
 		const buff = Buffer.alloc(8);
-		buff.writeBigInt64BE(BigInt(data), 0);
+		if (data instanceof BigInt) buff.writeBigInt64BE(data, 0);
+		else buff.writeBigInt64BE(BigInt(data), 0);
 
 		this.writeBuffer(buff);
 	}

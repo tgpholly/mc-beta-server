@@ -11,6 +11,7 @@ let idPool = 1;
 global.fromIDPool = function() {
 	const oldVal = idPool;
 	idPool++;
+	console.log(idPool);
 	return oldVal;
 }
 
@@ -52,6 +53,7 @@ module.exports.init = function(config) {
 		if (tickCounter % tickRate == 0) {
 			for (let key of netUserKeys) {
 				netUsers[key].socket.write(new PacketMappingTable[NamedPackets.KeepAlive]().writePacket());
+
 			}
 		}
 		// Update Chunks
@@ -82,20 +84,22 @@ module.exports.init = function(config) {
 
 		// Update users
 		for (let key of netUserKeys) {
-			const user = netUsers[netUserKeys];
+			const user = netUsers[key];
 
-			let itemsToRemove = [];
-			for (let i = 0; i < Math.min(user.chunksToSend.getLength(), 128); i++) {
-				const chunkKey = user.chunksToSend.itemKeys[i];
-				itemsToRemove.push(chunkKey);
-				user.socket.write(user.chunksToSend.items[chunkKey]);
+			if (user.loginFinished) {
+				let itemsToRemove = [];
+				for (let i = 0; i < Math.min(user.chunksToSend.getLength(), 128); i++) {
+					const chunkKey = user.chunksToSend.itemKeys[i];
+					itemsToRemove.push(chunkKey);
+					user.socket.write(user.chunksToSend.items[chunkKey]);
+				}
+
+				for (let item of itemsToRemove) {
+					user.chunksToSend.remove(item, false);
+				}
+
+				user.chunksToSend.regenerateIterableArray();
 			}
-
-			for (let item of itemsToRemove) {
-				user.chunksToSend.remove(item, false);
-			}
-
-			user.chunksToSend.regenerateIterableArray();
 		}
 
 		tickCounter++;
@@ -108,7 +112,9 @@ module.exports.connection = async function(socket = new Socket) {
     socket.on('data', function(chunk) {
 		const reader = new bufferStuff.Reader(chunk);
 
-        switch(reader.readByte()) {
+		const packetID = reader.readByte();
+
+        switch(packetID) {
 			case NamedPackets.KeepAlive:
 				socket.write(new PacketMappingTable[NamedPackets.KeepAlive]().writePacket());
 			break;
@@ -150,6 +156,14 @@ module.exports.connection = async function(socket = new Socket) {
 				thisUser.username = reader.readString();
 
 				socket.write(new PacketMappingTable[NamedPackets.Handshake](thisUser.username).writePacket());
+			break;
+
+			case NamedPackets.Player:
+				
+			break;
+
+			default:
+				console.log("0x" + packetID.toString(16));
 			break;
 		}
 	});
