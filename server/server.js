@@ -11,7 +11,6 @@ let idPool = 1;
 global.fromIDPool = function() {
 	const oldVal = idPool;
 	idPool++;
-	console.log(idPool);
 	return oldVal;
 }
 
@@ -38,6 +37,7 @@ function removeUser(id) {
 let config = {};
 
 let entities = {};
+let entityKeys = {};
 
 global.chunkManager = new ChunkManager();
 global.generatingChunks = false;
@@ -50,15 +50,18 @@ module.exports.init = function(config) {
     console.log(`Up! Running at 0.0.0.0:${config.port}`);
 
 	tickInterval = setInterval(() => {
+		// Runs every sec
 		if (tickCounter % tickRate == 0) {
 			for (let key of netUserKeys) {
-				netUsers[key].socket.write(new PacketMappingTable[NamedPackets.KeepAlive]().writePacket());
-
+				const user = netUsers[key];
+				user.socket.write(new PacketMappingTable[NamedPackets.KeepAlive]().writePacket());
+				if (user.loginFinished) user.socket.write(new PacketMappingTable[NamedPackets.TimeUpdate](tickCounter).writePacket());
 			}
 		}
-		// Update Chunks
+		// Do chunk updates
 		if (!global.generatingChunks) {
 			let itemsToRemove = [];
+			// Do a max of 128 chunk updates per tick
 			for (let i = 0; i < Math.min(global.chunkManager.queuedBlockUpdates.getLength(), 128); i++) {
 				const chunkUpdateKey = global.chunkManager.queuedBlockUpdates.itemKeys[i];
 				const chunkUpdate = global.chunkManager.queuedBlockUpdates.items[chunkUpdateKey];
@@ -82,7 +85,14 @@ module.exports.init = function(config) {
 			}
 		}
 
-		// Update users
+		// Entity update!
+		for (let key of netUserKeys) {
+			const user = netUsers[key];
+
+
+		}
+
+		// Send queued chunks to users
 		for (let key of netUserKeys) {
 			const user = netUsers[key];
 
@@ -123,14 +133,13 @@ module.exports.connection = async function(socket = new Socket) {
 				socket.write(new PacketMappingTable[NamedPackets.LoginRequest](reader.readInt(), reader.readString(), reader.readLong(), reader.readByte()).writePacket(thisUser.id));
 				socket.write(new PacketMappingTable[NamedPackets.SpawnPosition]().writePacket());
 
-				const dt = new Date().getTime();
 				for (let x = -3; x < 4; x++) {
 					for (let z = -3; z < 4; z++) {
 						socket.write(new PacketMappingTable[NamedPackets.PreChunk](x, z, true).writePacket());
 					}
 				}
-				console.log("Chunk packet generation took " + (new Date().getTime() - dt) + "ms");
-				
+
+				// Place a layer of glass under the player so they don't fall n' die
 				for (let x = 0; x < 16; x++) {
 					for (let z = 0; z < 16; z++) {
 						socket.write(new PacketMappingTable[NamedPackets.BlockChange](x, 64, z, 20, 0).writePacket());
@@ -156,6 +165,46 @@ module.exports.connection = async function(socket = new Socket) {
 				thisUser.username = reader.readString();
 
 				socket.write(new PacketMappingTable[NamedPackets.Handshake](thisUser.username).writePacket());
+			break;
+
+			case NamedPackets.ChatMessage:
+				const message = reader.readString();
+				// Hacky commands until I made a command system
+				if (message.startsWith("/")) {
+					const command = message.substring(1, message.length).split(" ");
+					console.log(command);
+					if (command[0] == "time") {
+						if (command.length < 2) {
+						} else if (command[1] == "set") {
+							if (command.length < 3) {
+							} else {
+								switch (command[2]) {
+									case "day":
+										tickCounter = (BigInt(24000) * (tickCounter / BigInt(24000)));
+									break;
+
+									case "noon":
+										tickCounter = (BigInt(24000) * (tickCounter / BigInt(24000))) + BigInt(6000);
+									break;
+
+									case "sunset":
+										tickCounter = (BigInt(24000) * (tickCounter / BigInt(24000))) + BigInt(12000);
+									break;
+
+									case "midnight":
+										tickCounter = (BigInt(24000) * (tickCounter / BigInt(24000))) + BigInt(18000);
+									break;
+								}
+							}
+						}
+					}
+				} else {
+					// Send player's message to all players
+					const cachedPacket = new PacketMappingTable[NamedPackets.ChatMessage](`<${thisUser.username}> ${message}`).writePacket();
+					for (let key of netUserKeys) {
+						netUsers[key].socket.write(cachedPacket);
+					}
+				}
 			break;
 
 			case NamedPackets.Player:
