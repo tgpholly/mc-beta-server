@@ -1,7 +1,7 @@
 /*
 	===========- bufferStuff.js -===========
 	  Created by Holly (tgpethan) (c) 2021
-	  Licensed under MIT
+	  Licenced under MIT
 	========================================
 */
 
