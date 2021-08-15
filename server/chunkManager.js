@@ -20,30 +20,27 @@ module.exports = class {
 
 		this.toRemove = [];
 
+		// WoAh!!! Thread pool in js!?!??!???!11!?!?!
 		for (let i = 0; i < config.threadPoolCount; i++) {
 			const worker = new Worker(workerPath);
 			this.threadPool.push([false, worker]);
 			const myID = i;
 			worker.on("message", (data) => {
-				/*const user = global.getUserByKey(message[0]);
-				for (let square of message[1]) { user.chunksToSend.add(Buffer.from(square)); }
-				this.threadPool[myID][0] = false;
-				this.toRemove.push(message[2]);*/
 				switch (data[0]) {
 					case "chunk":
 						const user = global.getUserByKey(data[2]);
 						user.chunksToSend.add(Buffer.from(data[1]));
-						//this.threadPool[myID][0] = false;
+					break;
+
+					// Specific to the chunk task as multiple of them are sent before removal
+					case "remove":
+						this.toRemove.push(data[1]);
+						this.threadPool[myID][0] = false;
 					break;
 
 					case "generate":
 						this.chunks[data[2]][data[3]] = data[1];
 						this.toRemove.push(data[4]);
-						this.threadPool[myID][0] = false;
-					break;
-
-					case "remove":
-						this.toRemove.push(data[1]);
 						this.threadPool[myID][0] = false;
 					break;
 				}
