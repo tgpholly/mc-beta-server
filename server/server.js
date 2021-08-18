@@ -42,7 +42,7 @@ let entityKeys = {};
 global.chunkManager = new ChunkManager();
 global.generatingChunks = false;
 
-let tickInterval, tickCounter = BigInt(0);
+let tickInterval, tickCounter = BigInt(0), worldTime = 0;
 let tickRate = BigInt(20);
 
 module.exports.init = function(config) {
@@ -55,7 +55,7 @@ module.exports.init = function(config) {
 			for (let key of netUserKeys) {
 				const user = netUsers[key];
 				user.socket.write(new PacketMappingTable[NamedPackets.KeepAlive]().writePacket());
-				if (user.loginFinished) user.socket.write(new PacketMappingTable[NamedPackets.TimeUpdate](tickCounter).writePacket());
+				if (user.loginFinished) user.socket.write(new PacketMappingTable[NamedPackets.TimeUpdate](BigInt(worldTime)).writePacket());
 			}
 		}
 		// Do chunk updates
@@ -113,6 +113,7 @@ module.exports.init = function(config) {
 		}
 
 		tickCounter++;
+		worldTime++;
 	}, 1000 / parseInt(tickRate.toString()));
 }
 
@@ -148,7 +149,10 @@ module.exports.connection = async function(socket = new Socket) {
 
 				socket.write(new PacketMappingTable[NamedPackets.Player](true).writePacket());
 
-				socket.write(new PacketMappingTable[NamedPackets.ChatMessage](`\u00A7e${thisUser.username} has joined the game`).writePacket());
+				const joinMessage = new PacketMappingTable[NamedPackets.ChatMessage](`\u00A7e${thisUser.username} has joined the game`).writePacket();
+				for (let key of netUserKeys) {
+					netUsers[key].socket.write(joinMessage);
+				}
 
 				socket.write(new PacketMappingTable[NamedPackets.PlayerPositionAndLook](8.5, 65 + 1.6200000047683716, 65, 8.5, 0, 0, false).writePacket());
 
@@ -180,19 +184,19 @@ module.exports.connection = async function(socket = new Socket) {
 							} else {
 								switch (command[2]) {
 									case "day":
-										tickCounter = (BigInt(24000) * (tickCounter / BigInt(24000)));
+										worldTime = (24000 * (worldTime / 24000));
 									break;
 
 									case "noon":
-										tickCounter = (BigInt(24000) * (tickCounter / BigInt(24000))) + BigInt(6000);
+										worldTime = (24000 * (worldTime / 24000)) + 6000;
 									break;
 
 									case "sunset":
-										tickCounter = (BigInt(24000) * (tickCounter / BigInt(24000))) + BigInt(12000);
+										worldTime = (24000 * (worldTime / 24000)) + 12000;
 									break;
 
 									case "midnight":
-										tickCounter = (BigInt(24000) * (tickCounter / BigInt(24000))) + BigInt(18000);
+										worldTime = (24000 * (worldTime / 24000)) + 18000;
 									break;
 								}
 							}
@@ -212,7 +216,7 @@ module.exports.connection = async function(socket = new Socket) {
 			break;
 
 			default:
-				console.log("0x" + packetID.toString(16));
+				console.log(toHexValue(packetID));
 			break;
 		}
 	});
@@ -226,4 +230,9 @@ module.exports.connection = async function(socket = new Socket) {
         console.log("Connection error!");
 		removeUser(thisUser.id);
 	});
+}
+
+function toHexValue(val = 0x00) {
+	if (val < 16) return `0x0${val.toString(16).toUpperCase()}`;
+	else return `0x${val.toString(16).toUpperCase()}`;
 }
