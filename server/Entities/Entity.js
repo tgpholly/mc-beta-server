@@ -1,5 +1,7 @@
 class Entity {
 	constructor(x = 0, y = 0, z = 0, yaw = 0, pitch = 0) {
+		this.EID = global.fromIDPool();
+
 		this.x = x;
 		this.y = y;
 		this.z = z;
