@@ -6,8 +6,10 @@
 */
 
 module.exports.Writer = class {
-	constructor() {
-		this.buffer = Buffer.alloc(0);
+	constructor(size = 0) {
+		this.buffer = Buffer.alloc(size);
+		this.offset = 0;
+		this.baseSize = size;
 	}
 
 	reset() {
@@ -23,10 +25,27 @@ module.exports.Writer = class {
 	}
 
 	writeByte(data = 0) {
-		const buff = Buffer.alloc(1);
-		buff.writeInt8(data, 0);
+		if (this.baseSize == 0) {
+			const buff = Buffer.alloc(1);
+			buff.writeInt8(data, 0);
+	
+			this.writeBuffer(buff);
+		} else {
+			this.buffer.writeInt8(data, this.offset);
+			this.offset += 1;
+		}
+	}
 
-		this.writeBuffer(buff);
+	writeUByte(data = 0) {
+		if (this.baseSize == 0) {
+			const buff = Buffer.alloc(1);
+			buff.writeUInt8(data, 0);
+
+			this.writeBuffer(buff);
+		} else {
+			this.buffer.writeUInt8(data, this.offset);
+			this.offset += 1;
+		}
 	}
 
 	writeByteArray(data = [0]) {

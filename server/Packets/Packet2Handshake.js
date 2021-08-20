@@ -7,7 +7,7 @@ class Packet2Handshake extends Packet {
 		this.username = username;
 	}
 
-	writePacket(EID = 0) {
+	writePacket() {
 		super.writePacket();
 
 		this.writer.writeString("-"); // "-" == Offline mode

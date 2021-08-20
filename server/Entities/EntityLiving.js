@@ -1,8 +1,8 @@
 const Entity = require("./Entity.js");
 
-class EntityPlayer extends Entity {
-	constructor(x = 0, y = 0, z = 0) {
-		super(x, y, z);
+class EntityLiving extends Entity {
+	constructor(EID = 0, x = 0, y = 0, z = 0) {
+		super(EID, x, y, z);
 
 		
 	}
@@ -12,4 +12,4 @@ class EntityPlayer extends Entity {
 	}
 }
 
-module.exports = EntityPlayer;
+module.exports = EntityLiving;

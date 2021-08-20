@@ -1,11 +1,8 @@
+const { Worker } = require('worker_threads');
 const FunkyArray = require("./Util/funkyArray.js");
-const bufferStuff = require("./bufferStuff.js");
-
 const config = require("../config.json");
 
-const { Worker } = require('worker_threads');
-
-const workerPath = __dirname + "/Workers/ChunkPacketGenerator.js";
+const workerPath = `${__dirname}/Workers/ChunkWorker.js`;
 
 module.exports = class {
 	constructor() {
@@ -17,7 +14,6 @@ module.exports = class {
 
 		this.threadPool = [];
 		this.workPool = new FunkyArray();
-
 		this.toRemove = [];
 
 		// WoAh!!! Thread pool in js!?!??!???!11!?!?!
@@ -30,10 +26,6 @@ module.exports = class {
 					case "chunk":
 						const user = global.getUserByKey(data[2]);
 						user.chunksToSend.add(Buffer.from(data[1]));
-					break;
-
-					// Specific to the chunk task as multiple of them are sent before removal
-					case "remove":
 						this.toRemove.push(data[1]);
 						this.threadPool[myID][0] = false;
 					break;
@@ -102,10 +94,10 @@ module.exports = class {
 	}
 
 	setBlock(id = 0, x = 0, y = 0, z = 0) {
-		if (y < 0 || y > 127) throw "Tried to set a block outside of the world!";
+		if (y < 0 || y > 127) return console.error("Tried to set a block outside of the world!");
 
-		const chunkX = Math.floor(x / 16);
-		const chunkZ = Math.floor(z / 16);
+		const chunkX = Math.floor(x >> 4);
+		const chunkZ = Math.floor(z >> 4);
 		const blockX = x - (16 * chunkX);
 		const blockZ = z - (16 * chunkZ);
 

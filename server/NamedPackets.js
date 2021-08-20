@@ -1,4 +1,5 @@
 const namedPackets = {
+	"Disconnect": -1,
 	"KeepAlive": 0x00,
 	"LoginRequest": 0x01,
 	"Handshake": 0x02,

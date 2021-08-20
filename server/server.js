@@ -1,8 +1,10 @@
 const bufferStuff = require("./bufferStuff.js");
 const ChunkManager = require("./chunkManager.js");
 const User = require("./user.js");
+const EntityPlayer = require("./Entities/EntityPlayer.js");
 const PacketMappingTable = require("./PacketMappingTable.js");
 const NamedPackets = require("./NamedPackets.js");
+const Converter = require("./Converter.js");
 
 const Socket = require("net").Socket;
 const uuid = require("uuid").v4;
@@ -23,6 +25,7 @@ global.getUserByKey = function(key) {
 
 function addUser(socket) {
 	let user = new User(global.fromIDPool(), socket);
+	user.entityRef = new EntityPlayer(user.id, 8.5, 65.5, 8.5);
 	netUsers[user.id] = user;
 	netUserKeys = Object.keys(netUsers);
 
@@ -59,12 +62,14 @@ module.exports.init = function(config) {
 			}
 		}
 		// Do chunk updates
+		// Don't update if chunk is generating
 		if (!global.generatingChunks) {
 			let itemsToRemove = [];
 			// Do a max of 128 chunk updates per tick
 			for (let i = 0; i < Math.min(global.chunkManager.queuedBlockUpdates.getLength(), 128); i++) {
 				const chunkUpdateKey = global.chunkManager.queuedBlockUpdates.itemKeys[i];
 				const chunkUpdate = global.chunkManager.queuedBlockUpdates.items[chunkUpdateKey];
+				// Don't update if chunk is nonexistant
 				if (global.chunkManager.chunks[chunkUpdate[1]] == null) continue;
 				if (global.chunkManager.chunks[chunkUpdate[1]][chunkUpdate[2]] == null) continue;
 				itemsToRemove.push(chunkUpdateKey);
@@ -73,11 +78,13 @@ module.exports.init = function(config) {
 					global.chunkManager.chunks[chunkUpdate[1]][chunkUpdate[2]][chunkUpdate[3]][chunkUpdate[4]][chunkUpdate[5]] = chunkUpdate[0];
 
 					const packet = new PacketMappingTable[NamedPackets.BlockChange](chunkUpdate[4] + (16 * chunkUpdate[1]), chunkUpdate[3], chunkUpdate[5] + (16 * chunkUpdate[2]), chunkUpdate[0]).writePacket();
-					for (let userKey in netUserKeys) {
+					for (let userKey of netUserKeys) {
 						const user = netUsers[userKey];
 						if (user.loginFinished) user.socket.write(packet);
 					}
-				} catch (e) {}
+				} catch (e) {
+					console.error(e);
+				}
 			}
 
 			for (let item of itemsToRemove) {
@@ -89,7 +96,7 @@ module.exports.init = function(config) {
 		for (let key of netUserKeys) {
 			const user = netUsers[key];
 
-
+			//user.entityRef.onTick();
 		}
 
 		// Send queued chunks to users
@@ -126,8 +133,12 @@ module.exports.connection = async function(socket = new Socket) {
 		const packetID = reader.readByte();
 
         switch(packetID) {
+			case NamedPackets.Disconnect:
+				removeUser(thisUser.id);
+			break;
+
 			case NamedPackets.KeepAlive:
-				socket.write(new PacketMappingTable[NamedPackets.KeepAlive]().writePacket());
+				
 			break;
 
 			case NamedPackets.LoginRequest:
@@ -154,15 +165,21 @@ module.exports.connection = async function(socket = new Socket) {
 					netUsers[key].socket.write(joinMessage);
 				}
 
+				socket.write(new PacketMappingTable[NamedPackets.SetSlot](0, 36, 3, 64, 0).writePacket());
+
 				socket.write(new PacketMappingTable[NamedPackets.PlayerPositionAndLook](8.5, 65 + 1.6200000047683716, 65, 8.5, 0, 0, false).writePacket());
 
 				thisUser.loginFinished = true;
 
+				// Send chunks
 				for (let x = -3; x < 4; x++) {
 					for (let z = -3; z < 4; z++) {
 						global.chunkManager.multiBlockChunk(x, z, thisUser);
 					}
 				}
+
+				// Send this user to other online users
+
 			break;
 
 			case NamedPackets.Handshake:
@@ -209,6 +226,44 @@ module.exports.connection = async function(socket = new Socket) {
 						netUsers[key].socket.write(cachedPacket);
 					}
 				}
+			break;
+
+			case NamedPackets.Animation:
+				const EID = reader.readInt();
+				const cachedPacket = new PacketMappingTable[NamedPackets.Animation](thisUser.id, reader.readByte()).writePacket();
+				for (let key of netUserKeys) {
+					if (netUsers[key].id !== thisUser.id) netUsers[key].socket.write(cachedPacket);
+				}
+			break;
+
+			case NamedPackets.PlayerDigging:
+				const status = reader.readByte();
+
+				if (status == 2) {
+					const x = reader.readInt();
+					const y = reader.readByte();
+					const z = reader.readInt();
+
+					global.chunkManager.setBlock(0, x, y, z);
+				}
+			break;
+
+			case NamedPackets.PlayerBlockPlacement:
+				const x = reader.readInt();
+				const y = reader.readByte();
+				const z = reader.readInt();
+				let xOff = 0, yOff = 0, zOff = 0;
+				switch (reader.readByte()) { // direction
+					case 0: yOff = -1; break;
+					case 1: yOff = 1; break;
+					case 2: zOff = -1; break;
+					case 3: zOff = 1; break;
+					case 4: xOff = -1; break;
+					case 5: xOff = 1; break;
+				}
+				const block = reader.readShort();
+
+				global.chunkManager.setBlock(block, x + xOff, y + yOff, z + zOff);
 			break;
 
 			case NamedPackets.Player:
