@@ -11,7 +11,7 @@ class Packet4TimeUpdate extends Packet {
 		
 	}
 
-	writePacket(EID = 0) {
+	writePacket() {
 		super.writePacket();
 
 		this.writer.writeLong(this.time);

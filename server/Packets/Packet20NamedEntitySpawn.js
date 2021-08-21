@@ -10,8 +10,8 @@ class Packet20NamedEntitySpawn extends Packet {
 		this.absX = Converter.toAbsoluteInt(x);
 		this.absY = Converter.toAbsoluteInt(y);
 		this.absZ = Converter.toAbsoluteInt(z);
-		this.packedYaw = 0;		// TODO: Add rotation.
-		this.packedPitch = 0;
+		this.packedYaw = Converter.to360Fraction(yaw);
+		this.packedPitch = Converter.to360Fraction(pitch);
 		this.currentItem = currentItem;
 	}
 

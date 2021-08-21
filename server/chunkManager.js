@@ -22,9 +22,10 @@ module.exports = class {
 			this.threadPool.push([false, worker]);
 			const myID = i;
 			worker.on("message", (data) => {
+				let user;
 				switch (data[0]) {
 					case "chunk":
-						const user = global.getUserByKey(data[2]);
+						user = global.getUserByKey(data[2]);
 						user.chunksToSend.add(Buffer.from(data[1]));
 						this.toRemove.push(data[1]);
 						this.threadPool[myID][0] = false;
