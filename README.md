@@ -8,7 +8,11 @@ Implemented:
  - Block breaking
  
 To Implement:
- - Entities
+ - Entities:
+   - Players
+   - Items/Blocks
+   - Animals
+   - Mobs
  - Inventories
  - Terrain saving to disk
  
