@@ -7,7 +7,6 @@ const NamedPackets = require("./NamedPackets.js");
 const Converter = require("./Converter.js");
 
 const Socket = require("net").Socket;
-const uuid = require("uuid").v4;
 
 let idPool = 1;
 global.fromIDPool = function() {
@@ -95,7 +94,7 @@ module.exports.init = function(config) {
 		// Entity update!
 		for (let key of netUserKeys) {
 			const user = netUsers[key];
-
+			
 			//user.entityRef.onTick();
 		}
 
