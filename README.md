@@ -15,6 +15,9 @@ To Implement:
    - Mobs
  - Inventories
  - Terrain saving to disk
+ - Sleeping in beds
+ - Tile entities
+ - Probably a bunch more things that i'm forgetting
  
 Long Term:
  - Optimise the shit out of this
