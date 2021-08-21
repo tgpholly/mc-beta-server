@@ -1,4 +1,4 @@
-# mc-beta-server
+# mc-beta-server [![CodeFactor](https://www.codefactor.io/repository/github/tgpethan/mc-beta-server/badge)](https://www.codefactor.io/repository/github/tgpethan/mc-beta-server)
 me trying to understand minecraft beta's protocol
 
 Implemented:
