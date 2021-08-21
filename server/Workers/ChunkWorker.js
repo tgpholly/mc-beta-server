@@ -53,6 +53,7 @@ function doChunk(chunk) {
 	writer.writeByte(127); // Size Y
 	writer.writeByte(15); // Size Z
 
+	// pre-alloc since doing an alloc 98,304 times takes a while yknow.
 	const blocks = new bufferStuff.Writer(32768);
 	const metadata = new bufferStuff.Writer(32768);
 	const lighting = new bufferStuff.Writer(32768);
