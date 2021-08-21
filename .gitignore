@@ -1,3 +1,8 @@
+# Custom stuff
+old/
+
+#===- Default node gitignore -===#
+
 # Logs
 logs
 *.log
