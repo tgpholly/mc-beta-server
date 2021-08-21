@@ -17,7 +17,7 @@ module.exports = class {
 		this.toRemove = [];
 
 		// WoAh!!! Thread pool in js!?!??!???!11!?!?!
-		for (let i = 0; i < config.threadPoolCount; i++) {
+		for (let i = 0; i < config.worldThreads; i++) {
 			const worker = new Worker(workerPath);
 			this.threadPool.push([false, worker]);
 			const myID = i;

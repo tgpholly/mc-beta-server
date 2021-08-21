@@ -1,4 +1,4 @@
 {
 	"port": 25565,
-	"threadPoolCount": 8
+	"worldThreads": 4
 }
