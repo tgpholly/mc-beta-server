@@ -6,6 +6,12 @@
 */
 
 module.exports.Writer = class {
+	// bufferStuff supports pre-allocating memory for the buffer
+	// if you pass in a size of 0 then it will just dynamicly allocate at the
+	// cost of performance
+
+	// NOTE: In pre-allocation mode if you exceed the size of the buffer
+	// 		 that you set it will cause a crash.
 	constructor(size = 0) {
 		this.buffer = Buffer.alloc(size);
 		this.offset = 0;
@@ -49,61 +55,101 @@ module.exports.Writer = class {
 	}
 
 	writeByteArray(data = [0]) {
-		const buff = Buffer.alloc(data.length);
+		if (this.baseSize == 0) {
+			const buff = Buffer.alloc(data.length);
 
-		for (let byte of data) {
-			buff.writeInt8(byte);
+			for (let byte of data) {
+				buff.writeInt8(byte);
+			}
+
+			this.writeBuffer(buff);
+		} else {
+			for (let byte of data) {
+				this.buffer.writeInt8(byte);
+				this.offset += 1;
+			}
 		}
-
-		this.writeBuffer(buff);
 	}
 
 	writeShort(data = 0) {
-		const buff = Buffer.alloc(2);
-		buff.writeIntBE(data, 0, 2);
+		if (this.baseSize == 0) {
+			const buff = Buffer.alloc(2);
+			buff.writeIntBE(data, 0, 2);
 
-		this.writeBuffer(buff);
+			this.writeBuffer(buff);
+		} else {
+			this.buffer.writeIntBE(data, this.offset, 2);
+			this.offset += 2;
+		}
 	}
 
 	writeShortArray(data = [0]) {
-		const buff = Buffer.alloc(data.length * 2);
-		let offset = 0;
+		if (this.baseSize == 0) {
+			const buff = Buffer.alloc(data.length * 2);
+			let offset = 0;
 
-		for (let short of data) {
-			buff.writeIntBE(short, offset, 2);
-			offset += 2;
+			for (let short of data) {
+				buff.writeIntBE(short, offset, 2);
+				offset += 2;
+			}
+
+			this.writeBuffer(buff);
+		} else {
+			for (let short of data) {
+				this.buffer.writeIntBE(short, this.offset, 2);
+				this.offset += 2;
+			}
 		}
-
-		this.writeBuffer(buff);
 	}
 
 	writeInt(data = 0) {
-		const buff = Buffer.alloc(4);
-		buff.writeIntBE(data, 0, 4);
+		if (this.baseSize == 0) {
+			const buff = Buffer.alloc(4);
+			buff.writeIntBE(data, 0, 4);
 
-		this.writeBuffer(buff);
+			this.writeBuffer(buff);
+		} else {
+			this.buffer.writeIntBE(data, this.offset, 4);
+			this.offset += 4;
+		}
 	}
 
 	writeLong(data = 0) {
-		const buff = Buffer.alloc(8);
-		if (data instanceof BigInt) buff.writeBigInt64BE(data, 0);
-		else buff.writeBigInt64BE(BigInt(data), 0);
+		if (this.baseSize) {
+			const buff = Buffer.alloc(8);
+			if (data instanceof BigInt) buff.writeBigInt64BE(data, 0);
+			else buff.writeBigInt64BE(BigInt(data), 0);
 
-		this.writeBuffer(buff);
+			this.writeBuffer(buff);
+		} else {
+			if (data instanceof BigInt) this.buffer.writeBigInt64BE(data, this.offset);
+			else this.buffer.writeBigInt64BE(BigInt(data), this.offset);
+			this.offset += 8;
+		}
 	}
 
 	writeFloat(data = 0.0) {
-		const buff = Buffer.alloc(4);
-		buff.writeFloatBE(data, 0);
+		if (this.baseSize == 0) {
+			const buff = Buffer.alloc(4);
+			buff.writeFloatBE(data, 0);
 
-		this.writeBuffer(buff);
+			this.writeBuffer(buff);
+		} else {
+			this.buffer.writeFloatBE(data, this.offset);
+			this.offset += 4;
+		}
 	}
 
 	writeDouble(data = 0.0) {
-		const buff = Buffer.alloc(8);
-		buff.writeDoubleBE(data, 0);
+		if (this.baseSize == 0) {
+			const buff = Buffer.alloc(8);
+			buff.writeDoubleBE(data, 0);
 
-		this.writeBuffer(buff);
+			this.writeBuffer(buff);
+		} else {
+			this.buffer.writeDoubleBE(data, this.offset);
+			this.offset += 8;
+		}
 	}
 
 	writeString(string = "") {
