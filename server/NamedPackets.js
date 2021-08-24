@@ -1,3 +1,10 @@
+/*
+	===========- NamedPackets.js -==========
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const namedPackets = {
 	"Disconnect": -1,
 	"KeepAlive": 0x00,

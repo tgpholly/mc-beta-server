@@ -1,3 +1,10 @@
+/*
+	===============- user.js -==============
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const funkyArray = require("./Util/funkyArray.js");
 
 const Socket = require("net").Socket;

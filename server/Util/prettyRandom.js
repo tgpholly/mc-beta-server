@@ -1,3 +1,10 @@
+/*
+	===========- prettyRandom.js -==========
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 let lastRandom = -1;
 
 function pRandom(from = 0, to = 2147483647) {

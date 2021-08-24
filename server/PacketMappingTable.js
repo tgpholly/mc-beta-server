@@ -1,3 +1,10 @@
+/*
+	========- PacketMappingTable.js -=======
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const Packet0KeepAlive = require("./Packets/Packet0KeepAlive.js"),
 	  Packet1LoginRequest = require("./Packets/Packet1LoginRequest.js"),
 	  Packet2Handshake = require("./Packets/Packet2Handshake.js"),

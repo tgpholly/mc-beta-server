@@ -1,3 +1,10 @@
+/*
+	===========- chunkManager.js -==========
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const { Worker } = require('worker_threads');
 const FunkyArray = require("./Util/funkyArray.js");
 const config = require("../config.json");

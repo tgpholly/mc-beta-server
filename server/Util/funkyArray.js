@@ -1,3 +1,10 @@
+/*
+	===========- funkyArray.js -============
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const pRandom = require("./prettyRandom.js");
 
 module.exports = class {

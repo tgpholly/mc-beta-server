@@ -1,3 +1,10 @@
+/*
+	==============- Entity.js -=============
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 class Entity {
 	constructor(EID = 0, x = 0, y = 0, z = 0, yaw = 0, pitch = 0) {
 		this.EID = EID;

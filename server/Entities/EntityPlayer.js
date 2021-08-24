@@ -1,3 +1,10 @@
+/*
+	===========- EntityPlayer.js -==========
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const EntityLiving = require("./EntityLiving.js");
 const user = require("../user.js");
 

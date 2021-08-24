@@ -1,3 +1,10 @@
+/*
+	==============- Packet.js -=============
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const bufferStuff = require("../bufferStuff.js");
 
 module.exports = class {

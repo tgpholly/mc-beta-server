@@ -1,3 +1,10 @@
+/*
+	==============- index.js -==============
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const server = new (require('net').Server)();
 const config = require("./config.json");
 

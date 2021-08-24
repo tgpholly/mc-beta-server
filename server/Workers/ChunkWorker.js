@@ -1,3 +1,10 @@
+/*
+	===========- ChunkWorker.js -===========
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const { parentPort } = require('worker_threads');
 
 const { deflateSync } = require("zlib");

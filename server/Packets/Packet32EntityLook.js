@@ -1,3 +1,10 @@
+/*
+	=======- Packet32EntityLook.js -========
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const Packet = require("./Packet.js");
 const Converter = require("../Converter.js");
 

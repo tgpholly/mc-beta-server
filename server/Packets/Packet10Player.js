@@ -1,3 +1,10 @@
+/*
+	=========- Packet10Player.js -==========
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 const Packet = require("./Packet.js");
 
 class Packet10Player extends Packet {

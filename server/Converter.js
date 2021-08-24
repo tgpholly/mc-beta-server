@@ -1,3 +1,10 @@
+/*
+	============- Converter.js -============
+	  Created by Holly (tgpethan) (c) 2021
+	  Licenced under MIT
+	========================================
+*/
+
 module.exports.toAbsoluteInt = function(float = 0.0) {
 	return Math.floor(float * 32.0);
 }
