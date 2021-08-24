@@ -115,7 +115,7 @@ module.exports.Writer = class {
 	}
 
 	writeLong(data = 0) {
-		if (this.baseSize) {
+		if (this.baseSize == 0) {
 			const buff = Buffer.alloc(8);
 			if (data instanceof BigInt) buff.writeBigInt64BE(data, 0);
 			else buff.writeBigInt64BE(BigInt(data), 0);
