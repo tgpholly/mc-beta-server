@@ -8,6 +8,8 @@ const Packet0KeepAlive = require("./Packets/Packet0KeepAlive.js"),
 	  Packet13PlayerPositionAndLook = require("./Packets/Packet13PlayerPositionAndLook.js"),
 	  Packet18Animation = require("./Packets/Packet18Animation.js"),
 	  Packet20NamedEntitySpawn = require("./Packets/Packet20NamedEntitySpawn.js"),
+	  Packet32EntityLook = require("./Packets/Packet32EntityLook.js"), 
+	  Packet34EntityTeleport = require("./Packets/Packet34EntityTeleport.js"),
 	  Packet50PreChunk = require("./Packets/Packet50PreChunk.js"),
 	  Packet53BlockChange = require("./Packets/Packet53BlockChange.js"),
 	  Packet103SetSlot = require("./Packets/Packet103SetSlot.js");
@@ -23,6 +25,8 @@ const mappingTable = {
 	0x0D: Packet13PlayerPositionAndLook,
 	0x12: Packet18Animation,
 	0x14: Packet20NamedEntitySpawn,
+	0x20: Packet32EntityLook,
+	0x22: Packet34EntityTeleport,
 	0x32: Packet50PreChunk,
 	0x35: Packet53BlockChange,
 	0x67: Packet103SetSlot

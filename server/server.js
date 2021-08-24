@@ -22,9 +22,24 @@ global.getUserByKey = function(key) {
 	return netUsers[key];
 }
 
+global.sendToAllPlayers = function(buffer = Buffer.alloc(0)) {
+	for (let key of netUserKeys) {
+		const user = netUsers[key];
+		user.socket.write(buffer);
+	}
+}
+
+global.sendToAllPlayersButSelf = function(id, buffer = Buffer.alloc(0)) {
+	for (let key of netUserKeys) {
+		if (key == id) continue;
+		const user = netUsers[key];
+		user.socket.write(buffer);
+	}
+}
+
 function addUser(socket) {
 	let user = new User(global.fromIDPool(), socket);
-	user.entityRef = new EntityPlayer(user.id, 8.5, 65.5, 8.5);
+	user.entityRef = new EntityPlayer(user, 8.5, 65.5, 8.5);
 	netUsers[user.id] = user;
 	netUserKeys = Object.keys(netUsers);
 
@@ -95,7 +110,7 @@ module.exports.init = function(config) {
 		for (let key of netUserKeys) {
 			const user = netUsers[key];
 			
-			//user.entityRef.onTick();
+			if (user.loginFinished) user.entityRef.onTick();
 		}
 
 		// Send queued chunks to users
@@ -177,8 +192,16 @@ module.exports.connection = async function(socket = new Socket) {
 					}
 				}
 
-				// Send this user to other online users
+				// Send this user to other online user
+				global.sendToAllPlayersButSelf(thisUser.id, new PacketMappingTable[NamedPackets.NamedEntitySpawn](thisUser.id, thisUser.username, thisUser.entityRef.x, thisUser.entityRef.y, thisUser.entityRef.z, thisUser.entityRef.yaw, thisUser.entityRef.pitch, 0).writePacket());
 
+				// send all online users to this user
+				for (let key of netUserKeys) {
+					if (key == thisUser.id) continue;
+					const user = netUsers[key];
+
+					socket.write(new PacketMappingTable[NamedPackets.NamedEntitySpawn](user.id, user.username, user.entityRef.x, user.entityRef.y, user.entityRef.z, user.entityRef.yaw, user.entityRef.pitch, 0).writePacket());
+				}
 			break;
 
 			case NamedPackets.Handshake:
@@ -225,6 +248,27 @@ module.exports.connection = async function(socket = new Socket) {
 						netUsers[key].socket.write(cachedPacket);
 					}
 				}
+			break;
+
+			case NamedPackets.PlayerLook:
+				thisUser.entityRef.yaw = reader.readFloat() % 360 % -360;
+				thisUser.entityRef.pitch = reader.readFloat() % 360 % -360;
+			break;
+
+			case NamedPackets.PlayerPosition:
+				thisUser.entityRef.x = reader.readDouble();
+				thisUser.entityRef.y = reader.readDouble();
+				reader.readDouble(); // stance
+				thisUser.entityRef.z = reader.readDouble();
+			break;
+
+			case NamedPackets.PlayerPositionAndLook:
+				thisUser.entityRef.x = reader.readDouble();
+				thisUser.entityRef.y = reader.readDouble();
+				reader.readDouble(); // stance
+				thisUser.entityRef.z = reader.readDouble();
+				thisUser.entityRef.yaw = reader.readFloat() % 360 % -360;
+				thisUser.entityRef.pitch = reader.readFloat() % 360 % -360;
 			break;
 
 			case NamedPackets.Animation:

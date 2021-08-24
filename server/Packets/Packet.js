@@ -4,11 +4,13 @@ module.exports = class {
 	constructor(packetID = 0x00) {
 		this.id = packetID;
 
+		this.packetSize = 0;
+
 		this.writer = null;
 	}
 
 	writePacket() {
-		this.writer = new bufferStuff.Writer();
+		this.writer = new bufferStuff.Writer(this.packetSize);
 
 		this.writer.writeByte(this.id);
 
