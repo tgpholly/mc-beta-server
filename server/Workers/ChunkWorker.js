@@ -50,7 +50,7 @@ function generateChunk() {
 }
 
 function doChunk(chunk) {
-	const writer = new bufferStuff.Writer();
+	const writer = new bufferStuff.Writer(18);
 
 	writer.writeByte(0x33); // Chunk
 	writer.writeInt(chunk[0] << 4); // Chunk X
