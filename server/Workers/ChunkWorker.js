@@ -5,9 +5,8 @@
 	========================================
 */
 
-const { parentPort } = require('worker_threads');
-
-const { deflateSync } = require("zlib");
+const { parentPort } = require('worker_threads'),
+	  { deflateSync } = require("zlib");
 
 const bufferStuff = require("../bufferStuff.js");
 
