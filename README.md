@@ -6,10 +6,11 @@ Implemented:
  - Terrain sending
  - Block placement
  - Block breaking
+ - Entities:
+   - Players
  
 To Implement:
  - Entities:
-   - Players
    - Items/Blocks
    - Animals
    - Mobs
