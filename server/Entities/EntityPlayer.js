@@ -39,9 +39,9 @@ class EntityPlayer extends EntityLiving {
 	onTick() {
 		super.onTick();
 
-		this.absX = Math.floor(this.x);
-		this.absY = Math.floor(this.y);
-		this.absZ = Math.floor(this.z);
+		this.absX = this.x.toFixed(2);
+		this.absY = this.y.toFixed(2);
+		this.absZ = this.z.toFixed(2);
 
 		this.absYaw = Math.floor(this.yaw);
 		this.absPitch = Math.floor(this.pitch);
