@@ -97,6 +97,14 @@ module.exports = class {
 		this.workPool.add([false, ["generate", cx, cz, null]]);
 	}
 
+	chunkExists(cx = 0, cz = 0) {
+		if (this.chunks[cx] == null) return false;
+		if (this.chunks[cx][cz] == null) return false;
+		
+		// In any other case the chunk exists
+		return true;
+	}
+
 	multiBlockChunk(chunkX = 0, chunkZ = 0, user) {
 		this.workPool.add([false, ["chunk", [chunkX, chunkZ, this.chunks[chunkX][chunkZ]], user.id, null]]);
 	}
@@ -104,8 +112,8 @@ module.exports = class {
 	setBlock(id = 0, x = 0, y = 0, z = 0) {
 		if (y < 0 || y > 127) return console.error("Tried to set a block outside of the world!");
 
-		const chunkX = Math.floor(x >> 4);
-		const chunkZ = Math.floor(z >> 4);
+		const chunkX = x >> 4;
+		const chunkZ = z >> 4;
 		const blockX = x - (16 * chunkX);
 		const blockZ = z - (16 * chunkZ);
 
