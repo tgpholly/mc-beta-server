@@ -70,14 +70,21 @@ module.exports = function(cx = 0, cz = 0, seed = 0) {
 
 	const chunkX = cx << 4;
 	const chunkZ = cz << 4;
+	let topBlock = 0;
 	// 3rd pass???
 	for (let x = 0; x < 16; x++) {
 		for (let z = 0; z < 16; z++) {
-			const topBlock = stripTopCoord[x][z];
+			topBlock = stripTopCoord[x][z];
 
-			if (chunk[topBlock][x][z][0] == 2 && Math.floor(Math.random() * 5) == 0) {
-				chunk[topBlock + 1][x][z][0] = 31;
-				chunk[topBlock + 1][x][z][1] = 1;
+			if (chunk[topBlock][x][z][0] == 2) {
+				if (Math.floor(Math.random() * 5) == 0) {
+					chunk[topBlock + 1][x][z][0] = 31;
+					chunk[topBlock + 1][x][z][1] = 1;
+				} else if (Math.floor(Math.random() * 150) == 0) {
+					chunk[topBlock + 1][x][z][0] = 38;
+				} else if (Math.floor(Math.random() * 150) == 0) {
+					chunk[topBlock + 1][x][z][0] = 37;
+				}
 			}
 
 			// Need a better way of doing this it currently takes a severely long time (gee I wonder why)
