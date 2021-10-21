@@ -30,6 +30,11 @@ module.exports.Writer = class {
 		this.writeByte(data ? 1 : 0);
 	}
 
+	// NOTE: Currently writing a nibble requires you to write both halves at the same time.
+	writeNibble(nibble1 = 0, nibble2 = 0) {
+		this.writeUByte(nibble1 | (nibble2 << 4));
+	}
+
 	writeByte(data = 0) {
 		if (this.baseSize == 0) {
 			const buff = Buffer.alloc(1);
