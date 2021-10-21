@@ -7,6 +7,7 @@
 
 const { Worker } = require('worker_threads');
 const FunkyArray = require("./Util/funkyArray.js");
+const pRandom = require("./Util/prettyRandom.js");
 const config = require("../config.json");
 
 const workerPath = `${__dirname}/Workers/ChunkWorker.js`;
@@ -22,6 +23,9 @@ module.exports = class {
 		this.threadPool = [];
 		this.workPool = new FunkyArray();
 		this.toRemove = [];
+
+		// TODO: Figure out a better way of doing this?
+		this.seed = pRandom(-2147483647, 2147483647) - new Date().getTime() * pRandom(1, 6);
 
 		// WoAh!!! Thread pool in js!?!??!???!11!?!?!
 		for (let i = 0; i < config.worldThreads; i++) {
@@ -39,9 +43,15 @@ module.exports = class {
 					break;
 
 					case "generate":
+						const startTime = new Date().getTime();
 						this.chunks[data[2]][data[3]] = data[1];
 						this.toRemove.push(data[4]);
+						const treeBlocksRef = data[5];
+						treeBlocksRef.forEach((block) => {
+							this.setBlock(block[0], block[1], block[2], block[3]);
+						});
 						this.threadPool[myID][0] = false;
+						console.log(`Trees fin took ${new Date().getTime() - startTime}ms`);
 					break;
 				}
 			});
@@ -79,13 +89,7 @@ module.exports = class {
 				}
 				this.toRemove = [];
 			}
-		}, 1000 / 20);
-
-		for (let x = -3; x < 4; x++) {
-			for (let z = -3; z < 4; z++) {
-				this.createChunk(x, z);
-			}
-		}
+		}, 1000 / 60);
 
 		global.generatingChunks = false;
 	}
@@ -94,7 +98,7 @@ module.exports = class {
 	createChunk(cx = 0, cz = 0) {
 		if (this.chunks[cx] == null) this.chunks[cx] = {};
 
-		this.workPool.add([false, ["generate", cx, cz, null]]);
+		this.workPool.add([false, ["generate", cx, cz, null, this.seed]]);
 	}
 
 	chunkExists(cx = 0, cz = 0) {
@@ -109,17 +113,19 @@ module.exports = class {
 		this.workPool.add([false, ["chunk", [chunkX, chunkZ, this.chunks[chunkX][chunkZ]], user.id, null]]);
 	}
 
-	setBlock(id = 0, x = 0, y = 0, z = 0) {
+	setBlock(x = 0, y = 0, z = 0, id = 0, metadata = 0) {
 		if (y < 0 || y > 127) return console.error("Tried to set a block outside of the world!");
 
 		const chunkX = x >> 4;
 		const chunkZ = z >> 4;
-		const blockX = x - (16 * chunkX);
-		const blockZ = z - (16 * chunkZ);
+		const blockX = x - (chunkX << 4);
+		const blockZ = z - (chunkZ << 4);
 
-		// Don't queue a block update if that block is already this block
-		//if (this.chunks[chunkX][chunkZ][y][blockX][blockZ] == id) return;
+		// Don't queue a block update if that block is already this block (wow those ifs)
+		if (this.chunks[chunkX] != null)
+			if (this.chunks[chunkX][chunkZ] != null)
+				if (this.chunks[chunkX][chunkZ][y][blockX][blockZ] == id) return;
 
-		this.queuedBlockUpdates.add([id, chunkX, chunkZ, y, blockX, blockZ]);
+		this.queuedBlockUpdates.add([chunkX, chunkZ, y, blockX, blockZ, id, metadata]);
 	}
 }

@@ -84,33 +84,41 @@ module.exports.init = function(config) {
 		}
 		// Do chunk updates
 		// Don't update if chunk is generating
-		if (!global.generatingChunks) {
+		if (true) {
 			let itemsToRemove = [];
-			// Do a max of 128 chunk updates per tick
+			// Do a max of 128 block updates per tick
 			for (let i = 0; i < Math.min(global.chunkManager.queuedBlockUpdates.getLength(), 128); i++) {
 				const chunkUpdateKey = global.chunkManager.queuedBlockUpdates.itemKeys[i];
 				const chunkUpdate = global.chunkManager.queuedBlockUpdates.items[chunkUpdateKey];
 				// Don't update if chunk is nonexistant
-				if (global.chunkManager.chunks[chunkUpdate[1]] == null) continue;
-				if (global.chunkManager.chunks[chunkUpdate[1]][chunkUpdate[2]] == null) continue;
-				itemsToRemove.push(chunkUpdateKey);
-				
-				try {
-					global.chunkManager.chunks[chunkUpdate[1]][chunkUpdate[2]][chunkUpdate[3]][chunkUpdate[4]][chunkUpdate[5]] = chunkUpdate[0];
 
-					const packet = new PacketMappingTable[NamedPackets.BlockChange](chunkUpdate[4] + (16 * chunkUpdate[1]), chunkUpdate[3], chunkUpdate[5] + (16 * chunkUpdate[2]), chunkUpdate[0]).writePacket();
-					for (let userKey of netUserKeys) {
-						const user = netUsers[userKey];
-						if (user.loginFinished) user.socket.write(packet);
-					}
-				} catch (e) {
-					console.error(e);
+				// TODO: Remove this once infinite terrain is in :)
+				if (chunkUpdate[0] < -10 || chunkUpdate[0] > 10 || chunkUpdate[1] < -10 || chunkUpdate[1] > 10) {
+					itemsToRemove.push(chunkUpdateKey);
+					continue;
 				}
+
+				// If the chunk just plain doesn't exist (yet) skip this one
+				if (global.chunkManager.chunks[chunkUpdate[0]] == null) continue;
+				if (global.chunkManager.chunks[chunkUpdate[0]][chunkUpdate[1]] == null) continue;
+
+				global.chunkManager.chunks[chunkUpdate[0]][chunkUpdate[1]][chunkUpdate[2]][chunkUpdate[3]][chunkUpdate[4]][0] = chunkUpdate[5];
+				global.chunkManager.chunks[chunkUpdate[0]][chunkUpdate[1]][chunkUpdate[2]][chunkUpdate[3]][chunkUpdate[4]][1] = chunkUpdate[6];
+
+				const packet = new PacketMappingTable[NamedPackets.BlockChange](chunkUpdate[3] + (chunkUpdate[0] << 4), chunkUpdate[2], chunkUpdate[4] + (chunkUpdate[1] << 4), chunkUpdate[5], chunkUpdate[6]).writePacket();
+				for (let userKey of netUserKeys) {
+					const user = netUsers[userKey];
+					if (user.loginFinished) user.socket.write(packet);
+				}
+
+				itemsToRemove.push(chunkUpdateKey);
 			}
 
 			for (let item of itemsToRemove) {
 				global.chunkManager.queuedBlockUpdates.remove(item, false);
 			}
+
+			global.chunkManager.queuedBlockUpdates.regenerateIterableArray();
 		}
 
 		// Entity update!
@@ -143,6 +151,12 @@ module.exports.init = function(config) {
 		tickCounter++;
 		worldTime++;
 	}, 1000 / parseInt(tickRate.toString()));
+
+	for (let x = -3; x < 4; x++) {
+		for (let z = -3; z < 4; z++) {
+			global.chunkManager.createChunk(x, z);
+		}
+	}
 }
 
 module.exports.connection = async function(socket = new Socket) {
@@ -294,7 +308,7 @@ module.exports.connection = async function(socket = new Socket) {
 					const y = reader.readByte();
 					const z = reader.readInt();
 
-					global.chunkManager.setBlock(0, x, y, z);
+					global.chunkManager.setBlock(x, y, z, 0);
 				}
 			break;
 
@@ -313,7 +327,7 @@ module.exports.connection = async function(socket = new Socket) {
 				}
 				const block = reader.readShort();
 
-				global.chunkManager.setBlock(block, x + xOff, y + yOff, z + zOff);
+				global.chunkManager.setBlock(x + xOff, y + yOff, z + zOff, block);
 			break;
 
 			case NamedPackets.Player:

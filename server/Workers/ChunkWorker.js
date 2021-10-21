@@ -26,14 +26,15 @@ parentPort.on("message", (data) => {
 
 		case "generate":
 			const startTime = new Date().getTime();
-			parentPort.postMessage([data[0], generateChunk(data[1], data[2]), data[1], data[2], data[3]]);
-			console.log(`Chunk (${data[1]}, ${data[2]}) took ${new Date().getTime() - startTime}ms to generate`);
+			const chunkData = generateChunk(data[1], data[2], data[4]);
+			parentPort.postMessage([data[0], chunkData[0], data[1], data[2], data[3], chunkData[1]]);
+			console.log(`Chunk took ${new Date().getTime() - startTime}ms`);
 		break;
 	}
 });
 
-function generateChunk(x = 0, z = 0) {
-	return GeneratorPerlin(x, z);
+function generateChunk(x = 0, z = 0, seed = 0) {
+	return GeneratorPerlin(x, z, seed);
 }
 
 function doChunk(chunk) {
@@ -56,11 +57,11 @@ function doChunk(chunk) {
 	for (let x = 0; x < 16; x++) {
 		for (let z = 0; z < 16; z++) {
 			for (let y = 0; y < 128; y++) {
-				blocks.writeByte(chunk[2][y][x][z]); // The block
+				blocks.writeByte(chunk[2][y][x][z][0]);
 				if (blockMeta) {
-					metadata.writeByte(0x00); // TODO: Metadata
+					metadata.writeNibble(chunk[2][y - 1][x][z][1], chunk[2][y][x][z][1]); // NOTE: This is sorta jank but it does work
 					// Light level 15 for 2 blocks (1111 1111)
-					lighting.writeUByte(0xFF); // TODO: Lighting (Client seems to do it's own so it's not top priority)
+					lighting.writeNibble(15, 15); // TODO: Lighting (Client seems to do it's own (when a block update happens) so it's not top priority)
 				}
 				// Hack for nibble stuff
 				blockMeta = !blockMeta;
