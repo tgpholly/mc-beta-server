@@ -43,15 +43,14 @@ module.exports = class {
 					break;
 
 					case "generate":
-						const startTime = new Date().getTime();
 						this.chunks[data[2]][data[3]] = data[1];
 						this.toRemove.push(data[4]);
 						const treeBlocksRef = data[5];
 						treeBlocksRef.forEach((block) => {
-							this.setBlock(block[0], block[1], block[2], block[3]);
+							this.setBlock(block[0], block[1], block[2], block[3], 0, false);
 						});
+						this.queuedBlockUpdates.regenerateIterableArray();
 						this.threadPool[myID][0] = false;
-						console.log(`Trees fin took ${new Date().getTime() - startTime}ms`);
 					break;
 				}
 			});
@@ -113,7 +112,7 @@ module.exports = class {
 		this.workPool.add([false, ["chunk", [chunkX, chunkZ, this.chunks[chunkX][chunkZ]], user.id, null]]);
 	}
 
-	setBlock(x = 0, y = 0, z = 0, id = 0, metadata = 0) {
+	setBlock(x = 0, y = 0, z = 0, id = 0, metadata = 0, regenerate = true) {
 		if (y < 0 || y > 127) return console.error("Tried to set a block outside of the world!");
 
 		const chunkX = x >> 4;
@@ -126,6 +125,6 @@ module.exports = class {
 			if (this.chunks[chunkX][chunkZ] != null)
 				if (this.chunks[chunkX][chunkZ][y][blockX][blockZ] == id) return;
 
-		this.queuedBlockUpdates.add([chunkX, chunkZ, y, blockX, blockZ, id, metadata]);
+		this.queuedBlockUpdates.add([chunkX, chunkZ, y, blockX, blockZ, id, metadata], regenerate);
 	}
 }

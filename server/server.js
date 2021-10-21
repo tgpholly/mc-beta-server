@@ -90,11 +90,10 @@ module.exports.init = function(config) {
 			for (let i = 0; i < Math.min(global.chunkManager.queuedBlockUpdates.getLength(), 128); i++) {
 				const chunkUpdateKey = global.chunkManager.queuedBlockUpdates.itemKeys[i];
 				const chunkUpdate = global.chunkManager.queuedBlockUpdates.items[chunkUpdateKey];
-				// Don't update if chunk is nonexistant
-
+				
 				// TODO: Remove this once infinite terrain is in :)
-				if (chunkUpdate[0] < -10 || chunkUpdate[0] > 10 || chunkUpdate[1] < -10 || chunkUpdate[1] > 10) {
-					itemsToRemove.push(chunkUpdateKey);
+				if (chunkUpdate[0] < -3 || chunkUpdate[0] > 4 || chunkUpdate[1] < -3 || chunkUpdate[1] > 4) {
+					itemsToRemove.push(chunkUpdateKey, false);
 					continue;
 				}
 
