@@ -1,15 +1,19 @@
 # mc-beta-server [![CodeFactor](https://www.codefactor.io/repository/github/tgpethan/mc-beta-server/badge)](https://www.codefactor.io/repository/github/tgpethan/mc-beta-server)
 me trying to understand minecraft beta's protocol
 
-Implemented:
+**Implemented:**
  - Basic flat terrain generation
  - Terrain sending
  - Block placement
  - Block breaking
  - Entities:
    - Players
- 
-To Implement:
+
+**WIP:**
+ - Terrain generation using perlin noise
+ - Cross chunk structure generation (trees, buildings, etc...)
+
+**To Implement:**
  - Entities:
    - Items/Blocks
    - Animals
@@ -20,5 +24,5 @@ To Implement:
  - Tile entities
  - Probably a bunch more things that i'm forgetting
  
-Long Term:
+**Long Term:**
  - Optimise the shit out of this
