@@ -22,22 +22,25 @@ module.exports = class {
 		let id;
 		if (this.indexingMode) {
 			this.items[id = this.index] = item;
+			this.index++;
 		} else {
 			this.items[id = pRandom()] = item;
 		}
 
-		if (regenerate) this.regenerateIterableArray();
-		this.itemKeys = Object.keys(this.items);
-		
-		this.index++;
+		if (regenerate) {
+			this.regenerateIterableArray();
+			this.itemKeys = Object.keys(this.items);
+		}
 
 		return this.items[id];
 	}
 
 	remove(id, regenerate = true) {
 		delete this.items[id];
-		if (regenerate) this.regenerateIterableArray();
-		this.itemKeys = Object.keys(this.items);
+		if (regenerate) {
+			this.regenerateIterableArray();
+			this.itemKeys = Object.keys(this.items);
+		}
 	}
 
 	removeFirstItem(regenerate = true) {
@@ -51,6 +54,7 @@ module.exports = class {
 		for (let itemKey of this.itemKeys) {
 			this.iterableArray.push(this.items[itemKey]);
 		}
+		this.itemKeys = Object.keys(this.items);
 	}
 
 	getFirstItem() {
