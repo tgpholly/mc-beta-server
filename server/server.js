@@ -12,6 +12,7 @@ const EntityPlayer = require("./Entities/EntityPlayer.js");
 const PacketMappingTable = require("./PacketMappingTable.js");
 const NamedPackets = require("./NamedPackets.js");
 const Converter = require("./Converter.js");
+const Block = require("./Blocks/Block.js");
 
 const Socket = require("net").Socket;
 
@@ -84,7 +85,8 @@ module.exports.init = function(config) {
 		}
 		// Do chunk updates
 		// Don't update if chunk is generating
-		if (true) {
+		if (global.chunkManager.queuedBlockUpdates.getLength() > 0) {
+			console.log("Queue length: " + global.chunkManager.queuedBlockUpdates.getLength())
 			let itemsToRemove = [];
 			// Do a max of 128 block updates per tick
 			for (let i = 0; i < Math.min(global.chunkManager.queuedBlockUpdates.getLength(), 128); i++) {
@@ -176,7 +178,7 @@ module.exports.connection = async function(socket = new Socket) {
 			break;
 
 			case NamedPackets.LoginRequest:
-				socket.write(new PacketMappingTable[NamedPackets.LoginRequest](reader.readInt(), reader.readString(), reader.readLong(), reader.readByte()).writePacket(thisUser.id));
+				socket.write(new PacketMappingTable[NamedPackets.LoginRequest](reader.readInt(), reader.readString(), global.chunkManager.seed, reader.readByte()).writePacket(thisUser.id));
 				socket.write(new PacketMappingTable[NamedPackets.SpawnPosition]().writePacket());
 
 				for (let x = -3; x < 4; x++) {
@@ -188,7 +190,7 @@ module.exports.connection = async function(socket = new Socket) {
 				// Place a layer of glass under the player so they don't fall n' die
 				for (let x = 0; x < 16; x++) {
 					for (let z = 0; z < 16; z++) {
-						socket.write(new PacketMappingTable[NamedPackets.BlockChange](x, 64, z, 20, 0).writePacket());
+						socket.write(new PacketMappingTable[NamedPackets.BlockChange](x, 64, z, Block.glass.blockID, 0).writePacket());
 					}
 				}
 
