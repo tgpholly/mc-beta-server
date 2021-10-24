@@ -86,7 +86,6 @@ module.exports.init = function(config) {
 		// Do chunk updates
 		// Don't update if chunk is generating
 		if (global.chunkManager.queuedBlockUpdates.getLength() > 0) {
-			console.log("Queue length: " + global.chunkManager.queuedBlockUpdates.getLength())
 			let itemsToRemove = [];
 			// Do a max of 128 block updates per tick
 			for (let i = 0; i < Math.min(global.chunkManager.queuedBlockUpdates.getLength(), 128); i++) {
@@ -94,7 +93,7 @@ module.exports.init = function(config) {
 				const chunkUpdate = global.chunkManager.queuedBlockUpdates.items[chunkUpdateKey];
 				
 				// TODO: Remove this once infinite terrain is in :)
-				if (chunkUpdate[0] < -3 || chunkUpdate[0] > 4 || chunkUpdate[1] < -3 || chunkUpdate[1] > 4) {
+				if (chunkUpdate[0] < -3 || chunkUpdate[0] > 3 || chunkUpdate[1] < -3 || chunkUpdate[1] > 3) {
 					itemsToRemove.push(chunkUpdateKey, false);
 					continue;
 				}
