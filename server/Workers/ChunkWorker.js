@@ -25,10 +25,10 @@ parentPort.on("message", (data) => {
 		break;
 
 		case "generate":
-			const startTime = new Date().getTime();
+			const startTime = Date.now();
 			const chunkData = generateChunk(data[1], data[2], data[4]);
 			parentPort.postMessage([data[0], chunkData[0], data[1], data[2], data[3], chunkData[1]]);
-			console.log(`Chunk took ${new Date().getTime() - startTime}ms`);
+			console.log(`Chunk took ${Date.now() - startTime}ms`);
 		break;
 	}
 });
