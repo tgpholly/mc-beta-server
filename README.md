@@ -3,21 +3,20 @@ me trying to understand minecraft beta's protocol
 
 **Implemented:**
  - Basic flat terrain generation
+
+**WIP:**
+
+**To Implement:**
  - Terrain sending
  - Block placement
  - Block breaking
  - Entities:
    - Players
-
-**WIP:**
- - Terrain generation using perlin noise
- - Cross chunk structure generation (trees, buildings, etc...)
-
-**To Implement:**
- - Entities:
    - Items/Blocks
    - Animals
    - Mobs
+ - Terrain generation using perlin noise
+ - Cross chunk structure generation (trees, buildings, etc...)
  - Inventories
  - Terrain saving to disk
  - Sleeping in beds
