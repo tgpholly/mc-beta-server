@@ -6,7 +6,7 @@ enum LogType {
 	INFO,
 	WARN,
 	ERROR
-};
+}
 
 const LogTags = {
 	INFO: chalk.bgGreen(chalk.black("  INFO  ")),

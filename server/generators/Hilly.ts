@@ -35,7 +35,8 @@ export class HillyGenerator implements IGenerator {
 	// This is good enough (and fast enough) for what is needed here.
 	private mulberry32(a:number) {
 		return function() {
-			var t = a += 0x6D2B79F5;
+			// TODO: Determine if "a" is needed
+			let t = a += 0x6D2B79F5;
 			t = Math.imul(t ^ t >>> 15, t | 1);
 			t ^= t + Math.imul(t ^ t >>> 7, t | 61);
 			return ((t ^ t >>> 14) >>> 0) / 4294967296;

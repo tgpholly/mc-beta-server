@@ -3,4 +3,4 @@ import { readFileSync } from "fs";
 import { MinecraftServer } from "./server/MinecraftServer";
 const config:Config = JSON.parse(readFileSync("./config.json").toString()) as Config;
 
-const mcServer = new MinecraftServer(config);
+new MinecraftServer(config);

@@ -1,9 +1,8 @@
-import { Console } from "../console";
 import { FunkyArray } from "../funkyArray";
 import { Chunk } from "./Chunk";
 import { IEntity } from "./entities/IEntity";
 import { Player } from "./entities/Player";
-import { FlatGenerator } from "./generators/Flat";
+//import { FlatGenerator } from "./generators/Flat";
 import { HillyGenerator } from "./generators/Hilly";
 import { IGenerator } from "./generators/IGenerator";
 
@@ -26,7 +25,7 @@ export class World {
 	// TODO: getChunkByCoordPair failed in here during removeEntity, figure out why.
 	public removeEntity(entity:IEntity) {
 		if (entity instanceof Player) {
-			for (let coordPair of entity.loadedChunks) {
+			for (const coordPair of entity.loadedChunks) {
 				const chunk = this.getChunkByCoordPair(coordPair);
 				chunk.playersInChunk.remove(entity.entityId);
 
@@ -68,11 +67,11 @@ export class World {
 		this.chunks.remove(coordPair);
 	}
 
-	public tick(tickCount:number) {
+	public tick() {
 		this.entites.forEach(entity => {
 			if (entity instanceof Player) {
 				if (entity.justUnloaded.length > 0) {
-					for (let coordPair of entity.justUnloaded) {
+					for (const coordPair of entity.justUnloaded) {
 						const chunkToUnload = this.getChunkByCoordPair(coordPair);
 						chunkToUnload.playersInChunk.remove(entity.entityId);
 						if (chunkToUnload.playersInChunk.length === 0) {

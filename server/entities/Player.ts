@@ -1,12 +1,9 @@
-import { FunkyArray } from "../../funkyArray";
 import { Chunk } from "../Chunk";
 import { MPClient } from "../MPClient";
 import { MinecraftServer } from "../MinecraftServer";
 import { World } from "../World";
 import { PacketMapChunk } from "../packets/MapChunk";
 import { EntityLiving } from "./EntityLiving";
-import { Entity } from "./Entity";
-import { Socket } from "net";
 import { PacketPreChunk } from "../packets/PreChunk";
 
 export class Player extends EntityLiving {
@@ -64,7 +61,7 @@ export class Player extends EntityLiving {
 			}
 
 			// Mark any unaccounted chunks for unload
-			for (let coordPair of this.loadedChunks) {
+			for (const coordPair of this.loadedChunks) {
 				if (!currentLoads.includes(coordPair)) {
 					this.justUnloaded.push(coordPair);
 					const chunkToUnload = this.world.getChunkByCoordPair(coordPair);

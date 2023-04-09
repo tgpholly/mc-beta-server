@@ -11,12 +11,8 @@ import { PacketKeepAlive } from "./packets/KeepAlive";
 import { PacketLoginRequest } from "./packets/LoginRequest";
 import { PacketDisconnectKick } from "./packets/DisconnectKick";
 import { Player } from "./entities/Player";
-import { PacketTimeUpdate } from "./packets/TimeUpdate";
 import { PacketSpawnPosition } from "./packets/SpawnPosition";
-import { Chunk } from "./Chunk";
-import { PacketMapChunk } from "./packets/MapChunk";
 import { PacketPlayerPositionLook } from "./packets/PlayerPositionLook";
-import { PacketPreChunk } from "./packets/PreChunk";
 import { PacketChat } from "./packets/Chat";
 
 export class MinecraftServer {
@@ -25,10 +21,9 @@ export class MinecraftServer {
 	private static readonly TICK_RATE_MS = 1000 / MinecraftServer.TICK_RATE;
 	private readonly keepalivePacket = new PacketKeepAlive().writeData();
 
-	private totalClients:number = 0;
 	private config:Config;
 	private server:Server;
-	private serverClock:NodeJS.Timer;
+	private readonly serverClock:NodeJS.Timer;
 	private tickCounter:number = 0;
 	private clients:FunkyArray<string, MPClient>;
 	private worlds:FunkyArray<number, World>;
@@ -85,7 +80,7 @@ export class MinecraftServer {
 			}
 
 			this.worlds.forEach(world => {
-				world.tick(this.tickCounter);
+				world.tick();
 			});
 			this.tickCounter++;
 		}, MinecraftServer.TICK_RATE_MS);
@@ -101,13 +96,56 @@ export class MinecraftServer {
 		});
 	}
 
+	handleLoginRequest(reader:Reader, socket:Socket, setMPClient:(mpclient:MPClient) => void) {
+		const loginPacket = new PacketLoginRequest().readData(reader);
+		if (loginPacket.protocolVersion !== MinecraftServer.PROTOCOL_VERSION) {
+			if (loginPacket.protocolVersion > MinecraftServer.PROTOCOL_VERSION) {
+				socket.write(new PacketDisconnectKick("Outdated server!").writeData());
+			} else {
+				socket.write(new PacketDisconnectKick("Outdated or modded client!").writeData());
+			}
+			return;
+		}
+		
+		const world = this.worlds.get(0);
+		if (world instanceof World) {
+			const clientEntity = new Player(this, world, loginPacket.username);
+			world.addEntity(clientEntity);
+
+			const client = new MPClient(socket, clientEntity);
+			setMPClient(client);
+			clientEntity.mpClient = client;
+			this.clients.set(loginPacket.username, client);
+
+			this.sendToAllClients(new PacketChat(`\u00a7e${loginPacket.username} joined the game`).writeData());
+
+			socket.write(new PacketLoginRequest(clientEntity.entityId, "", 0, 0).writeData());
+			socket.write(new PacketSpawnPosition(8, 64, 8).writeData());
+
+			socket.write(new PacketPlayerPositionLook(8, 70, 70.62, 8, 0, 0, false).writeData());
+		} else {
+			socket.write(new PacketDisconnectKick("Failed to find world to put player in.").writeData());
+		}
+	}
+	
+	handleHandshake(reader:Reader, socket:Socket) {
+		const handshakePacket = new PacketHandshake().readData(reader);
+		socket.write(handshakePacket.writeData());
+	}
+
 	onConnection(socket:Socket) {
 		let mpClient:MPClient;
+		const setMPClient = (mpclient:MPClient) => {
+			mpClient = mpclient;
+		}
 
 		const playerDisconnect = (err:Error) => {
 			mpClient.entity.world.removeEntity(mpClient.entity);
 			this.clients.remove(mpClient.entity.username);
 			this.sendToAllClients(new PacketChat(`\u00a7e${mpClient.entity.username} left the game`).writeData());
+			if (typeof(err) !== "boolean") {
+				Console.printError(`Client disconnected with error: ${err.message}`);
+			}
 		}
 		socket.on("close", playerDisconnect.bind(this));
 		socket.on("error", playerDisconnect.bind(this));
@@ -123,45 +161,10 @@ export class MinecraftServer {
 
 			const packetId = reader.readUByte();
 			switch (packetId) {
-				// Handle timeouts at some point, idk.
-				case Packets.KeepAlive:
-					break;
-
-				case Packets.LoginRequest:
-					const loginPacket = new PacketLoginRequest().readData(reader);
-					if (loginPacket.protocolVersion !== MinecraftServer.PROTOCOL_VERSION) {
-						if (loginPacket.protocolVersion > MinecraftServer.PROTOCOL_VERSION) {
-							socket.write(new PacketDisconnectKick("Outdated server!").writeData());
-						} else {
-							socket.write(new PacketDisconnectKick("Outdated or modded client!").writeData());
-						}
-						return;
-					}
-					
-					const world = this.worlds.get(0);
-					if (world instanceof World) {
-						const clientEntity = new Player(this, world, loginPacket.username);
-						world.addEntity(clientEntity);
-
-						const client = mpClient = new MPClient(socket, clientEntity);
-						clientEntity.mpClient = client;
-						this.clients.set(loginPacket.username, client);
-
-						this.sendToAllClients(new PacketChat(`\u00a7e${loginPacket.username} joined the game`).writeData());
-
-						socket.write(new PacketLoginRequest(clientEntity.entityId, "", 0, 0).writeData());
-						socket.write(new PacketSpawnPosition(8, 64, 8).writeData());
-
-						socket.write(new PacketPlayerPositionLook(8, 70, 70.62, 8, 0, 0, false).writeData());
-					} else {
-						socket.write(new PacketDisconnectKick("Failed to find world to put player in.").writeData());
-					}
-					break;
-
-				case Packets.Handshake:
-					const handshakePacket = new PacketHandshake().readData(reader);
-					socket.write(handshakePacket.writeData());
-					break;
+				// TODO: Handle timeouts at some point, idk.
+				case Packets.KeepAlive: break;
+				case Packets.LoginRequest: this.handleLoginRequest(reader, socket, setMPClient.bind(this)); break;
+				case Packets.Handshake: this.handleHandshake(reader, socket); break;
 			}
 		});
 	}

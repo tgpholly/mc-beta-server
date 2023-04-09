@@ -1,5 +1,4 @@
 import { FunkyArray } from "../funkyArray";
-import { Block } from "./blocks/Block";
 import { Player } from "./entities/Player";
 import { World } from "./World";
 

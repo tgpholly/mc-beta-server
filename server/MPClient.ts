@@ -37,7 +37,7 @@ export class MPClient {
 	}
 
 	handlePacketPlayer(packet:PacketPlayer) {
-		// TODO
+		this.entity.onGround = packet.onGround;
 	}
 
 	handlePacketPlayerPosition(packet:PacketPlayerPosition) {
