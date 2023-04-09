@@ -25,7 +25,8 @@ export class PacketMapChunk implements IPacket {
 	}
 
 	public readData(reader:Reader) {
-		
+		// TODO: Implement MapChunk reading
+		reader.readBool();
 
 		return this;
 	}

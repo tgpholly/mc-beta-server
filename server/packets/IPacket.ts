@@ -1,4 +1,4 @@
-import { Reader, Writer } from "../../bufferStuff";
+import { Reader } from "../../bufferStuff";
 import { Packets } from "../enums/Packets";
 
 export interface IPacket {

@@ -7,6 +7,7 @@ export class PacketKeepAlive implements IPacket {
 	private static readonly KeepAliveBuffer:Buffer = new Writer(1).writeByte(Packets.KeepAlive).toBuffer();
 
 	public readData(reader:Reader) {
+		reader;
 		return this;
 	}
 

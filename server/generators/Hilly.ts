@@ -2,7 +2,6 @@ import { Block } from "../blocks/Block";
 import { Chunk } from "../Chunk";
 import { IGenerator } from "./IGenerator";
 import { Noise2D, makeNoise2D } from "../../external/OpenSimplex2D";
-import shuffle_seed from "../../external/shuffle_seed";
 
 export class HillyGenerator implements IGenerator {
 	private seed:number;

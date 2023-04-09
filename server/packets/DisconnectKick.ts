@@ -6,11 +6,16 @@ export class PacketDisconnectKick implements IPacket {
 	public packetId = Packets.DisconnectKick;
 	public reason:string;
 
-	public constructor(reason:string) {
-		this.reason = reason;
+	public constructor(reason?:string) {
+		if (typeof(reason) === "string") {
+			this.reason = reason;
+		} else {
+			this.reason = "";
+		}
 	}
 
 	public readData(reader:Reader) {
+		this.reason = reader.readString();
 		return this;
 	}
 
