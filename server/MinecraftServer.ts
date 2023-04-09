@@ -17,6 +17,7 @@ import { Chunk } from "./Chunk";
 import { PacketMapChunk } from "./packets/MapChunk";
 import { PacketPlayerPositionLook } from "./packets/PlayerPositionLook";
 import { PacketPreChunk } from "./packets/PreChunk";
+import { PacketChat } from "./packets/Chat";
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
@@ -29,25 +30,56 @@ export class MinecraftServer {
 	private server:Server;
 	private serverClock:NodeJS.Timer;
 	private tickCounter:number = 0;
-	private clients:FunkyArray<number, MPClient>;
+	private clients:FunkyArray<string, MPClient>;
 	private worlds:FunkyArray<number, World>;
+	private overworld:World;
+
+	// https://stackoverflow.com/a/7616484
+	// Good enough for the world seed.
+	private hashCode(string:string) : number {
+		let hash = 0, i, chr;
+		if (string.length === 0) {
+			return hash;
+		}
+		for (i = 0; i < string.length; i++) {
+			chr = string.charCodeAt(i);
+			hash = ((hash << 5) - hash) + chr;
+			hash |= 0;
+		}
+		return hash;
+	}
 
 	public constructor(config:Config) {
 		this.config = config;
 
-		this.clients = new FunkyArray<number, MPClient>();
+		this.clients = new FunkyArray<string, MPClient>();
+
+		// Convert seed if needed
+		const worldSeed = typeof(this.config.seed) === "string" ? this.hashCode(this.config.seed) : this.config.seed;
 
 		this.worlds = new FunkyArray<number, World>();
-		this.worlds.set(0, new World());
+		this.worlds.set(0, this.overworld = new World(worldSeed));
+
+		// Generate spawn area (overworld)
+		const generateStartTime = Date.now();
+		Console.printInfo("[Overworld] Generating spawn area...");
+		let generatedCount = 0;
+		for (let x = -3; x < 3; x++) {
+			for (let z = -3; z < 3; z++) {
+				this.overworld.getChunk(x, z);
+				if (generatedCount++ % 5 === 0) {
+					Console.printInfo(`[Overworld] Generating spawn area... ${Math.floor(generatedCount / 36 * 100)}%`);
+				}
+			}	
+		}
+		Console.printInfo(`Done! Took ${Date.now() - generateStartTime}ms`);
 
 		this.serverClock = setInterval(() => {
 			// Every 1 sec
 			if (this.tickCounter % MinecraftServer.TICK_RATE === 0)  {
 				if (this.clients.length !== 0) {
-					const timePacket = new PacketTimeUpdate(this.tickCounter).writeData();
 					this.clients.forEach(client => {
 						client.send(this.keepalivePacket);
-						client.send(timePacket);
 					});
 				}
 			}
@@ -70,11 +102,26 @@ export class MinecraftServer {
 	}
 
 	onConnection(socket:Socket) {
+		let mpClient:MPClient;
+
+		const playerDisconnect = (err:Error) => {
+			mpClient.entity.world.removeEntity(mpClient.entity);
+			this.clients.remove(mpClient.entity.username);
+			this.sendToAllClients(new PacketChat(`\u00a7e${mpClient.entity.username} left the game`).writeData());
+		}
+		socket.on("close", playerDisconnect.bind(this));
+		socket.on("error", playerDisconnect.bind(this));
+
 		socket.on("data", chunk => {
 			const reader = new Reader(chunk);
 
+			// Let mpClient take over if it exists
+			if (mpClient instanceof MPClient) {
+				mpClient.handlePacket(reader);
+				return;
+			}
+
 			const packetId = reader.readUByte();
-			//console.log(packetId);
 			switch (packetId) {
 				// Handle timeouts at some point, idk.
 				case Packets.KeepAlive:
@@ -95,20 +142,17 @@ export class MinecraftServer {
 					if (world instanceof World) {
 						const clientEntity = new Player(this, world, loginPacket.username);
 						world.addEntity(clientEntity);
-						socket.write(new PacketLoginRequest(clientEntity.entityId, "", 0, -1).writeData());
+
+						const client = mpClient = new MPClient(socket, clientEntity);
+						clientEntity.mpClient = client;
+						this.clients.set(loginPacket.username, client);
+
+						this.sendToAllClients(new PacketChat(`\u00a7e${loginPacket.username} joined the game`).writeData());
+
+						socket.write(new PacketLoginRequest(clientEntity.entityId, "", 0, 0).writeData());
 						socket.write(new PacketSpawnPosition(8, 64, 8).writeData());
 
-						socket.write(new PacketPreChunk(0, 0, true).writeData());
-						const chunk = world.getChunk(0, 0);
-						if (chunk instanceof Chunk) {
-							(async () => {
-								const chunkData = await (new PacketMapChunk(0, 0, 0, 15, 127, 15, chunk).writeData());
-								socket.write(chunkData);
-								socket.write(new PacketPlayerPositionLook(8, 66, 66.62, 8, 0, 0, false).writeData());
-							})();
-						}
-						const client = new MPClient(socket, clientEntity);
-						this.clients.set(this.totalClients++, client);
+						socket.write(new PacketPlayerPositionLook(8, 70, 70.62, 8, 0, 0, false).writeData());
 					} else {
 						socket.write(new PacketDisconnectKick("Failed to find world to put player in.").writeData());
 					}

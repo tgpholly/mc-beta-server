@@ -1,11 +1,14 @@
+import { FunkyArray } from "../funkyArray";
 import { Block } from "./blocks/Block";
+import { Player } from "./entities/Player";
 import { World } from "./World";
 
 export class Chunk {
 	private readonly MAX_HEIGHT:number = 128;
 	private readonly world:World;
-	private readonly x:number;
-	private readonly z:number;
+	public readonly x:number;
+	public readonly z:number;
+	public readonly playersInChunk:FunkyArray<number, Player>;
 
 	private blocks:Uint8Array;
 
@@ -17,6 +20,8 @@ export class Chunk {
 		this.world = world;
 		this.x = x;
 		this.z = z;
+		this.playersInChunk = new FunkyArray<number, Player>();
+
 		this.blocks = new Uint8Array(16 * 16 * this.MAX_HEIGHT);
 
 		this.world.generator.generate(this);

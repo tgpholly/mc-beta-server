@@ -12,4 +12,15 @@ export class Block {
 
 
 	static bedrock = new Block(7);
+
+	static waterStill = new Block(9);
+
+
+
+
+
+
+
+	static wood = new Block(17);
+	static leaves = new Block(18);
 }

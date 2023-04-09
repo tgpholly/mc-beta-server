@@ -1,7 +1,10 @@
+import { Console } from "../console";
 import { FunkyArray } from "../funkyArray";
 import { Chunk } from "./Chunk";
 import { IEntity } from "./entities/IEntity";
+import { Player } from "./entities/Player";
 import { FlatGenerator } from "./generators/Flat";
+import { HillyGenerator } from "./generators/Hilly";
 import { IGenerator } from "./generators/IGenerator";
 
 export class World {
@@ -10,30 +13,78 @@ export class World {
 
 	public generator:IGenerator;
 
-	public constructor() {
+	public constructor(seed:number) {
 		this.chunks = new FunkyArray<number, Chunk>();
 		this.entites = new FunkyArray<number, IEntity>();
-		this.generator = new FlatGenerator();
-		this.chunks.set(Chunk.CreateCoordPair(0, 0), new Chunk(this, 0, 0));
+		this.generator = new HillyGenerator(seed);
 	}
 
 	public addEntity(entity:IEntity) {
 		this.entites.set(entity.entityId, entity);
 	}
 
-	public removeEntity(entity:IEntity|number) {
-		if (typeof(entity) === "number") {
-			return this.entites.remove(entity);
+	// TODO: getChunkByCoordPair failed in here during removeEntity, figure out why.
+	public removeEntity(entity:IEntity) {
+		if (entity instanceof Player) {
+			for (let coordPair of entity.loadedChunks) {
+				const chunk = this.getChunkByCoordPair(coordPair);
+				chunk.playersInChunk.remove(entity.entityId);
+
+				if (chunk.playersInChunk.length === 0) {
+					this.unloadChunk(coordPair);
+				}
+			}
 		}
 
-		return this.entites.remove(entity.entityId);
+		this.entites.remove(entity.entityId);
+		// TODO: Inform clients about entity removal
 	}
 
-	public getChunk(x:number, z:number) {
-		return this.chunks.get(Chunk.CreateCoordPair(x, z));
+	public getChunk(x:number, z:number, generate:boolean = true) {
+		const coordPair = Chunk.CreateCoordPair(x, z);
+		const existingChunk = this.chunks.get(coordPair);
+		if (!(existingChunk instanceof Chunk)) {
+			if (generate) {
+				return this.chunks.set(coordPair, new Chunk(this, x, z));
+			}
+
+			throw new Error(`BADLOOKUP: Chunk [${x}, ${z}] does not exist.`);
+		}
+
+		return existingChunk;
+	}
+
+	public getChunkByCoordPair(coordPair:number) {
+		const existingChunk = this.chunks.get(coordPair);
+		if (!(existingChunk instanceof Chunk)) {
+			throw new Error(`BADLOOKUP: Chunk ${coordPair} does not exist.`);
+		}
+
+		return existingChunk;
+	}
+
+	public unloadChunk(coordPair:number) {
+		// TODO: Save to disk
+		this.chunks.remove(coordPair);
 	}
 
 	public tick(tickCount:number) {
-		
+		this.entites.forEach(entity => {
+			if (entity instanceof Player) {
+				if (entity.justUnloaded.length > 0) {
+					for (let coordPair of entity.justUnloaded) {
+						const chunkToUnload = this.getChunkByCoordPair(coordPair);
+						chunkToUnload.playersInChunk.remove(entity.entityId);
+						if (chunkToUnload.playersInChunk.length === 0) {
+							this.unloadChunk(coordPair);
+						}
+					}
+
+					entity.justUnloaded = new Array<number>();
+				}
+			}
+
+			entity.onTick();
+		})
 	}
 }

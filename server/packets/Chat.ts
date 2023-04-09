@@ -6,8 +6,12 @@ export class PacketChat implements IPacket {
 	public packetId = Packets.Chat;
 	public message:string;
 
-	public constructor(message:string) {
-		this.message = message;
+	public constructor(message?:string) {
+		if (typeof(message) === "string") {
+			this.message = message;
+		} else {
+			this.message = "";
+		}
 	}
 
 	public readData(reader:Reader) {

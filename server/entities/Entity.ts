@@ -20,4 +20,10 @@ export class Entity implements IEntity {
 		this.world = world;
 		this.x = this.y = this.z = this.lastX = this.lastY = this.lastZ = 0;
 	}
+
+	onTick() {
+		this.lastX = this.x;
+		this.lastY = this.y;
+		this.lastZ = this.z;
+	}
 }

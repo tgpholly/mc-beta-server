@@ -6,8 +6,12 @@ export class PacketPlayer implements IPacket {
 	public packetId = Packets.Player;
 	public onGround:boolean;
 
-	public constructor(onGround:boolean = false) {
-		this.onGround = onGround;
+	public constructor(onGround?:boolean) {
+		if (typeof(onGround) === "boolean") {
+			this.onGround = onGround;
+		} else {
+			this.onGround = false;
+		}
 	}
 
 	public readData(reader:Reader) {

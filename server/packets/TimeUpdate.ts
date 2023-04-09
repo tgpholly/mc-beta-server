@@ -4,14 +4,14 @@ import { IPacket } from "./IPacket";
 
 export class PacketTimeUpdate implements IPacket {
 	public packetId = Packets.TimeUpdate;
-	public time:number;
+	public time:bigint;
 
-	public constructor(time:number) {
+	public constructor(time:bigint) {
 		this.time = time;
 	}
 
 	public readData(reader:Reader) {
-		this.time = Number(reader.readLong());
+		this.time = reader.readLong();
 
 		return this;
 	}

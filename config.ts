@@ -1,5 +1,6 @@
 export interface Config {
 	port: number,
 	onlineMode: boolean,
-	maxPlayers: number
+	maxPlayers: number,
+	seed: number|string,
 }

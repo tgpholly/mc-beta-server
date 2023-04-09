@@ -61,7 +61,7 @@ export class PacketMapChunk implements IPacket {
 					return reject(err);
 				}
 
-				resolve(new Writer(18).writeUByte(this.packetId).writeInt(this.x).writeShort(this.y).writeInt(this.z).writeUByte(this.sizeX).writeUByte(this.sizeY).writeUByte(this.sizeZ).writeInt(data.length).writeBuffer(data).toBuffer());
+				resolve(new Writer(18).writeUByte(this.packetId).writeInt(this.x << 4).writeShort(this.y).writeInt(this.z << 4).writeUByte(this.sizeX).writeUByte(this.sizeY).writeUByte(this.sizeZ).writeInt(data.length).writeBuffer(data).toBuffer());
 			});
 		});
 	}

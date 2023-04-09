@@ -1,5 +1,6 @@
 {
 	"port": 25565,
 	"onlineMode": false,
-	"maxPlayers": 20
+	"maxPlayers": 20,
+	"seed": "really janky"
 }

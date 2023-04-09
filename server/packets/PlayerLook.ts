@@ -8,10 +8,16 @@ export class PacketPlayerLook implements IPacket {
 	public pitch:number;
 	public onGround:boolean;
 
-	public constructor(yaw:number, pitch:number, onGround:boolean = false) {
-		this.yaw = yaw;
-		this.pitch = pitch;
-		this.onGround = onGround;
+	public constructor(yaw?:number, pitch?:number, onGround?:boolean) {
+		if (typeof(yaw) === "number" && typeof(pitch) === "number" && typeof(onGround) === "boolean") {
+			this.yaw = yaw;
+			this.pitch = pitch;
+			this.onGround = onGround;
+		} else {
+			this.yaw = Number.MIN_VALUE;
+			this.pitch = Number.MIN_VALUE;
+			this.onGround = false;
+		}
 	}
 
 	public readData(reader:Reader) {
