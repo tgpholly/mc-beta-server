@@ -47,8 +47,8 @@ export class EntityLiving extends Entity {
 		const diffYaw = this.absYaw - this.lastAbsYaw;
 		const diffPitch = this.absPitch - this.lastAbsPitch;
 
-		const doRelativeMove = Math.abs(diffX) >= 5 || Math.abs(diffY) >= 5 || Math.abs(diffZ) >= 5;
-		const doLook = Math.abs(diffYaw) >= 5 || Math.abs(diffPitch) >= 5;
+		const doRelativeMove = Math.abs(diffX) >= 4 || Math.abs(diffY) >= 4 || Math.abs(diffZ) >= 4;
+		const doLook = Math.abs(diffYaw) >= 4 || Math.abs(diffPitch) >= 4;
 		if (Math.abs(diffX) > 128 || Math.abs(diffY) > 128 || Math.abs(diffZ) > 128) {
 			this.world.sendToNearbyClients(this, new PacketEntityTeleport(this.entityId, this.absX, this.absY, this.absZ, this.absYaw, this.absPitch).writeData());
 		} else if (doRelativeMove && doLook) {

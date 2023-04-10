@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketPlayerDigging implements IPacket {
-	public packetId = Packets.PlayerDigging;
+	public packetId = Packet.PlayerDigging;
 	public status:number;
 	public x:number;
 	public y:number;

@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketPlayer implements IPacket {
-	public packetId = Packets.Player;
+	public packetId = Packet.Player;
 	public onGround:boolean;
 
 	public constructor(onGround?:boolean) {

@@ -16,4 +16,10 @@ export class Vec3 {
 			this.x = this.y = this.z = 0;
 		}
 	}
+
+	public set(x:number, y:number, z:number) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
 }

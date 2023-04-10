@@ -5,6 +5,7 @@ import { Player } from "./entities/Player";
 //import { FlatGenerator } from "./generators/Flat";
 import { HillyGenerator } from "./generators/Hilly";
 import { IGenerator } from "./generators/IGenerator";
+import { PacketBlockChange } from "./packets/BlockChange";
 
 export class World {
 	public static ENTITY_MAX_SEND_DISTANCE = 50;
@@ -59,6 +60,29 @@ export class World {
 		}
 
 		return existingChunk;
+	}
+
+	public getBlockId(x:number, y:number, z:number) {
+		const chunkX = x >> 4,
+			  chunkZ = z >> 4;
+
+		return this.getChunk(chunkX, chunkZ).getBlockId(x - chunkX << 4, y, z - chunkZ << 4);
+	}
+
+	public setBlock(blockId:number, x:number, y:number, z:number, doBlockUpdate?:boolean) {
+		const chunkX = x >> 4,
+			  chunkZ = z >> 4;
+
+		const chunk = this.getChunk(chunkX, chunkZ);
+		chunk.setBlock(blockId, x - chunkX << 4, y, z - chunkZ << 4);
+
+		const blockUpdatePacket = new PacketBlockChange(x, y, z, blockId, 0).writeData(); // TODO: Handle metadata
+		if (doBlockUpdate) {
+			// Send block update to all players that have this chunk loaded
+			chunk.playersInChunk.forEach(player => {
+				player.mpClient?.send(blockUpdatePacket);
+			});
+		}
 	}
 
 	public sendToNearbyClients(sentFrom:IEntity, buffer:Buffer) {

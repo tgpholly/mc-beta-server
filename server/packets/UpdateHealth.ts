@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketUpdateHealth implements IPacket {
-	public packetId = Packets.UpdateHealth;
+	public packetId = Packet.UpdateHealth;
 	public health:number;
 
 	public constructor(health:number) {

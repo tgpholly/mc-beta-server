@@ -1,6 +1,6 @@
 import { Socket } from "net";
 import { Reader, Writer } from "../bufferStuff";
-import { Packets } from "./enums/Packets";
+import { Packet } from "./enums/Packet";
 import { PacketPlayer } from "./packets/Player";
 import { PacketPlayerPosition } from "./packets/PlayerPosition";
 import { PacketPlayerLook } from "./packets/PlayerLook";
@@ -10,16 +10,25 @@ import { PacketChat } from "./packets/Chat";
 import { MinecraftServer } from "./MinecraftServer";
 import { Vec3 } from "./Vec3";
 import { Console } from "../console";
+import { PacketPlayerDigging } from "./packets/PlayerDigging";
+import { PacketAnimation } from "./packets/Animation";
+import { PacketEntityAction } from "./packets/EntityAction";
+import { IPacket } from "./packets/IPacket";
+import { Animation } from "./enums/Animation";
 
 export class MPClient {
 	private readonly mcServer:MinecraftServer;
 	private readonly socket:Socket;
 	public readonly entity:Player;
 
+	private diggingAt:Vec3;
+
 	public constructor(mcServer:MinecraftServer, socket:Socket, entity:Player) {
 		this.mcServer = mcServer;
 		this.socket = socket;
 		this.entity = entity;
+
+		this.diggingAt = new Vec3();
 	}
 
 	private mapCoordsToFace(pos:Vec3, face:number) {
@@ -49,12 +58,18 @@ export class MPClient {
 		const packetId = reader.readUByte();
 
 		switch (packetId) {
-			case Packets.Chat:               this.handleChat(new PacketChat().readData(reader)); break;
-			case Packets.Player:             this.handlePacketPlayer(new PacketPlayer().readData(reader)); break;
-			case Packets.PlayerPosition:     this.handlePacketPlayerPosition(new PacketPlayerPosition().readData(reader)); break;
-			case Packets.PlayerLook:         this.handlePacketPlayerLook(new PacketPlayerLook().readData(reader)); break;
-			case Packets.PlayerPositionLook: this.handlePacketPlayerPositionLook(new PacketPlayerPositionLook().readData(reader)); break;
-			case Packets.PlayerDigging:      this.handlePacketPlayerDigging(); break;
+			case Packet.Chat:                 this.handleChat(new PacketChat().readData(reader)); break;
+			case Packet.Player:               this.handlePacketPlayer(new PacketPlayer().readData(reader)); break;
+			case Packet.PlayerPosition:       this.handlePacketPlayerPosition(new PacketPlayerPosition().readData(reader)); break;
+			case Packet.PlayerLook:           this.handlePacketPlayerLook(new PacketPlayerLook().readData(reader)); break;
+			case Packet.PlayerPositionLook:   this.handlePacketPlayerPositionLook(new PacketPlayerPositionLook().readData(reader)); break;
+			case Packet.PlayerDigging:        this.handlePacketPlayerDigging(new PacketPlayerDigging().readData(reader)); break;
+			//case Packets.PlayerBlockPlacement: break;
+			//case Packets.HoldingChange: break;
+			//case Packets.UseBed: break;
+			case Packet.Animation:            this.handlePacketAnimation(new PacketAnimation().readData(reader)); break;
+			case Packet.EntityAction:         this.handlePacketEntityAction(new PacketEntityAction().readData(reader)); break;
+			default: Console.printWarn(`UNIMPLEMENTED PACKET: ${Packet[packetId]}`); break;
 		}
 	}
 	
@@ -106,8 +121,38 @@ export class MPClient {
 		this.entity.pitch = packet.pitch;
 	}
 
-	private handlePacketPlayerDigging() {
+	private handlePacketPlayerDigging(packet:PacketPlayerDigging) {
+		// Special drop item case
+		if (packet.status === 4) {
+			// TODO: Handle dropping items
+			return;
+		}
 
+		this.diggingAt.set(packet.x, packet.y, packet.z);
+		//this.mapCoordsToFace(this.diggingAt, packet.face);
+
+		if (packet.status === 0) {
+			// Started digging
+		} else if (packet.status === 2) {
+			if (this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z) != 0) {
+				this.entity.world.setBlock(0, this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, true);
+			}
+		}
+	}
+
+	// Animation start
+	private handlePacketAnimation(packet:PacketAnimation) {
+		// Forward this packet to all nearby clients
+		this.entity.world.sendToNearbyClients(this.entity, packet.writeData());
+	}
+
+	private handlePacketEntityAction(packet:PacketEntityAction) {
+		// Forward this packet to all nearby clients
+		switch (packet.action) {
+			case 1: this.entity.crouching = true; break;
+			case 2: this.entity.crouching = false; break;
+			case 3: break; // TODO: Leave Bed
+		}
 	}
 
 	public send(buffer:Buffer|Writer) {

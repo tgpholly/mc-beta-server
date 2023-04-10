@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketLoginRequest implements IPacket {
-	public packetId = Packets.LoginRequest;
+	public packetId = Packet.LoginRequest;
 	public protocolVersion:number;
 	public username:string;
 	public mapSeed:number;

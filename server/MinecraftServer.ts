@@ -4,7 +4,7 @@ import { Server, Socket, SocketAddress } from "net";
 import { FunkyArray } from "../funkyArray";
 import { World } from "./World";
 import { Reader } from "../bufferStuff";
-import { Packets } from "./enums/Packets";
+import { Packet } from "./enums/Packet";
 import { PacketHandshake } from "./packets/Handshake";
 import { MPClient } from "./MPClient";
 import { PacketKeepAlive } from "./packets/KeepAlive";
@@ -58,13 +58,13 @@ export class MinecraftServer {
 
 		// Generate spawn area (overworld)
 		const generateStartTime = Date.now();
-		Console.printInfo("[Overworld] Generating spawn area...");
+		Console.printInfo("Generating spawn area...");
 		let generatedCount = 0;
 		for (let x = -3; x < 3; x++) {
 			for (let z = -3; z < 3; z++) {
 				this.overworld.getChunk(x, z);
 				if (generatedCount++ % 5 === 0) {
-					Console.printInfo(`[Overworld] Generating spawn area... ${Math.floor(generatedCount / 36 * 100)}%`);
+					Console.printInfo(`Generating spawn area... ${Math.floor(generatedCount / 36 * 100)}%`);
 				}
 			}	
 		}
@@ -171,9 +171,9 @@ export class MinecraftServer {
 			const packetId = reader.readUByte();
 			switch (packetId) {
 				// TODO: Handle timeouts at some point, idk.
-				case Packets.KeepAlive: break;
-				case Packets.LoginRequest: this.handleLoginRequest(reader, socket, setMPClient.bind(this)); break;
-				case Packets.Handshake: this.handleHandshake(reader, socket); break;
+				case Packet.KeepAlive: break;
+				case Packet.LoginRequest: this.handleLoginRequest(reader, socket, setMPClient.bind(this)); break;
+				case Packet.Handshake: this.handleHandshake(reader, socket); break;
 			}
 		});
 	}

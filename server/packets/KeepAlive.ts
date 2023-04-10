@@ -1,10 +1,10 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketKeepAlive implements IPacket {
-	public packetId = Packets.KeepAlive;
-	private static readonly KeepAliveBuffer:Buffer = new Writer(1).writeByte(Packets.KeepAlive).toBuffer();
+	public packetId = Packet.KeepAlive;
+	private static readonly KeepAliveBuffer:Buffer = new Writer(1).writeByte(Packet.KeepAlive).toBuffer();
 
 	public readData(reader:Reader) {
 		reader;

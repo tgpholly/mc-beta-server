@@ -1,4 +1,5 @@
-export enum Packets {
+// https://wiki.vg/index.php?title=Protocol&oldid=488
+export enum Packet {
 	KeepAlive = 0x00,
 	LoginRequest = 0x01,
 	Handshake = 0x02,
@@ -20,9 +21,13 @@ export enum Packets {
 	Animation = 0x12,
 	EntityAction = 0x13,
 	NamedEntitySpawn = 0x14,
+
+	EntityMetadata = 0x28,
 	
 	PreChunk = 0x32,
 	MapChunk = 0x33,
+	MultiBlockChange = 0x34,
+	BlockChange = 0x035,
 
 	Entity = 0x1E,
 	EntityRelativeMove = 0x1F,

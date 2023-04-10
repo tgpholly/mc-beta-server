@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketTimeUpdate implements IPacket {
-	public packetId = Packets.TimeUpdate;
+	public packetId = Packet.TimeUpdate;
 	public time:bigint;
 
 	public constructor(time:bigint) {

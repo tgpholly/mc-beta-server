@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketHandshake implements IPacket {
-	public packetId:Packets = Packets.Handshake;
+	public packetId:Packet = Packet.Handshake;
 	private username:string;
 
 	public constructor(username?:string) {

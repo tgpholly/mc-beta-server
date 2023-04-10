@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketPreChunk implements IPacket {
-	public packetId = Packets.PreChunk;
+	public packetId = Packet.PreChunk;
 	public x:number;
 	public z:number;
 	public mode:boolean;

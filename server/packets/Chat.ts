@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketChat implements IPacket {
-	public packetId = Packets.Chat;
+	public packetId = Packet.Chat;
 	public message:string;
 
 	public constructor(message?:string) {

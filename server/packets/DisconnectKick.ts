@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketDisconnectKick implements IPacket {
-	public packetId = Packets.DisconnectKick;
+	public packetId = Packet.DisconnectKick;
 	public reason:string;
 
 	public constructor(reason?:string) {

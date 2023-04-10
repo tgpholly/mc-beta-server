@@ -1,11 +1,11 @@
 import { deflate } from "zlib";
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 import { Chunk } from "../Chunk";
 
 export class PacketMapChunk implements IPacket {
-	public packetId = Packets.MapChunk;
+	public packetId = Packet.MapChunk;
 	public x:number;
 	public y:number;
 	public z:number;

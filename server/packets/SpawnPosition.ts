@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketSpawnPosition implements IPacket {
-	public packetId = Packets.SpawnPosition;
+	public packetId = Packet.SpawnPosition;
 	public x:number;
 	public y:number;
 	public z:number;

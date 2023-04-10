@@ -1,9 +1,9 @@
 import { Reader, Writer } from "../../bufferStuff";
-import { Packets } from "../enums/Packets";
+import { Packet } from "../enums/Packet";
 import { IPacket } from "./IPacket";
 
 export class PacketUseEntity implements IPacket {
-	public packetId = Packets.UseEntity;
+	public packetId = Packet.UseEntity;
 	public userId:number;
 	public targetId:number;
 	public leftClick:boolean;
