@@ -13,9 +13,22 @@ export enum Packets {
 	PlayerPosition = 0x0B,
 	PlayerLook = 0x0C,
 	PlayerPositionLook = 0x0D,
+	PlayerDigging = 0x0E,
+	PlayerBlockPlacement = 0x0F,
+	HoldingChange = 0x10,
+	UseBed = 0x11,
+	Animation = 0x12,
+	EntityAction = 0x13,
+	NamedEntitySpawn = 0x14,
 	
 	PreChunk = 0x32,
 	MapChunk = 0x33,
 
-	DisconnectKick = 255
+	Entity = 0x1E,
+	EntityRelativeMove = 0x1F,
+	EntityLook = 0x20,
+	EntityLookRelativeMove = 0x21,
+	EntityTeleport = 0x22,
+
+	DisconnectKick = 0xff
 }

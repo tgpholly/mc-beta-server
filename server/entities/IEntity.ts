@@ -6,5 +6,6 @@ export interface IEntity {
 	lastX:number,
 	lastY:number,
 	lastZ:number,
+	distanceTo:(entity:IEntity) => number,
 	onTick:() => void
 }

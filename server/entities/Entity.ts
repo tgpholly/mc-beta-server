@@ -21,6 +21,14 @@ export class Entity implements IEntity {
 		this.x = this.y = this.z = this.lastX = this.lastY = this.lastZ = 0;
 	}
 
+	distanceTo(entity:IEntity) {
+		const dX = entity.x - this.x,
+			  dY = entity.y - this.y,
+			  dZ = entity.z - this.z;
+			  
+		return Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2) + Math.pow(dZ, 2));
+	}
+
 	onTick() {
 		this.lastX = this.x;
 		this.lastY = this.y;

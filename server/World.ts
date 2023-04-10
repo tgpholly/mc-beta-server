@@ -7,19 +7,26 @@ import { HillyGenerator } from "./generators/Hilly";
 import { IGenerator } from "./generators/IGenerator";
 
 export class World {
+	public static ENTITY_MAX_SEND_DISTANCE = 50;
+
 	public chunks:FunkyArray<number, Chunk>;
 	public entites:FunkyArray<number, IEntity>;
+	public players:FunkyArray<number, Player>;
 
 	public generator:IGenerator;
 
 	public constructor(seed:number) {
 		this.chunks = new FunkyArray<number, Chunk>();
 		this.entites = new FunkyArray<number, IEntity>();
+		this.players = new FunkyArray<number, Player>();
 		this.generator = new HillyGenerator(seed);
 	}
 
 	public addEntity(entity:IEntity) {
 		this.entites.set(entity.entityId, entity);
+		if (entity instanceof Player) {
+			this.players.set(entity.entityId, entity);
+		}
 	}
 
 	// TODO: getChunkByCoordPair failed in here during removeEntity, figure out why.
@@ -33,6 +40,7 @@ export class World {
 					this.unloadChunk(coordPair);
 				}
 			}
+			this.players.remove(entity.entityId);
 		}
 
 		this.entites.remove(entity.entityId);
@@ -53,6 +61,14 @@ export class World {
 		return existingChunk;
 	}
 
+	public sendToNearbyClients(sentFrom:IEntity, buffer:Buffer) {
+		this.players.forEach(player => {
+			if (sentFrom.entityId !== player.entityId && Math.abs(sentFrom.distanceTo(player)) < World.ENTITY_MAX_SEND_DISTANCE) {
+				player.mpClient?.send(buffer);
+			}
+		});
+	}
+
 	public getChunkByCoordPair(coordPair:number) {
 		const existingChunk = this.chunks.get(coordPair);
 		if (!(existingChunk instanceof Chunk)) {
@@ -69,6 +85,8 @@ export class World {
 
 	public tick() {
 		this.entites.forEach(entity => {
+			entity.onTick();
+
 			if (entity instanceof Player) {
 				if (entity.justUnloaded.length > 0) {
 					for (const coordPair of entity.justUnloaded) {
@@ -82,8 +100,6 @@ export class World {
 					entity.justUnloaded = new Array<number>();
 				}
 			}
-
-			entity.onTick();
 		})
 	}
 }

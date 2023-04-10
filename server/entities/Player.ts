@@ -33,6 +33,7 @@ export class Player extends EntityLiving {
 		if (bitX != this.lastX >> 4 || bitZ != this.lastZ >> 4 || this.firstUpdate) {
 			if (this.firstUpdate) {
 				this.firstUpdate = false;
+				// TODO: Make this based on the player's coords
 				this.mpClient?.send(new PacketPreChunk(0, 0, true).writeData());
 				const chunk = this.world.getChunk(0, 0);
 				(async () => {

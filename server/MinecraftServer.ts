@@ -1,6 +1,6 @@
 import { Config } from "../config";
 import { Console } from "../console";
-import { Server, Socket } from "net";
+import { Server, Socket, SocketAddress } from "net";
 import { FunkyArray } from "../funkyArray";
 import { World } from "./World";
 import { Reader } from "../bufferStuff";
@@ -14,6 +14,7 @@ import { Player } from "./entities/Player";
 import { PacketSpawnPosition } from "./packets/SpawnPosition";
 import { PacketPlayerPositionLook } from "./packets/PlayerPositionLook";
 import { PacketChat } from "./packets/Chat";
+import { PacketNamedEntitySpawn } from "./packets/NamedEntitySpawn";
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
@@ -112,7 +113,7 @@ export class MinecraftServer {
 			const clientEntity = new Player(this, world, loginPacket.username);
 			world.addEntity(clientEntity);
 
-			const client = new MPClient(socket, clientEntity);
+			const client = new MPClient(this, socket, clientEntity);
 			setMPClient(client);
 			clientEntity.mpClient = client;
 			this.clients.set(loginPacket.username, client);
@@ -121,6 +122,14 @@ export class MinecraftServer {
 
 			socket.write(new PacketLoginRequest(clientEntity.entityId, "", 0, 0).writeData());
 			socket.write(new PacketSpawnPosition(8, 64, 8).writeData());
+
+			const thisPlayerSpawn = new PacketNamedEntitySpawn(clientEntity.entityId, clientEntity.username, clientEntity.absX, clientEntity.absY, clientEntity.absZ, clientEntity.absYaw, clientEntity.absPitch, 0).writeData();
+			world.players.forEach(player => {
+				if (player.entityId !== clientEntity.entityId && clientEntity.distanceTo(player) < World.ENTITY_MAX_SEND_DISTANCE) {
+					socket.write(new PacketNamedEntitySpawn(player.entityId, player.username, player.absX, player.absY, player.absZ, player.absYaw, player.absPitch, 0).writeData());
+					player.mpClient?.send(thisPlayerSpawn);
+				}
+			});
 
 			socket.write(new PacketPlayerPositionLook(8, 70, 70.62, 8, 0, 0, false).writeData());
 		} else {

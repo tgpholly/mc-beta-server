@@ -34,7 +34,6 @@ export class HillyGenerator implements IGenerator {
 	// This is good enough (and fast enough) for what is needed here.
 	private mulberry32(a:number) {
 		return function() {
-			// TODO: Determine if "a" is needed
 			let t = a += 0x6D2B79F5;
 			t = Math.imul(t ^ t >>> 15, t | 1);
 			t ^= t + Math.imul(t ^ t >>> 7, t | 61);
@@ -87,6 +86,14 @@ export class HillyGenerator implements IGenerator {
 						chunk.setBlock(Block.wood.blockId, x, tY, z);
 						tY++;
 					}
+					chunk.setBlock(Block.leaves.blockId, x - 1, tY - 2, z);
+					chunk.setBlock(Block.leaves.blockId, x + 1, tY - 2, z);
+					chunk.setBlock(Block.leaves.blockId, x, tY - 2, z - 1);
+					chunk.setBlock(Block.leaves.blockId, x, tY - 2, z + 1);
+					chunk.setBlock(Block.leaves.blockId, x - 2, tY - 2, z);
+					chunk.setBlock(Block.leaves.blockId, x + 2, tY - 2, z);
+					chunk.setBlock(Block.leaves.blockId, x, tY - 2, z - 2);
+					chunk.setBlock(Block.leaves.blockId, x, tY - 2, z + 2);
 				}
 			}
 		}
