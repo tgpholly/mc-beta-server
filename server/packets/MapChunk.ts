@@ -34,7 +34,6 @@ export class PacketMapChunk implements IPacket {
 	public writeData() {
 		return new Promise<Buffer>((resolve, reject) => {
 			const blocks = new Writer(32768);
-			const metadata = new Writer(16384);
 			const lighting = new Writer(32768);
 
 			let blockMeta = false;
@@ -43,7 +42,6 @@ export class PacketMapChunk implements IPacket {
 					for (let y = 0; y < 128; y++) {
 						blocks.writeUByte(this.chunk.getBlockId(x, y, z));
 						if (blockMeta) {
-							metadata.writeUByte(0);
 							// Light level 15 for 2 blocks (1111 1111)
 							lighting.writeUByte(0xff); // TODO: Lighting (Client seems to do it's own (when a block update happens) so it's not top priority)
 							lighting.writeUByte(0xff);
@@ -55,7 +53,7 @@ export class PacketMapChunk implements IPacket {
 			}
 
 			// Write meta and lighting data into block buffer for compression
-			blocks.writeBuffer(metadata.toBuffer()).writeBuffer(lighting.toBuffer());
+			blocks.writeBuffer(this.chunk.getMetadataBuffer()).writeBuffer(lighting.toBuffer());
 
 			deflate(blocks.toBuffer(), (err, data) => {
 				if (err) {

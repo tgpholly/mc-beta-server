@@ -15,6 +15,7 @@ import { PacketSpawnPosition } from "./packets/SpawnPosition";
 import { PacketPlayerPositionLook } from "./packets/PlayerPositionLook";
 import { PacketChat } from "./packets/Chat";
 import { PacketNamedEntitySpawn } from "./packets/NamedEntitySpawn";
+import { WorldSaveManager } from "./WorldSaveManager";
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
@@ -28,6 +29,7 @@ export class MinecraftServer {
 	private tickCounter:number = 0;
 	private clients:FunkyArray<string, MPClient>;
 	private worlds:FunkyArray<number, World>;
+	public saveManager:WorldSaveManager;
 	private overworld:World;
 
 	// https://stackoverflow.com/a/7616484
@@ -48,27 +50,38 @@ export class MinecraftServer {
 	public constructor(config:Config) {
 		this.config = config;
 
+		if (this.config.saveCompression === "NONE") {
+			Console.printWarn("=============- WARNING -=============");
+			Console.printWarn(" Chunk compression is disabled. This");
+			Console.printWarn(" will lead to large file sizes!");
+			Console.printWarn("=====================================");
+		}
+
 		this.clients = new FunkyArray<string, MPClient>();
 
 		// Convert seed if needed
-		const worldSeed = typeof(this.config.seed) === "string" ? this.hashCode(this.config.seed) : this.config.seed;
+		let worldSeed = typeof(this.config.seed) === "string" ? this.hashCode(this.config.seed) : this.config.seed;
+
+		// Init save manager and load seed from it if possible
+		this.saveManager = new WorldSaveManager(this.config, worldSeed);
+		if (this.saveManager.worldSeed !== Number.MIN_VALUE) {
+			worldSeed = this.saveManager.worldSeed;
+		}
 
 		this.worlds = new FunkyArray<number, World>();
-		this.worlds.set(0, this.overworld = new World(worldSeed));
+		this.worlds.set(0, this.overworld = new World(this.saveManager, worldSeed));
 
 		// Generate spawn area (overworld)
-		const generateStartTime = Date.now();
-		Console.printInfo("Generating spawn area...");
-		let generatedCount = 0;
-		for (let x = -3; x < 3; x++) {
-			for (let z = -3; z < 3; z++) {
-				this.overworld.getChunk(x, z);
-				if (generatedCount++ % 5 === 0) {
-					Console.printInfo(`Generating spawn area... ${Math.floor(generatedCount / 36 * 100)}%`);
-				}
-			}	
-		}
-		Console.printInfo(`Done! Took ${Date.now() - generateStartTime}ms`);
+		(async () => {
+			const generateStartTime = Date.now();
+			Console.printInfo("Generating spawn area...");
+			for (let x = -3; x < 3; x++) {
+				for (let z = -3; z < 3; z++) {
+					await this.overworld.getChunkSafe(x, z);
+				}	
+			}
+			Console.printInfo(`Done! Took ${Date.now() - generateStartTime}ms`);
+		}).bind(this)();
 
 		this.serverClock = setInterval(() => {
 			// Every 1 sec

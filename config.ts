@@ -3,4 +3,6 @@ export interface Config {
 	onlineMode: boolean,
 	maxPlayers: number,
 	seed: number|string,
+	worldName: string,
+	saveCompression: "NONE"
 }

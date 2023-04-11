@@ -1,5 +1,6 @@
 import { FunkyArray } from "../funkyArray";
 import { Chunk } from "./Chunk";
+import { WorldSaveManager } from "./WorldSaveManager";
 import { IEntity } from "./entities/IEntity";
 import { Player } from "./entities/Player";
 //import { FlatGenerator } from "./generators/Flat";
@@ -10,13 +11,17 @@ import { PacketBlockChange } from "./packets/BlockChange";
 export class World {
 	public static ENTITY_MAX_SEND_DISTANCE = 50;
 
+	private readonly saveManager;
+
 	public chunks:FunkyArray<number, Chunk>;
 	public entites:FunkyArray<number, IEntity>;
 	public players:FunkyArray<number, Player>;
 
 	public generator:IGenerator;
 
-	public constructor(seed:number) {
+	public constructor(saveManager:WorldSaveManager, seed:number) {
+		this.saveManager = saveManager;
+
 		this.chunks = new FunkyArray<number, Chunk>();
 		this.entites = new FunkyArray<number, IEntity>();
 		this.players = new FunkyArray<number, Player>();
@@ -37,7 +42,7 @@ export class World {
 				const chunk = this.getChunkByCoordPair(coordPair);
 				chunk.playersInChunk.remove(entity.entityId);
 
-				if (chunk.playersInChunk.length === 0) {
+				if (!chunk.forceLoaded && chunk.playersInChunk.length === 0) {
 					this.unloadChunk(coordPair);
 				}
 			}
@@ -52,11 +57,36 @@ export class World {
 		const coordPair = Chunk.CreateCoordPair(x, z);
 		const existingChunk = this.chunks.get(coordPair);
 		if (!(existingChunk instanceof Chunk)) {
-			if (generate) {
-				return this.chunks.set(coordPair, new Chunk(this, x, z));
+			throw new Error(`BADLOOKUP: Chunk [${x}, ${z}] does not exist.`);
+		}
+
+		return existingChunk;
+	}
+
+	public getChunkSafe(x:number, z:number) {
+		return new Promise<Chunk>((resolve, reject) => {
+			const coordPair = Chunk.CreateCoordPair(x, z);
+			const existingChunk = this.chunks.get(coordPair);
+			if (!(existingChunk instanceof Chunk)) {
+				if (this.saveManager.chunksOnDisk.includes(coordPair)) {
+					return this.saveManager.readChunkFromDisk(this, x, z)
+						.then(chunk => {
+							//console.log("Loaded " + x + "," + z + " from disk");
+							resolve(this.chunks.set(coordPair, chunk));		
+						});
+				} else {
+					return resolve(this.chunks.set(coordPair, new Chunk(this, x, z, true)));
+				}
 			}
 
-			throw new Error(`BADLOOKUP: Chunk [${x}, ${z}] does not exist.`);
+			resolve(existingChunk);
+		});
+	}
+
+	public getChunkByCoordPair(coordPair:number) {
+		const existingChunk = this.chunks.get(coordPair);
+		if (!(existingChunk instanceof Chunk)) {
+			throw new Error(`BADLOOKUP: Chunk ${coordPair} does not exist.`);
 		}
 
 		return existingChunk;
@@ -93,18 +123,22 @@ export class World {
 		});
 	}
 
-	public getChunkByCoordPair(coordPair:number) {
-		const existingChunk = this.chunks.get(coordPair);
-		if (!(existingChunk instanceof Chunk)) {
-			throw new Error(`BADLOOKUP: Chunk ${coordPair} does not exist.`);
+	public async unloadChunk(coordPair:number) {
+		const chunk = this.getChunkByCoordPair(coordPair);
+		if (!chunk.savingToDisk) {
+			chunk.savingToDisk = true;
+
+			await this.saveManager.writeChunkToDisk(chunk);
+
+			if (chunk.playersInChunk.length === 0) {
+				this.chunks.remove(coordPair);
+				return;				
+			}
+
+			// A player loaded the chunk while we were, flushing to disk.
+			// Keep it loaded.
+			chunk.savingToDisk = false;
 		}
-
-		return existingChunk;
-	}
-
-	public unloadChunk(coordPair:number) {
-		// TODO: Save to disk
-		this.chunks.remove(coordPair);
 	}
 
 	public tick() {
@@ -116,7 +150,7 @@ export class World {
 					for (const coordPair of entity.justUnloaded) {
 						const chunkToUnload = this.getChunkByCoordPair(coordPair);
 						chunkToUnload.playersInChunk.remove(entity.entityId);
-						if (chunkToUnload.playersInChunk.length === 0) {
+						if (!chunkToUnload.forceLoaded && chunkToUnload.playersInChunk.length === 0) {
 							this.unloadChunk(coordPair);
 						}
 					}

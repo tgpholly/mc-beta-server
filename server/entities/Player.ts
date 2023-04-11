@@ -27,7 +27,7 @@ export class Player extends EntityLiving {
 		this.z = 8;
 	}
 
-	onTick() {
+	private async updatePlayerChunks() {
 		const bitX = this.x >> 4;
 		const bitZ = this.z >> 4;
 		if (bitX != this.lastX >> 4 || bitZ != this.lastZ >> 4 || this.firstUpdate) {
@@ -35,11 +35,9 @@ export class Player extends EntityLiving {
 				this.firstUpdate = false;
 				// TODO: Make this based on the player's coords
 				this.mpClient?.send(new PacketPreChunk(0, 0, true).writeData());
-				const chunk = this.world.getChunk(0, 0);
-				(async () => {
-					const chunkData = await (new PacketMapChunk(0, 0, 0, 15, 127, 15, chunk).writeData());
-					this.mpClient?.send(chunkData);
-				})();
+				const chunk = await this.world.getChunkSafe(0, 0);
+				const chunkData = await (new PacketMapChunk(0, 0, 0, 15, 127, 15, chunk).writeData());
+				this.mpClient?.send(chunkData);
 			}
 
 			// Load or keep any chunks we need
@@ -48,14 +46,12 @@ export class Player extends EntityLiving {
 				for (let z = bitZ - 6; z < bitZ + 6; z++) {
 					const coordPair = Chunk.CreateCoordPair(x, z);
 					if (!this.loadedChunks.includes(coordPair)) {
-						const chunk = this.world.getChunk(x, z);
+						const chunk = await this.world.getChunkSafe(x, z);
 						this.mpClient?.send(new PacketPreChunk(x, z, true).writeData());
 						this.loadedChunks.push(coordPair);
 						chunk.playersInChunk.set(this.entityId, this);
-						(async () => {
-							const chunkData = await (new PacketMapChunk(x, 0, z, 15, 127, 15, chunk).writeData());
-							this.mpClient?.send(chunkData);
-						})();
+						const chunkData = await (new PacketMapChunk(x, 0, z, 15, 127, 15, chunk).writeData());
+						this.mpClient?.send(chunkData);
 					}
 					currentLoads.push(coordPair);
 				}	
@@ -73,6 +69,10 @@ export class Player extends EntityLiving {
 			// Overwrite loaded chunks
 			this.loadedChunks = currentLoads;
 		}
+	}
+
+	public onTick() {
+		this.updatePlayerChunks();
 
 		super.onTick();
 	}

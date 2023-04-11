@@ -2,5 +2,7 @@
 	"port": 25565,
 	"onlineMode": false,
 	"maxPlayers": 20,
-	"seed": "really janky"
+	"seed": "really janky",
+	"saveCompression": "DEFLATE",
+	"worldName": "world"
 }

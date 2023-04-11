@@ -7,6 +7,12 @@ export class Reader {
 		this.offset = 0;
 	}
 
+	public readBuffer(bytes:number) {
+		const value = this.buffer.subarray(this.offset, this.offset + bytes);
+		this.offset += bytes;
+		return value;
+	}
+
 	public readByte() {
 		const value = this.buffer.readInt8(this.offset);
 		this.offset++;
