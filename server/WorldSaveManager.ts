@@ -170,7 +170,7 @@ export class WorldSaveManager {
 							}
 
 							const chunkData = new Reader(data);
-							const chunk = new Chunk(world, x, z, chunkData.readBuffer(totalByteSize).buffer, chunkData.readBuffer(totalByteSize / 2).buffer);
+							const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2));
 							resolve(chunk);
 						});
 					}
