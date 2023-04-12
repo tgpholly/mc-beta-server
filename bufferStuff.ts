@@ -13,6 +13,15 @@ export class Reader {
 		return value;
 	}
 
+	public readUint8Array(bytes:number) {
+		const croppedBuffer = this.readBuffer(bytes);
+		const newArray = new Uint8Array(croppedBuffer.length);
+		for (let i = 0; i < croppedBuffer.length; i++) {
+			newArray[i] = croppedBuffer[i];
+		}
+		return newArray;
+	}
+
 	public readByte() {
 		const value = this.buffer.readInt8(this.offset);
 		this.offset++;

@@ -96,7 +96,9 @@ export class WorldSaveManager {
 			chunkFileWriter.writeUByte(128); // Chunk Y
 			chunkFileWriter.writeUByte(16); // Chunk Z
 
-			const chunkData = new Writer().writeBuffer(Buffer.from(chunk.getData())).writeBuffer(chunk.getMetadataBuffer()).toBuffer();
+			const chunkData = new Writer()
+				.writeBuffer(Buffer.from(chunk.getData()))
+				.writeBuffer(chunk.getMetadataBuffer()).toBuffer();
 
 			if (saveType === SaveCompressionType.NONE) {
 				chunkFileWriter.writeInt(chunkData.length); // Data length
@@ -159,7 +161,7 @@ export class WorldSaveManager {
 					const contentLength = chunkFileReader.readInt();
 					if (saveCompressionType === SaveCompressionType.NONE) {
 						const chunkData = new Reader(chunkFileReader.readBuffer(contentLength));
-						const chunk = new Chunk(world, x, z, chunkData.readBuffer(totalByteSize).buffer, chunkData.readBuffer(totalByteSize / 2).buffer);
+						const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2));
 						resolve(chunk);
 					} else if (saveCompressionType === SaveCompressionType.DEFLATE) {
 						inflate(chunkFileReader.readBuffer(contentLength), (err, data) => {
