@@ -6,6 +6,8 @@ me trying to understand minecraft beta's protocol
  - "Decent" terrain generation using OpenSimplex Noise
  - Concept of worlds
  - Chunk management (loading / unloading)
+ - World/Chunk saving to disk
+ - Block breaking
 
 **WIP:**
  - Entities:
@@ -13,13 +15,11 @@ me trying to understand minecraft beta's protocol
 
 **To Implement:**
  - Block placement
- - Block breaking
  - Entities:
-   - Items/Blocks
+   - Items
    - Mobs
  - Cross chunk structure generation (trees, buildings, etc...)
  - Inventories (player inventory, containers, etc...)
- - Terrain saving to disk
  - Sleeping in beds
  - Tile entities
  - Probably a bunch more things that i'm forgetting
