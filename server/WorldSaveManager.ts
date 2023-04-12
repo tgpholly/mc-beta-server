@@ -103,6 +103,11 @@ export class WorldSaveManager {
 				chunkFileWriter.writeBuffer(chunkData); // Chunk data
 
 				writeFile(`${this.worldChunksFolderPath}/${chunk.x},${chunk.z}.hwc`, chunkFileWriter.toBuffer(), () => {
+					const cPair = Chunk.CreateCoordPair(chunk.x, chunk.z);
+					if (!this.chunksOnDisk.includes(cPair)) {
+						this.chunksOnDisk.push(cPair);
+					}
+
 					resolve(true);
 				});
 			} else if (saveType === SaveCompressionType.DEFLATE) {
