@@ -13,6 +13,7 @@ export class Reader {
 		return value;
 	}
 
+	// NOTE: This had to be a copy as the subarray is only cropped & offset
 	public readUint8Array(bytes:number) {
 		const croppedBuffer = this.readBuffer(bytes);
 		const newArray = new Uint8Array(croppedBuffer.length);

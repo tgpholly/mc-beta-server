@@ -96,7 +96,14 @@ export class World {
 		const chunkX = x >> 4,
 			  chunkZ = z >> 4;
 
-		return this.getChunk(chunkX, chunkZ).getBlockId(x - chunkX << 4, y, z - chunkZ << 4);
+		return this.getChunk(chunkX, chunkZ).getBlockId(x & 0xf, y, z & 0xf);
+	}
+
+	public getBlockMetadata(x:number, y:number, z:number) {
+		const chunkX = x >> 4,
+			  chunkZ = z >> 4;
+
+		return this.getChunk(chunkX, chunkZ).getBlockMetadata(x & 0xf, y, z & 0xf);
 	}
 
 	public setBlock(blockId:number, x:number, y:number, z:number, doBlockUpdate?:boolean) {
@@ -104,10 +111,26 @@ export class World {
 			  chunkZ = z >> 4;
 
 		const chunk = this.getChunk(chunkX, chunkZ);
-		chunk.setBlock(blockId, x - chunkX << 4, y, z - chunkZ << 4);
+		chunk.setBlockWithMetadata(blockId, 0, x & 0xf, y, z & 0xf);
 
-		const blockUpdatePacket = new PacketBlockChange(x, y, z, blockId, 0).writeData(); // TODO: Handle metadata
 		if (doBlockUpdate) {
+			const blockUpdatePacket = new PacketBlockChange(x, y, z, blockId, 0).writeData();
+			// Send block update to all players that have this chunk loaded
+			chunk.playersInChunk.forEach(player => {
+				player.mpClient?.send(blockUpdatePacket);
+			});
+		}
+	}
+
+	public setBlockWithMetadata(blockId:number, metadata:number, x:number, y:number, z:number, doBlockUpdate?:boolean) {
+		const chunkX = x >> 4,
+			  chunkZ = z >> 4;
+
+		const chunk = this.getChunk(chunkX, chunkZ);
+		chunk.setBlockWithMetadata(blockId, metadata, x & 0xf, y, z & 0xf);
+
+		if (doBlockUpdate) {
+			const blockUpdatePacket = new PacketBlockChange(x, y, z, blockId, metadata).writeData(); // TODO: Handle metadata
 			// Send block update to all players that have this chunk loaded
 			chunk.playersInChunk.forEach(player => {
 				player.mpClient?.send(blockUpdatePacket);

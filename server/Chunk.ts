@@ -20,20 +20,20 @@ export class Chunk {
 		return (x >= 0 ? 0 : 2147483648) | (x & 0x7fff) << 16 | (z >= 0 ? 0 : 0x8000) | z & 0x7fff;
 	}
 
-	public constructor(world:World, x:number, z:number, generateOrBlockData?:boolean|ArrayBuffer, metadata?:ArrayBuffer) {
+	public constructor(world:World, x:number, z:number, generateOrBlockData?:boolean|Uint8Array, metadata?:Uint8Array) {
 		this.world = world;
 		this.x = x;
 		this.z = z;
 		this.playersInChunk = new FunkyArray<number, Player>();
 
-		if (generateOrBlockData instanceof ArrayBuffer && metadata instanceof ArrayBuffer) {
+		if (generateOrBlockData instanceof Uint8Array && metadata instanceof Uint8Array) {
 			this.blocks = new Uint8Array(generateOrBlockData);
 			this.metadata = new NibbleArray(metadata);
 		} else {
 			this.blocks = new Uint8Array(16 * 16 * this.MAX_HEIGHT);
 			this.metadata = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
 
-			if (generateOrBlockData) {
+			if (typeof(generateOrBlockData) === "boolean" && generateOrBlockData) {
 				this.world.generator.generate(this);
 			}
 		}
@@ -43,7 +43,7 @@ export class Chunk {
 		if (x < 0 || x > 15 || y < 0 || y > 127 || z < 0 || z > 15) {
 			return;
 		}
-
+		
 		this.blocks[x << 11 | z << 7 | y] = blockId;
 	}
 
