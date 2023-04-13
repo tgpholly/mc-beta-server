@@ -1,6 +1,8 @@
 # mc-beta-server [![CodeFactor](https://www.codefactor.io/repository/github/tgpholly/mc-beta-server/badge/typescript)](https://www.codefactor.io/repository/github/tgpholly/mc-beta-server/overview/typescript)
 me trying to understand minecraft beta's protocol
 
+<img src="https://eusv.net/images/mc-beta-server-readme-0.webp">
+
 **Implemented:**
  - Basic flat terrain generation
  - "Decent" terrain generation using OpenSimplex Noise
