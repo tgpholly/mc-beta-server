@@ -75,7 +75,9 @@ export class World {
 							resolve(this.chunks.set(coordPair, chunk));		
 						});
 				} else {
-					return resolve(this.chunks.set(coordPair, new Chunk(this, x, z, true)));
+					resolve(this.chunks.set(coordPair, new Chunk(this, x, z, true)));
+					this.saveManager.writeChunkToDisk(this.getChunk(x, z));
+					return;
 				}
 			}
 
