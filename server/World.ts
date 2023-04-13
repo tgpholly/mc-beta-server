@@ -7,6 +7,8 @@ import { Player } from "./entities/Player";
 import { HillyGenerator } from "./generators/Hilly";
 import { IGenerator } from "./generators/IGenerator";
 import { PacketBlockChange } from "./packets/BlockChange";
+import { QueuedBlockUpdate } from "./queuedUpdateTypes/BlockUpdate";
+import { IQueuedUpdate } from "./queuedUpdateTypes/IQueuedUpdate";
 
 export class World {
 	public static ENTITY_MAX_SEND_DISTANCE = 50;
@@ -17,6 +19,8 @@ export class World {
 	public entites:FunkyArray<number, IEntity>;
 	public players:FunkyArray<number, Player>;
 
+	public queuedChunkBlocks:Array<IQueuedUpdate>;
+	public queuedUpdates:Array<IQueuedUpdate>;
 	public generator:IGenerator;
 
 	public constructor(saveManager:WorldSaveManager, seed:number) {
@@ -25,6 +29,8 @@ export class World {
 		this.chunks = new FunkyArray<number, Chunk>();
 		this.entites = new FunkyArray<number, IEntity>();
 		this.players = new FunkyArray<number, Player>();
+		this.queuedChunkBlocks = new Array<IQueuedUpdate>();
+		this.queuedUpdates = new Array<IQueuedUpdate>();
 		this.generator = new HillyGenerator(seed);
 	}
 
@@ -148,6 +154,14 @@ export class World {
 		});
 	}
 
+	public sendToNearbyAllNearbyClients(sentFrom:IEntity, buffer:Buffer) {
+		this.players.forEach(player => {
+			if (Math.abs(sentFrom.distanceTo(player)) < World.ENTITY_MAX_SEND_DISTANCE) {
+				player.mpClient?.send(buffer);
+			}
+		});
+	}
+
 	public async unloadChunk(coordPair:number) {
 		const chunk = this.getChunkByCoordPair(coordPair);
 		if (!chunk.savingToDisk) {
@@ -167,6 +181,25 @@ export class World {
 	}
 
 	public tick() {
+		if (this.queuedUpdates.length > 0) {
+			for (let i = this.queuedUpdates.length - 1; i >= 0; i--) {
+				const update = this.queuedUpdates[i];
+				if (update instanceof QueuedBlockUpdate) {
+					if (this.chunks.keys.includes(update.coordPair)) {
+						this.queuedUpdates.splice(i, 1);
+						const thatChunk = this.getChunkByCoordPair(update.coordPair);
+						thatChunk.setBlockWithMetadata(update.blockId, update.metadata, update.x, update.y, update.z);
+						if (thatChunk.playersInChunk.length > 0) {
+							const blockUpdate = new PacketBlockChange((thatChunk.x << 4) + update.x, update.y, (thatChunk.z << 4) + update.z, update.blockId, update.metadata).writeData()
+							thatChunk.playersInChunk.forEach(player => {
+								player.mpClient?.send(blockUpdate);
+							});
+						}
+					}
+				}
+			}
+		}
+
 		this.entites.forEach(entity => {
 			entity.onTick();
 

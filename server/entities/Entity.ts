@@ -17,6 +17,8 @@ export class Entity implements IEntity {
 	public lastY:number;
 	public lastZ:number;
 
+	public health:number;
+
 	public fire:number;
 
 	public crouching:boolean;
@@ -31,6 +33,8 @@ export class Entity implements IEntity {
 		this.world = world;
 		this.x = this.y = this.z = this.lastX = this.lastY = this.lastZ = 0;
 		this.crouching = this.lastCrouchState = this.lastFireState = false;
+
+		this.health = 20;
 	}
 
 	updateMetadata() {
@@ -47,7 +51,7 @@ export class Entity implements IEntity {
 				metadata.addMetadataEntry(0, new MetadataEntry(MetadataFieldType.Byte, Number(this.fire > 0) + Number(this.crouching) * 2));
 			}
 
-			this.world.sendToNearbyClients(this, new PacketEntityMetadata(this.entityId, metadata.writeBuffer()).writeData());
+			this.world.sendToNearbyAllNearbyClients(this, new PacketEntityMetadata(this.entityId, metadata.writeBuffer()).writeData());
 
 			this.lastCrouchState = this.crouching;
 			this.lastFireState = this.fire > 0;
@@ -62,12 +66,18 @@ export class Entity implements IEntity {
 		return Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2) + Math.pow(dZ, 2));
 	}
 
+	damageFrom(damage:number, entity?:IEntity) {
+		if (entity === undefined) {
+			this.health -= damage;
+		}
+	}
+
 	onTick() {
 		this.updateMetadata();
 
 		if (this.fire > 0) {
 			if (this.fire % 20 === 0) {
-
+				this.damageFrom(1);
 			}
 			
 			this.fire--;

@@ -5,6 +5,7 @@ import { World } from "../World";
 import { PacketMapChunk } from "../packets/MapChunk";
 import { EntityLiving } from "./EntityLiving";
 import { PacketPreChunk } from "../packets/PreChunk";
+import { PacketUpdateHealth } from "../packets/UpdateHealth";
 
 export class Player extends EntityLiving {
 	public username:string;
@@ -13,6 +14,8 @@ export class Player extends EntityLiving {
 	public loadedChunks:Array<number>;
 	public justUnloaded:Array<number>;
 	public mpClient?:MPClient;
+
+	private lastHealth:number;
 
 	public constructor(server:MinecraftServer, world:World, username:string) {
 		super(world);
@@ -25,6 +28,8 @@ export class Player extends EntityLiving {
 		this.x = 8;
 		this.y = 64;
 		this.z = 8;
+
+		this.lastHealth = this.health;
 	}
 
 	private async updatePlayerChunks() {
@@ -33,7 +38,7 @@ export class Player extends EntityLiving {
 		if (bitX != this.lastX >> 4 || bitZ != this.lastZ >> 4 || this.firstUpdate) {
 			if (this.firstUpdate) {
 				this.firstUpdate = false;
-				// TODO: Make this based on the player's coords
+				// TODO: Make this based on the player's initial coords
 				this.mpClient?.send(new PacketPreChunk(0, 0, true).writeData());
 				const chunk = await this.world.getChunkSafe(0, 0);
 				const chunkData = await (new PacketMapChunk(0, 0, 0, 15, 127, 15, chunk).writeData());
@@ -73,6 +78,11 @@ export class Player extends EntityLiving {
 
 	public onTick() {
 		this.updatePlayerChunks();
+
+		if (this.health != this.lastHealth) {
+			this.lastHealth = this.health;
+			this.mpClient?.send(new PacketUpdateHealth(this.health).writeData());
+		}
 
 		super.onTick();
 	}

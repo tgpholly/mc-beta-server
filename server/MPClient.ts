@@ -135,7 +135,7 @@ export class MPClient {
 			// Started digging
 		} else if (packet.status === 2) {
 			if (this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z) != 0) {
-				this.entity.world.setBlock(0, this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, true);
+				this.entity.world.setBlockWithMetadata(0, 0, this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, true);
 			}
 		}
 	}

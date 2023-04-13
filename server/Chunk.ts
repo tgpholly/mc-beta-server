@@ -1,11 +1,12 @@
 import { FunkyArray } from "../funkyArray";
 import { NibbleArray } from "../nibbleArray";
 import { Player } from "./entities/Player";
+import { QueuedBlockUpdate } from "./queuedUpdateTypes/BlockUpdate";
 import { World } from "./World";
 
 export class Chunk {
 	private readonly MAX_HEIGHT:number = 128;
-	private readonly world:World;
+	public readonly world:World;
 	public readonly x:number;
 	public readonly z:number;
 	public readonly playersInChunk:FunkyArray<number, Player>;
@@ -39,8 +40,22 @@ export class Chunk {
 		}
 	}
 
+	public calculateLighting() {
+
+	}
+
+	public queueBlockUpdateForOuterChunkBlock(blockId:number, metadata:number, x:number, y:number, z:number) {
+		const cPair = Chunk.CreateCoordPair(this.x + (x >> 4), this.z + (z >> 4));
+		if (this.world.chunks.keys.includes(cPair)) {
+			this.world.queuedUpdates.push(new QueuedBlockUpdate(cPair, x & 0xf, y, z & 0xf, blockId, metadata));
+		} else {
+			this.world.queuedChunkBlocks.push(new QueuedBlockUpdate(cPair, x & 0xf, y, z & 0xf, blockId, metadata));
+		}
+	}
+
 	public setBlock(blockId:number, x:number, y:number, z:number) {
 		if (x < 0 || x > 15 || y < 0 || y > 127 || z < 0 || z > 15) {
+			this.queueBlockUpdateForOuterChunkBlock(blockId, 0, x, y, z);
 			return;
 		}
 		
@@ -49,6 +64,7 @@ export class Chunk {
 
 	public setBlockWithMetadata(blockId:number, metadata:number, x:number, y:number, z:number) {
 		if (x < 0 || x > 15 || y < 0 || y > 127 || z < 0 || z > 15) {
+			this.queueBlockUpdateForOuterChunkBlock(blockId, metadata, x, y, z);
 			return;
 		}
 		x = x << 11 | z << 7 | y;

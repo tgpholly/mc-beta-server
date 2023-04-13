@@ -2,6 +2,7 @@ import { Block } from "../blocks/Block";
 import { Chunk } from "../Chunk";
 import { IGenerator } from "./IGenerator";
 import { Noise2D, makeNoise2D } from "../../external/OpenSimplex2D";
+import { QueuedBlockUpdate } from "../queuedUpdateTypes/BlockUpdate";
 
 export class HillyGenerator implements IGenerator {
 	private seed:number;
@@ -60,6 +61,8 @@ export class HillyGenerator implements IGenerator {
 
 	public generate(chunk:Chunk) {
 		const treeRNG = this.mulberry32(this.seed + chunk.x + chunk.z);
+		const grassRNG = this.mulberry32(this.seed + chunk.x + chunk.z);
+
 		let colY = 0, colDirtMin = 0, colWaterY = 0, orgColY = 0;
 		for (let x = 0; x < 16; x++) {
 			for (let z = 0; z < 16; z++) {
@@ -77,7 +80,7 @@ export class HillyGenerator implements IGenerator {
 				) / 9);
 				colDirtMin = colY - 2;
 				const sandNoise = this.underwaterSandGenerator((chunk.x * 16 + x) / 16, (chunk.z * 16 + z) / 16);
-				if (colY === 59 && sandNoise > 0.5) {
+				if (colY <= 60 && sandNoise > 0.5) {
 					chunk.setBlock(Block.sand.blockId, x, colY, z);
 				} else {
 					chunk.setBlock(Block.grass.blockId, x, colY, z);
@@ -108,6 +111,22 @@ export class HillyGenerator implements IGenerator {
 				while (colWaterY <= 58) {
 					colWaterY++;
 					chunk.setBlock(Block.waterStill.blockId, x, colWaterY, z);
+				}
+
+				const queuedChunkBlocks = chunk.world.queuedChunkBlocks;
+				if (queuedChunkBlocks.length > 0) {
+					const thisCoordPair = Chunk.CreateCoordPair(chunk.x, chunk.z);
+					for (let i = queuedChunkBlocks.length - 1; i >= 0; i--) {
+						const blockUpdate = queuedChunkBlocks[i];
+						if (blockUpdate instanceof QueuedBlockUpdate && blockUpdate.coordPair === thisCoordPair) {
+							queuedChunkBlocks.splice(i, 1);
+							chunk.setBlockWithMetadata(blockUpdate.blockId, blockUpdate.metadata, blockUpdate.x, blockUpdate.y, blockUpdate.z);
+						}
+					}
+				}
+
+				if (grassRNG() > 0.9 && chunk.getBlockId(x, orgColY, z) === Block.grass.blockId) {
+					chunk.setBlockWithMetadata(Block.tallGrass.blockId, 1, x, orgColY + 1, z);
 				}
 
 				// TODO: Move trees to it's own generator

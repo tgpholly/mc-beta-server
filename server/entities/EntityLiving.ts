@@ -11,6 +11,7 @@ export class EntityLiving extends Entity {
 	public pitch:number;
 	public lastPitch:number;
 	public onGround:boolean;
+	public fallDistance:number;
 
 	public absX:number;
 	public absY:number;
@@ -26,8 +27,8 @@ export class EntityLiving extends Entity {
 	public constructor(world:World) {
 		super(world);
 
-		this.yaw = this.lastYaw = this.pitch = this.lastPitch = this.absX = this.absY = this.absZ = this.absYaw = this.absPitch = this.lastAbsX = this.lastAbsY = this.lastAbsZ = this.lastAbsYaw = this.lastAbsPitch = 0;
-		this.onGround = false;
+		this.fallDistance = this.yaw = this.lastYaw = this.pitch = this.lastPitch = this.absX = this.absY = this.absZ = this.absYaw = this.absPitch = this.lastAbsX = this.lastAbsY = this.lastAbsZ = this.lastAbsYaw = this.lastAbsPitch = 0;
+		this.onGround = true;
 	}
 
 	private constrainRot(rot:number) {
@@ -73,6 +74,11 @@ export class EntityLiving extends Entity {
 	onTick() {
 		super.onTick();
 		this.sendPositionUpdate();
+
+		if (!this.onGround) {
+			this.fallDistance
+		}
+
 		this.lastYaw = this.yaw;
 		this.lastPitch = this.lastPitch;
 	}
