@@ -90,7 +90,7 @@ export class WorldSaveManager {
 			resolve(true);
 		});*/
 		return new Promise<boolean>((resolve, reject) => {
-			const saveType = SaveCompressionType[this.config.saveCompression];
+			const saveType = this.config.saveCompression;
 			const chunkFileWriter = new Writer(10);
 			chunkFileWriter.writeUByte(0xFC); // Chunk File Magic
 			chunkFileWriter.writeUByte(0); // File Version

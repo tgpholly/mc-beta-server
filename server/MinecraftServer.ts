@@ -16,6 +16,7 @@ import { PacketPlayerPositionLook } from "./packets/PlayerPositionLook";
 import { PacketChat } from "./packets/Chat";
 import { PacketNamedEntitySpawn } from "./packets/NamedEntitySpawn";
 import { WorldSaveManager } from "./WorldSaveManager";
+import { SaveCompressionType } from "./enums/SaveCompressionType";
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
@@ -50,7 +51,7 @@ export class MinecraftServer {
 	public constructor(config:Config) {
 		this.config = config;
 
-		if (this.config.saveCompression === "NONE") {
+		if (this.config.saveCompression === SaveCompressionType.NONE) {
 			Console.printWarn("=============- WARNING -=============");
 			Console.printWarn(" Chunk compression is disabled. This");
 			Console.printWarn(" will lead to large file sizes!");
