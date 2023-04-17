@@ -86,9 +86,9 @@ export class WorldSaveManager {
 	}
 
 	public writeChunkToDisk(chunk:Chunk) {
-		return new Promise<boolean>((resolve, reject) => {
+		/*return new Promise<boolean>((resolve, reject) => {
 			resolve(true);
-		});
+		});*/
 		return new Promise<boolean>((resolve, reject) => {
 			const saveType = this.config.saveCompression;
 			const chunkFileWriter = new Writer(10);
