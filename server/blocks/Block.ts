@@ -26,6 +26,8 @@ export class Block {
 
 	static readonly waterStill = new Block(9);
 
+	static readonly lavaStill = new Block(11);
+
 	static readonly sand = new Block(12);
 	static readonly gravel = new Block(13);
 
@@ -33,6 +35,9 @@ export class Block {
 	static readonly leaves = new Block(18);
 
 	static readonly tallGrass = new Block(31);
+
+	static readonly flowerDandelion = new Block(37);
+	static readonly flowerRose = new Block(38);
 
 	static readonly clay = new Block(82);
 }

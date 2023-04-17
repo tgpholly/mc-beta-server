@@ -84,6 +84,12 @@ export class MPClient {
 				const consoleMessage = `[CONSOLE] ${message.slice(1, message.length).join(" ")}`;
 				Console.printChat(consoleMessage);
 				this.mcServer.sendToAllClients(new PacketChat(consoleMessage).writeData());
+			} else if (message[0] === "/top") {
+				// TODO: Figure out why this is broken
+				packet.message = `Woosh!`;
+				const topBlock = this.entity.world.getChunk(this.entity.x >> 4, this.entity.z >> 4).getTopBlockY(this.entity.x & 0xf, this.entity.z & 0xf);
+				console.log(topBlock);
+				this.send(new PacketPlayerPositionLook(this.entity.x, topBlock, topBlock + 0.62, this.entity.z, this.entity.yaw, this.entity.pitch, false).writeData());
 			}
 
 			if (packet.message !== "") {

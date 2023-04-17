@@ -40,6 +40,16 @@ export class Chunk {
 		}
 	}
 
+	public getTopBlockY(x:number, z:number) {
+		let castY = this.MAX_HEIGHT;
+		while (castY-- > 0) {
+			if (this.getBlockId(x, castY, z) !== 0) {
+				break;
+			}
+		}
+		return castY;
+	}
+
 	public calculateLighting() {
 
 	}

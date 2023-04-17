@@ -2,6 +2,7 @@ import { Block } from "../blocks/Block";
 import { Chunk } from "../Chunk";
 import { IGenerator } from "./IGenerator";
 import { Noise2D, makeNoise2D } from "../../external/OpenSimplex2D";
+import { Noise3D, makeNoise3D } from "../../external/OpenSimplex3D";
 import { QueuedBlockUpdate } from "../queuedUpdateTypes/BlockUpdate";
 
 export class HillyGenerator implements IGenerator {
@@ -16,31 +17,51 @@ export class HillyGenerator implements IGenerator {
 	private generator5:Noise2D;
 	private generator6:Noise2D;
 	private oceanGenerator:Noise2D;
-	private mountainGenerator:Noise2D;
+	private hillGenerator:Noise2D;
+
+	private caveGenerator1:Noise3D;
+	private caveGenerator2:Noise3D;
+	private caveGenerator3:Noise3D;
+	private caveGenerator4:Noise3D;
+
 	private underwaterGravelGenerator:Noise2D;
 	private underwaterSandGenerator:Noise2D;
 	private underwaterClayGenerator:Noise2D;
+	private flowerGenerator:Noise2D;
 
 	public constructor(seed:number) {
 		this.seed = seed;
 		this.seedGenerator = this.mulberry32(this.seed);
 
-		this.generator = this.createGenerator();
-		this.generator1 = this.createGenerator();
-		this.generator2 = this.createGenerator();
-		this.generator3 = this.createGenerator();
-		this.generator4 = this.createGenerator();
-		this.generator5 = this.createGenerator();
-		this.generator6 = this.createGenerator();
-		this.oceanGenerator = this.createGenerator();
-		this.mountainGenerator = this.createGenerator();
-		this.underwaterGravelGenerator = this.createGenerator();
-		this.underwaterSandGenerator = this.createGenerator();
-		this.underwaterClayGenerator = this.createGenerator();
+		this.generator = this.createGenerator2D();
+		this.generator1 = this.createGenerator2D();
+		this.generator2 = this.createGenerator2D();
+		this.generator3 = this.createGenerator2D();
+		this.generator4 = this.createGenerator2D();
+		this.generator5 = this.createGenerator2D();
+		this.generator6 = this.createGenerator2D();
+		this.oceanGenerator = this.createGenerator2D();
+		this.hillGenerator = this.createGenerator2D();
+
+		this.caveGenerator1 = this.createGenerator3D();
+		this.caveGenerator2 = this.createGenerator3D();
+		this.caveGenerator3 = this.createGenerator3D();
+		this.caveGenerator4 = this.createGenerator3D();
+
+		this.underwaterGravelGenerator = this.createGenerator2D();
+		this.underwaterSandGenerator = this.createGenerator2D();
+		this.underwaterClayGenerator = this.createGenerator2D();
+		this.flowerGenerator = this.createGenerator2D();
+
+
 	}
 
-	private createGenerator() {
+	private createGenerator2D() {
 		return makeNoise2D(this.seedGenerator() * Number.MAX_SAFE_INTEGER);
+	}
+
+	private createGenerator3D() {
+		return makeNoise3D(this.seedGenerator() * Number.MAX_SAFE_INTEGER);
 	}
 
 	// This is soooo much faster than using Math.round in here
@@ -62,6 +83,7 @@ export class HillyGenerator implements IGenerator {
 	public generate(chunk:Chunk) {
 		const treeRNG = this.mulberry32(this.seed + chunk.x + chunk.z);
 		const grassRNG = this.mulberry32(this.seed + chunk.x + chunk.z);
+		const flowerRNG = this.mulberry32(this.seed + chunk.x + chunk.z);
 
 		let colY = 0, colDirtMin = 0, colWaterY = 0, orgColY = 0;
 		for (let x = 0; x < 16; x++) {
@@ -76,7 +98,7 @@ export class HillyGenerator implements IGenerator {
 					this.generator5((chunk.x * 16 + x) / 10, (chunk.z * 16 + z) / 10) * 10 +
 					this.generator6((chunk.x * 16 + x) / 16, (chunk.z * 16 + z) / 16) * 16 +
 					oceanValue +
-					(Math.max(this.mountainGenerator((chunk.x * 16 + x) / 128, (chunk.z * 16 + z) / 128), 0) * 50 + Math.min(oceanValue, 0))
+					(Math.max(this.hillGenerator((chunk.x * 16 + x) / 128, (chunk.z * 16 + z) / 128), 0) * 50 + Math.min(oceanValue, 0))
 				) / 9);
 				colDirtMin = colY - 2;
 				const sandNoise = this.underwaterSandGenerator((chunk.x * 16 + x) / 16, (chunk.z * 16 + z) / 16);
@@ -86,6 +108,7 @@ export class HillyGenerator implements IGenerator {
 					chunk.setBlock(Block.grass.blockId, x, colY, z);
 				}
 
+				let caveY = colY + 1;
 				while (colY-- > 0) {
 					if (colY >= colDirtMin) {
 						chunk.setBlock(Block.dirt.blockId, x, colY, z);
@@ -113,6 +136,22 @@ export class HillyGenerator implements IGenerator {
 					chunk.setBlock(Block.waterStill.blockId, x, colWaterY, z);
 				}
 
+
+				while (caveY-- > 1) {
+					if (
+						this.caveGenerator1((chunk.x * 16 + x) / 16, caveY / 16, (chunk.z * 16 + z) / 16) > 0.45 ||
+						this.caveGenerator2((chunk.x * 16 + x) / 8, caveY / 8, (chunk.z * 16 + z) / 8) > 0.6 ||
+						this.caveGenerator3((chunk.x * 16 + x) / 256, caveY / 256, (chunk.z * 16 + z) / 256) > 0.6 ||
+						this.caveGenerator4((chunk.x * 16 + x) / 128, caveY / 128, (chunk.z * 16 + z) / 128) > 0.6
+					) {
+						if (caveY <= 3) {
+							chunk.setBlock(Block.lavaStill.blockId, x, caveY, z);
+						} else {
+							chunk.setBlock(0, x, caveY, z);
+						}
+					}
+				}
+
 				const queuedChunkBlocks = chunk.world.queuedChunkBlocks;
 				if (queuedChunkBlocks.length > 0) {
 					const thisCoordPair = Chunk.CreateCoordPair(chunk.x, chunk.z);
@@ -125,9 +164,19 @@ export class HillyGenerator implements IGenerator {
 					}
 				}
 
-				if (grassRNG() > 0.9 && chunk.getBlockId(x, orgColY, z) === Block.grass.blockId) {
-					chunk.setBlockWithMetadata(Block.tallGrass.blockId, 1, x, orgColY + 1, z);
+				// Grass and flowers
+				if (chunk.getBlockId(x, orgColY, z) === Block.grass.blockId) {
+					if (grassRNG() > 0.9) {
+						chunk.setBlockWithMetadata(Block.tallGrass.blockId, 1, x, orgColY + 1, z);
+					} else if (this.flowerGenerator((chunk.x * 16 + x) / 16, (chunk.z * 16 + z) / 16) > 0.5 && flowerRNG() > 0.9) {
+						if (flowerRNG() > 0.4) {
+							chunk.setBlockWithMetadata(Block.flowerRose.blockId, 1, x, orgColY + 1, z);
+						} else {
+							chunk.setBlockWithMetadata(Block.flowerDandelion.blockId, 1, x, orgColY + 1, z);
+						}
+					}
 				}
+				
 
 				// TODO: Move trees to it's own generator
 				if (chunk.getBlockId(x, orgColY + 1, z) !== Block.waterStill.blockId && chunk.getBlockId(x, orgColY, z) === Block.grass.blockId && treeRNG() > 0.995) {
