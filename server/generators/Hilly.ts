@@ -139,10 +139,10 @@ export class HillyGenerator implements IGenerator {
 
 				while (caveY-- > 1) {
 					if (
-						this.caveGenerator1((chunk.x * 16 + x) / 16, caveY / 16, (chunk.z * 16 + z) / 16) > 0.45 ||
-						this.caveGenerator2((chunk.x * 16 + x) / 8, caveY / 8, (chunk.z * 16 + z) / 8) > 0.6 ||
-						this.caveGenerator3((chunk.x * 16 + x) / 256, caveY / 256, (chunk.z * 16 + z) / 256) > 0.6 ||
-						this.caveGenerator4((chunk.x * 16 + x) / 128, caveY / 128, (chunk.z * 16 + z) / 128) > 0.6
+						((this.caveGenerator1((chunk.x * 16 + x) / 16, caveY / 16, (chunk.z * 16 + z) / 16) +
+						this.caveGenerator2((chunk.x * 16 + x) / 8, caveY / 8, (chunk.z * 16 + z) / 8)) / 2) > 0.45
+						//this.caveGenerator3((chunk.x * 16 + x) / 256, caveY / 256, (chunk.z * 16 + z) / 256) > 0.6 ||
+						//this.caveGenerator4((chunk.x * 16 + x) / 128, caveY / 128, (chunk.z * 16 + z) / 128) > 0.6
 					) {
 						if (caveY <= 3) {
 							chunk.setBlock(Block.lavaStill.blockId, x, caveY, z);
