@@ -1,4 +1,4 @@
-# mc-beta-server [![CodeFactor](https://www.codefactor.io/repository/github/tgpholly/mc-beta-server/badge/typescript)](https://www.codefactor.io/repository/github/tgpholly/mc-beta-server/overview/typescript)
+# mc-beta-server [![CodeFactor](https://www.codefactor.io/repository/github/tgpholly/mc-beta-server/badge/typescript)](https://www.codefactor.io/repository/github/tgpholly/mc-beta-server/overview/typescript) [![Node.js CI](https://github.com/tgpholly/mc-beta-server/actions/workflows/node.js.yml/badge.svg?branch=typescript)](https://github.com/tgpholly/mc-beta-server/actions/workflows/node.js.yml)
 me trying to understand minecraft beta's protocol
 
 <img src="https://eusv.net/images/mc-beta-server-readme-0.webp">
