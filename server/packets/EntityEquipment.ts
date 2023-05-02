@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketEntityEquipment implements IPacket {
 	public packetId = Packet.EntityEquipment;
@@ -16,7 +18,7 @@ export class PacketEntityEquipment implements IPacket {
 		this.damage = damage;
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.entityId = reader.readInt();
 		this.slot = reader.readShort();
 		this.itemId = reader.readShort();
@@ -26,6 +28,6 @@ export class PacketEntityEquipment implements IPacket {
 	}
 
 	public writeData() {
-		return new Writer(10).writeUByte(this.packetId).writeInt(this.entityId).writeShort(this.slot).writeShort(this.itemId).writeShort(this.damage).toBuffer();
+		return createWriter(Endian.BE, 10).writeUByte(this.packetId).writeInt(this.entityId).writeShort(this.slot).writeShort(this.itemId).writeShort(this.damage).toBuffer();
 	}
 }

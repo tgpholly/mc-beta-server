@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketTimeUpdate implements IPacket {
 	public packetId = Packet.TimeUpdate;
@@ -10,13 +12,13 @@ export class PacketTimeUpdate implements IPacket {
 		this.time = time;
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.time = reader.readLong();
 
 		return this;
 	}
 
 	public writeData() {
-		return new Writer(9).writeUByte(this.packetId).writeLong(this.time).toBuffer();
+		return createWriter(Endian.BE, 9).writeUByte(this.packetId).writeLong(this.time).toBuffer();
 	}
 }

@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketRespawn implements IPacket {
 	public packetId = Packet.Respawn;
@@ -10,13 +12,13 @@ export class PacketRespawn implements IPacket {
 		this.health = health;
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.health = reader.readShort();
 
 		return this;
 	}
 
 	public writeData() {
-		return new Writer(3).writeUByte(this.packetId).writeShort(this.health).toBuffer();
+		return createWriter(Endian.BE, 3).writeUByte(this.packetId).writeShort(this.health).toBuffer();
 	}
 }

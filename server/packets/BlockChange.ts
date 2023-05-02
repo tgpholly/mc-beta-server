@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketBlockChange implements IPacket {
 	public packetId = Packet.BlockChange;
@@ -26,7 +28,7 @@ export class PacketBlockChange implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.x = reader.readInt();
 		this.y = reader.readByte();
 		this.z = reader.readInt();
@@ -37,6 +39,6 @@ export class PacketBlockChange implements IPacket {
 	}
 
 	public writeData() {
-		return new Writer(12).writeUByte(this.packetId).writeInt(this.x).writeByte(this.y).writeInt(this.z).writeByte(this.blockType).writeByte(this.blockMetadata).toBuffer();
+		return createWriter(Endian.BE, 12).writeUByte(this.packetId).writeInt(this.x).writeByte(this.y).writeInt(this.z).writeByte(this.blockType).writeByte(this.blockMetadata).toBuffer();
 	}
 }

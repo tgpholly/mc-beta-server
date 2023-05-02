@@ -1,22 +1,24 @@
 import { Config } from "../config";
 import { Console } from "../console";
-import { Server, Socket, SocketAddress } from "net";
+import { createReader } from "../bufferStuff/index";
 import { FunkyArray } from "../funkyArray";
-import { World } from "./World";
-import { Reader } from "../bufferStuff";
-import { Packet } from "./enums/Packet";
-import { PacketHandshake } from "./packets/Handshake";
+import { IReader } from "../bufferStuff/readers/IReader";
+import { Server, Socket, SocketAddress } from "net";
 import { MPClient } from "./MPClient";
+import { Packet } from "./enums/Packet";
 import { PacketKeepAlive } from "./packets/KeepAlive";
+import { PacketHandshake } from "./packets/Handshake";
 import { PacketLoginRequest } from "./packets/LoginRequest";
-import { PacketDisconnectKick } from "./packets/DisconnectKick";
-import { Player } from "./entities/Player";
+import { PacketChat } from "./packets/Chat";
 import { PacketSpawnPosition } from "./packets/SpawnPosition";
 import { PacketPlayerPositionLook } from "./packets/PlayerPositionLook";
-import { PacketChat } from "./packets/Chat";
 import { PacketNamedEntitySpawn } from "./packets/NamedEntitySpawn";
-import { WorldSaveManager } from "./WorldSaveManager";
+import { PacketDisconnectKick } from "./packets/DisconnectKick";
+import { Player } from "./entities/Player";
 import { SaveCompressionType } from "./enums/SaveCompressionType";
+import { WorldSaveManager } from "./WorldSaveManager";
+import { World } from "./World";
+import { Endian } from "../bufferStuff/Endian";
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
@@ -111,7 +113,7 @@ export class MinecraftServer {
 		});
 	}
 
-	handleLoginRequest(reader:Reader, socket:Socket, setMPClient:(mpclient:MPClient) => void) {
+	handleLoginRequest(reader:IReader, socket:Socket, setMPClient:(mpclient:MPClient) => void) {
 		const loginPacket = new PacketLoginRequest().readData(reader);
 		if (loginPacket.protocolVersion !== MinecraftServer.PROTOCOL_VERSION) {
 			if (loginPacket.protocolVersion > MinecraftServer.PROTOCOL_VERSION) {
@@ -151,7 +153,7 @@ export class MinecraftServer {
 		}
 	}
 	
-	handleHandshake(reader:Reader, socket:Socket) {
+	handleHandshake(reader:IReader, socket:Socket) {
 		const handshakePacket = new PacketHandshake().readData(reader);
 		socket.write(handshakePacket.writeData());
 	}
@@ -174,7 +176,7 @@ export class MinecraftServer {
 		socket.on("error", playerDisconnect.bind(this));
 
 		socket.on("data", chunk => {
-			const reader = new Reader(chunk);
+			const reader = createReader(Endian.BE, chunk);
 
 			// Let mpClient take over if it exists
 			if (mpClient instanceof MPClient) {

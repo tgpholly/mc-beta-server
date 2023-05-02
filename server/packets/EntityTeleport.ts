@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketEntityTeleport implements IPacket {
 	public packetId = Packet.EntityTeleport;
@@ -29,7 +31,7 @@ export class PacketEntityTeleport implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.entityId = reader.readInt();
 		this.x = reader.readInt();
 		this.y = reader.readInt();
@@ -41,6 +43,6 @@ export class PacketEntityTeleport implements IPacket {
 	}
 
 	public writeData() {
-		return new Writer(19).writeUByte(this.packetId).writeInt(this.entityId).writeInt(this.x).writeInt(this.y).writeInt(this.z).writeByte(this.yaw).writeByte(this.pitch).toBuffer();
+		return createWriter(Endian.BE, 19).writeUByte(this.packetId).writeInt(this.entityId).writeInt(this.x).writeInt(this.y).writeInt(this.z).writeByte(this.yaw).writeByte(this.pitch).toBuffer();
 	}
 }

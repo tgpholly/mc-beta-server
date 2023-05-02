@@ -1,12 +1,14 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketKeepAlive implements IPacket {
 	public packetId = Packet.KeepAlive;
-	private static readonly KeepAliveBuffer:Buffer = new Writer(1).writeByte(Packet.KeepAlive).toBuffer();
+	private static readonly KeepAliveBuffer:Buffer = createWriter(Endian.BE, 1).writeByte(Packet.KeepAlive).toBuffer();
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		reader;
 		return this;
 	}

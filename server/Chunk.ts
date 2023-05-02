@@ -40,7 +40,7 @@ export class Chunk {
 			this.metadata = new NibbleArray(metadata);
 			this.skyLight = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
 			this.blockLight = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
-			this.calculateLighting();
+			//this.calculateLighting();
 		} else {
 			this.blocks = new Uint8Array(16 * 16 * this.MAX_HEIGHT);
 			this.metadata = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
@@ -49,7 +49,7 @@ export class Chunk {
 
 			if (typeof(generateOrBlockData) === "boolean" && generateOrBlockData) {
 				this.world.generator.generate(this);
-				this.calculateLighting();
+				//this.calculateLighting();
 			}
 		}
 	}

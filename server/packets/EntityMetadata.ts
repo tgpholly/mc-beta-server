@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 const EMPTY_BUFFER = Buffer.alloc(0);
 
@@ -19,13 +21,13 @@ export class PacketEntityMetadata implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		// TODO: EntityMetadata reading
 
 		return this;
 	}
 
 	public writeData() {
-		return new Writer(5).writeUByte(this.packetId).writeInt(this.entityId).writeBuffer(this.metadata).toBuffer();
+		return createWriter(Endian.BE, 5).writeUByte(this.packetId).writeInt(this.entityId).writeBuffer(this.metadata).toBuffer();
 	}
 }

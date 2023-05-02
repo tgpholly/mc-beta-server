@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketAnimation implements IPacket {
 	public packetId = Packet.Animation;
@@ -17,7 +19,7 @@ export class PacketAnimation implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.entityId = reader.readInt();
 		this.animation = reader.readByte();
 
@@ -25,6 +27,6 @@ export class PacketAnimation implements IPacket {
 	}
 
 	public writeData() {
-		return new Writer(6).writeUByte(this.packetId).writeInt(this.entityId).writeByte(this.animation).toBuffer();
+		return createWriter(Endian.BE, 6).writeUByte(this.packetId).writeInt(this.entityId).writeByte(this.animation).toBuffer();
 	}
 }

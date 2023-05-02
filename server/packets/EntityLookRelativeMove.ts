@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketEntityLookRelativeMove implements IPacket {
 	public packetId = Packet.EntityLookRelativeMove;
@@ -29,7 +31,7 @@ export class PacketEntityLookRelativeMove implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.entityId = reader.readInt();
 		this.dX = reader.readByte();
 		this.dY = reader.readByte();
@@ -41,6 +43,6 @@ export class PacketEntityLookRelativeMove implements IPacket {
 	}
 
 	public writeData() {
-		return new Writer(10).writeUByte(this.packetId).writeInt(this.entityId).writeByte(this.dX).writeByte(this.dY).writeByte(this.dZ).writeByte(this.yaw).writeByte(this.pitch).toBuffer();
+		return createWriter(Endian.BE, 10).writeUByte(this.packetId).writeInt(this.entityId).writeByte(this.dX).writeByte(this.dY).writeByte(this.dZ).writeByte(this.yaw).writeByte(this.pitch).toBuffer();
 	}
 }

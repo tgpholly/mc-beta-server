@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketDisconnectKick implements IPacket {
 	public packetId = Packet.DisconnectKick;
@@ -14,12 +16,12 @@ export class PacketDisconnectKick implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
-		this.reason = reader.readString();
+	public readData(reader:IReader) {
+		this.reason = reader.readString16();
 		return this;
 	}
 
 	public writeData() {
-		return new Writer(3 + this.reason.length * 2).writeUByte(this.packetId).writeString(this.reason).toBuffer();
+		return createWriter(Endian.BE, 3 + this.reason.length * 2).writeUByte(this.packetId).writeString16(this.reason).toBuffer();
 	}
 }

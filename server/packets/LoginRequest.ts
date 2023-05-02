@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketLoginRequest implements IPacket {
 	public packetId = Packet.LoginRequest;
@@ -23,9 +25,9 @@ export class PacketLoginRequest implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.protocolVersion = reader.readInt();
-		this.username = reader.readString();
+		this.username = reader.readString16();
 		this.mapSeed = Number(reader.readLong());
 		this.dimension = reader.readByte();
 
@@ -33,6 +35,6 @@ export class PacketLoginRequest implements IPacket {
 	}
 
 	public writeData() {
-		return new Writer(16 + (2 * this.username.length)).writeUByte(this.packetId).writeInt(this.protocolVersion).writeString(this.username).writeLong(this.mapSeed).writeByte(this.dimension).toBuffer();
+		return createWriter(Endian.BE, 16 + (2 * this.username.length)).writeUByte(this.packetId).writeInt(this.protocolVersion).writeString16(this.username).writeLong(this.mapSeed).writeByte(this.dimension).toBuffer();
 	}
 }

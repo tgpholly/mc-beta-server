@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketNamedEntitySpawn implements IPacket {
 	public packetId = Packet.NamedEntitySpawn;
@@ -35,9 +37,9 @@ export class PacketNamedEntitySpawn implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.entityId = reader.readInt();
-		this.playerName = reader.readString();
+		this.playerName = reader.readString16();
 		this.x = reader.readInt();
 		this.y = reader.readInt();
 		this.z = reader.readInt();
@@ -48,6 +50,6 @@ export class PacketNamedEntitySpawn implements IPacket {
 	}
 
 	public writeData() {
-		return new Writer(23 + this.playerName.length * 2).writeUByte(this.packetId).writeInt(this.entityId).writeString(this.playerName).writeInt(this.x).writeInt(this.y).writeInt(this.z).writeByte(this.yaw).writeByte(this.pitch).writeShort(this.currentItem).toBuffer();
+		return createWriter(Endian.BE, 23 + this.playerName.length * 2).writeUByte(this.packetId).writeInt(this.entityId).writeString16(this.playerName).writeInt(this.x).writeInt(this.y).writeInt(this.z).writeByte(this.yaw).writeByte(this.pitch).writeShort(this.currentItem).toBuffer();
 	}
 }

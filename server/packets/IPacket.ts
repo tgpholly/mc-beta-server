@@ -1,8 +1,8 @@
-import { Reader } from "../../bufferStuff";
+import { IReader } from "../../bufferStuff/readers/IReader";
 import { Packet } from "../enums/Packet";
 
 export interface IPacket {
 	packetId: Packet,
-	readData: (reader:Reader) => IPacket,
+	readData: (reader:IReader) => IPacket,
 	writeData: () => Buffer|Promise<Buffer>
 }

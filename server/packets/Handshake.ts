@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createReader, createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketHandshake implements IPacket {
 	public packetId:Packet = Packet.Handshake;
@@ -14,13 +16,13 @@ export class PacketHandshake implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
-		this.username = reader.readString();
+	public readData(reader:IReader) {
+		this.username = reader.readString16();
 
 		return this;
 	}
 
 	public writeData() {
-		return new Writer(5).writeUByte(this.packetId).writeString("-").toBuffer();
+		return createWriter(Endian.BE, 5).writeUByte(this.packetId).writeString16("-").toBuffer();
 	}
 }

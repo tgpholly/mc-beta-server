@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketPlayerDigging implements IPacket {
 	public packetId = Packet.PlayerDigging;
@@ -26,7 +28,7 @@ export class PacketPlayerDigging implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.status = reader.readByte();
 		this.x = reader.readInt();
 		this.y = reader.readByte();
@@ -37,6 +39,6 @@ export class PacketPlayerDigging implements IPacket {
 	}
 
 	public writeData() {
-		return new Writer(12).writeUByte(this.packetId).writeByte(this.status).writeInt(this.x).writeByte(this.y).writeInt(this.z).writeByte(this.face).toBuffer();
+		return createWriter(Endian.BE, 12).writeUByte(this.packetId).writeByte(this.status).writeInt(this.x).writeByte(this.y).writeInt(this.z).writeByte(this.face).toBuffer();
 	}
 }

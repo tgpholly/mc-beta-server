@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketPreChunk implements IPacket {
 	public packetId = Packet.PreChunk;
@@ -14,7 +16,7 @@ export class PacketPreChunk implements IPacket {
 		this.mode = mode;
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.x = reader.readInt();
 		this.z = reader.readInt();
 		this.mode = reader.readBool();
@@ -23,6 +25,6 @@ export class PacketPreChunk implements IPacket {
 	}
 
 	public writeData() {
-		return new Writer(10).writeUByte(this.packetId).writeInt(this.x).writeInt(this.z).writeBool(this.mode).toBuffer();
+		return createWriter(Endian.BE, 10).writeUByte(this.packetId).writeInt(this.x).writeInt(this.z).writeBool(this.mode).toBuffer();
 	}
 }

@@ -1,10 +1,11 @@
 import { readFileSync, readFile, writeFile, existsSync, mkdirSync, writeFileSync, readdirSync } from "fs";
-import { Reader, Writer } from "../bufferStuff";
+import { createWriter, createReader } from "../bufferStuff/index";
 import { Config } from "../config";
 import { Chunk } from "./Chunk";
 import { SaveCompressionType } from "./enums/SaveCompressionType";
 import { deflate, inflate } from "zlib";
 import { World } from "./World";
+import { Endian } from "../bufferStuff/Endian";
 
 export class WorldSaveManager {
 	private readonly worldFolderPath;
@@ -61,7 +62,7 @@ export class WorldSaveManager {
 	}
 
 	private createInfoFile(numericalSeed:number) {
-		const infoFileWriter = new Writer(26);
+		const infoFileWriter = createWriter(Endian.BE, 26);
 		infoFileWriter.writeUByte(0xFD); // Info File Magic
 		infoFileWriter.writeUByte(0); // File Version
 		infoFileWriter.writeLong(this.worldCreationDate.getTime()); // World creation date
@@ -71,7 +72,7 @@ export class WorldSaveManager {
 	}
 
 	private readInfoFile() {
-		const infoFileReader = new Reader(readFileSync(this.infoFilePath));
+		const infoFileReader = createReader(Endian.BE, readFileSync(this.infoFilePath));
 		const fileMagic = infoFileReader.readUByte();
 		if (fileMagic !== 0xFD) {
 			throw new Error("World info file is invalid");
@@ -88,7 +89,7 @@ export class WorldSaveManager {
 	public writeChunkToDisk(chunk:Chunk) {
 		return new Promise<boolean>((resolve, reject) => {
 			const saveType = this.config.saveCompression;
-			const chunkFileWriter = new Writer(10);
+			const chunkFileWriter = createWriter(Endian.BE, 10);
 			chunkFileWriter.writeUByte(0xFC); // Chunk File Magic
 			// TODO: Change to 1 when lighting actually works
 			chunkFileWriter.writeUByte(0); // File Version
@@ -97,7 +98,7 @@ export class WorldSaveManager {
 			chunkFileWriter.writeUByte(128); // Chunk Y
 			chunkFileWriter.writeUByte(16); // Chunk Z
 
-			const chunkData = new Writer()
+			const chunkData = createWriter(Endian.BE)
 				.writeBuffer(Buffer.from(chunk.getData()))
 				.writeBuffer(chunk.getMetadataBuffer()).toBuffer()
 				//.writeBuffer(chunk.getBlockLightBuffer())
@@ -146,7 +147,7 @@ export class WorldSaveManager {
 					return reject(err);
 				}
 
-				const chunkFileReader = new Reader(data);
+				const chunkFileReader = createReader(Endian.BE, data);
 				
 				// Check file validity
 				if (chunkFileReader.readUByte() !== 0xFC) {
@@ -163,7 +164,7 @@ export class WorldSaveManager {
 
 					const contentLength = chunkFileReader.readInt();
 					if (saveCompressionType === SaveCompressionType.NONE) {
-						const chunkData = new Reader(chunkFileReader.readBuffer(contentLength));
+						const chunkData = createReader(Endian.BE, chunkFileReader.readBuffer(contentLength));
 						const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2));
 						resolve(chunk);
 					} else if (saveCompressionType === SaveCompressionType.DEFLATE) {
@@ -172,7 +173,7 @@ export class WorldSaveManager {
 								return reject(err);
 							}
 
-							const chunkData = new Reader(data);
+							const chunkData = createReader(Endian.BE, data);
 							const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2));
 							resolve(chunk);
 						});
@@ -186,7 +187,7 @@ export class WorldSaveManager {
 
 					const contentLength = chunkFileReader.readInt();
 					if (saveCompressionType === SaveCompressionType.NONE) {
-						const chunkData = new Reader(chunkFileReader.readBuffer(contentLength));
+						const chunkData = createReader(Endian.BE, chunkFileReader.readBuffer(contentLength));
 						const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2));
 						resolve(chunk);
 					} else if (saveCompressionType === SaveCompressionType.DEFLATE) {
@@ -195,7 +196,7 @@ export class WorldSaveManager {
 								return reject(err);
 							}
 
-							const chunkData = new Reader(data);
+							const chunkData = createReader(Endian.BE, data);
 							const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2), chunkData.readUint8Array(totalByteSize / 2), chunkData.readUint8Array(totalByteSize / 2));
 							resolve(chunk);
 						});

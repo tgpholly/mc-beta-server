@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketPlayerPosition implements IPacket {
 	public packetId = Packet.PlayerPosition;
@@ -26,7 +28,7 @@ export class PacketPlayerPosition implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
+	public readData(reader:IReader) {
 		this.x = reader.readDouble();
 		this.y = reader.readDouble();
 		this.stance = reader.readDouble();
@@ -37,6 +39,6 @@ export class PacketPlayerPosition implements IPacket {
 	}
 
 	public writeData() {
-		return new Writer(34).writeUByte(this.packetId).writeDouble(this.x).writeDouble(this.y).writeDouble(this.stance).writeDouble(this.z).writeBool(this.onGround).toBuffer();
+		return createWriter(Endian.BE, 34).writeUByte(this.packetId).writeDouble(this.x).writeDouble(this.y).writeDouble(this.stance).writeDouble(this.z).writeBool(this.onGround).toBuffer();
 	}
 }

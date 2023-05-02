@@ -1,4 +1,5 @@
-import { Writer } from "../bufferStuff";
+import { createWriter } from "../bufferStuff/index";
+import { Endian } from "../bufferStuff/Endian";
 import { FunkyArray } from "../funkyArray";
 import { MetadataFieldType } from "./enums/MetadataFieldType";
 
@@ -43,7 +44,7 @@ export class MetadataWriter {
 	}
 
 	public writeBuffer() {
-		const writer = new Writer(this.calculateBufferSize());
+		const writer = createWriter(Endian.BE, this.calculateBufferSize());
 		for (let key of this.entries.keys) {
 			const entry = this.entries.get(key);
 			if (entry instanceof MetadataEntry) {
@@ -56,7 +57,7 @@ export class MetadataWriter {
 						case MetadataFieldType.Float: writer.writeFloat(entry.value); break;
 					}
 				} else if (typeof(entry.value) === "string") {
-					writer.writeString(entry.value);
+					writer.writeString16(entry.value);
 				}
 			}
 		}

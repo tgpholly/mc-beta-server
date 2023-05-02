@@ -1,0 +1,3 @@
+[submodule "bufferStuff"]
+	path = bufferStuff
+	url = https://github.com/tgpholly/bufferStuff.git

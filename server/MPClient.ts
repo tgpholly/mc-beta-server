@@ -1,20 +1,18 @@
-import { Socket } from "net";
-import { Reader, Writer } from "../bufferStuff";
+import { Console } from "../console";
+import { IReader } from "../bufferStuff/readers/IReader";
+import { MinecraftServer } from "./MinecraftServer";
 import { Packet } from "./enums/Packet";
+import { PacketAnimation } from "./packets/Animation";
+import { PacketChat } from "./packets/Chat"
+import { PacketEntityAction } from "./packets/EntityAction";
 import { PacketPlayer } from "./packets/Player";
 import { PacketPlayerPosition } from "./packets/PlayerPosition";
 import { PacketPlayerLook } from "./packets/PlayerLook";
 import { PacketPlayerPositionLook } from "./packets/PlayerPositionLook";
-import { Player } from "./entities/Player";
-import { PacketChat } from "./packets/Chat";
-import { MinecraftServer } from "./MinecraftServer";
-import { Vec3 } from "./Vec3";
-import { Console } from "../console";
 import { PacketPlayerDigging } from "./packets/PlayerDigging";
-import { PacketAnimation } from "./packets/Animation";
-import { PacketEntityAction } from "./packets/EntityAction";
-import { IPacket } from "./packets/IPacket";
-import { Animation } from "./enums/Animation";
+import { Player } from "./entities/Player";
+import { Socket } from "net";
+import { Vec3 } from "./Vec3";
 
 export class MPClient {
 	private readonly mcServer:MinecraftServer;
@@ -54,7 +52,7 @@ export class MPClient {
 		}
 	}
 
-	public handlePacket(reader:Reader) {
+	public handlePacket(reader:IReader) {
 		const packetId = reader.readUByte();
 
 		switch (packetId) {
@@ -161,11 +159,7 @@ export class MPClient {
 		}
 	}
 
-	public send(buffer:Buffer|Writer) {
-		if (buffer instanceof Writer) {
-			this.socket.write(buffer.toBuffer());
-		} else {
-			this.socket.write(buffer);
-		}
+	public send(buffer:Buffer) {
+		this.socket.write(buffer);
 	}
 }

@@ -1,6 +1,8 @@
-import { Reader, Writer } from "../../bufferStuff";
-import { Packet } from "../enums/Packet";
+import { createWriter } from "../../bufferStuff/index";
+import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
+import { IReader } from "../../bufferStuff/readers/IReader";
+import { Packet } from "../enums/Packet";
 
 export class PacketChat implements IPacket {
 	public packetId = Packet.Chat;
@@ -14,13 +16,13 @@ export class PacketChat implements IPacket {
 		}
 	}
 
-	public readData(reader:Reader) {
-		this.message = reader.readString();
+	public readData(reader:IReader) {
+		this.message = reader.readString16();
 
 		return this;
 	}
 
 	public writeData() {
-		return new Writer(3 + this.message.length * 2).writeUByte(this.packetId).writeString(this.message).toBuffer();
+		return createWriter(Endian.BE, 3 + this.message.length * 2).writeUByte(this.packetId).writeString16(this.message).toBuffer();
 	}
 }
