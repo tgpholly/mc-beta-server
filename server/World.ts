@@ -45,11 +45,13 @@ export class World {
 	public removeEntity(entity:IEntity) {
 		if (entity instanceof Player) {
 			for (const coordPair of entity.loadedChunks) {
-				const chunk = this.getChunkByCoordPair(coordPair);
-				chunk.playersInChunk.remove(entity.entityId);
+				if (this.chunkExists(coordPair)) {
+					const chunk = this.getChunkByCoordPair(coordPair);
+					chunk.playersInChunk.remove(entity.entityId);
 
-				if (!chunk.forceLoaded && chunk.playersInChunk.length === 0) {
-					this.unloadChunk(coordPair);
+					if (!chunk.forceLoaded && chunk.playersInChunk.length === 0) {
+						this.unloadChunk(coordPair);
+					}
 				}
 			}
 			this.players.remove(entity.entityId);
@@ -57,6 +59,14 @@ export class World {
 
 		this.entites.remove(entity.entityId);
 		// TODO: Inform clients about entity removal
+	}
+
+	public chunkExists(coordPairOrX:number, chunkZ?:number) {
+		if (typeof(coordPairOrX) === "number" && typeof(chunkZ) === "number") {
+			return this.chunks.has(Chunk.CreateCoordPair(coordPairOrX, chunkZ));
+		}
+
+		return this.chunks.has(coordPairOrX);
 	}
 
 	public getChunk(x:number, z:number, generate:boolean = true) {
@@ -206,10 +216,13 @@ export class World {
 			if (entity instanceof Player) {
 				if (entity.justUnloaded.length > 0) {
 					for (const coordPair of entity.justUnloaded) {
-						const chunkToUnload = this.getChunkByCoordPair(coordPair);
-						chunkToUnload.playersInChunk.remove(entity.entityId);
-						if (!chunkToUnload.forceLoaded && chunkToUnload.playersInChunk.length === 0) {
-							this.unloadChunk(coordPair);
+						if (this.chunks.get(coordPair) != undefined)
+						{
+							const chunkToUnload = this.getChunkByCoordPair(coordPair);
+							chunkToUnload.playersInChunk.remove(entity.entityId);
+							if (!chunkToUnload.forceLoaded && chunkToUnload.playersInChunk.length === 0) {
+								this.unloadChunk(coordPair);
+							}
 						}
 					}
 

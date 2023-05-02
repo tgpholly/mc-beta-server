@@ -17,6 +17,11 @@ export class Block {
 		Block.lightPassage[this.blockId] = value;
 	}
 
+	public setLightPassage(value:number) {
+		this.lightPassage = value;
+		return this;
+	}
+
 	// Define statics here
 	static readonly stone = new Block(1);
 	static readonly grass = new Block(2);
@@ -24,7 +29,7 @@ export class Block {
 
 	static readonly bedrock = new Block(7);
 
-	static readonly waterStill = new Block(9);
+	static readonly waterStill = new Block(9).setLightPassage(3);
 
 	static readonly lavaStill = new Block(11);
 
@@ -32,7 +37,9 @@ export class Block {
 	static readonly gravel = new Block(13);
 
 	static readonly wood = new Block(17);
-	static readonly leaves = new Block(18);
+	static readonly leaves = new Block(18).setLightPassage(1);
+
+	static readonly glass = new Block(20).setLightPassage(255);
 
 	static readonly tallGrass = new Block(31);
 

@@ -48,6 +48,10 @@ export class FunkyArray<T, TT> {
 		return this.items.get(key);
 	}
 
+	public has(key:T) : boolean {
+		return this.itemKeys.includes(key);
+	}
+
 	public get keys() : Array<T> {
 		return this.itemKeys;
 	}

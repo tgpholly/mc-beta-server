@@ -86,13 +86,11 @@ export class WorldSaveManager {
 	}
 
 	public writeChunkToDisk(chunk:Chunk) {
-		/*return new Promise<boolean>((resolve, reject) => {
-			resolve(true);
-		});*/
 		return new Promise<boolean>((resolve, reject) => {
 			const saveType = this.config.saveCompression;
 			const chunkFileWriter = new Writer(10);
 			chunkFileWriter.writeUByte(0xFC); // Chunk File Magic
+			// TODO: Change to 1 when lighting actually works
 			chunkFileWriter.writeUByte(0); // File Version
 			chunkFileWriter.writeUByte(saveType); // Save compression type
 			chunkFileWriter.writeUByte(16); // Chunk X
@@ -101,13 +99,15 @@ export class WorldSaveManager {
 
 			const chunkData = new Writer()
 				.writeBuffer(Buffer.from(chunk.getData()))
-				.writeBuffer(chunk.getMetadataBuffer()).toBuffer();
+				.writeBuffer(chunk.getMetadataBuffer()).toBuffer()
+				//.writeBuffer(chunk.getBlockLightBuffer())
+				//.writeBuffer(chunk.getSkyLightBuffer()).toBuffer();
 
 			if (saveType === SaveCompressionType.NONE) {
 				chunkFileWriter.writeInt(chunkData.length); // Data length
 				chunkFileWriter.writeBuffer(chunkData); // Chunk data
 
-				writeFile(`${this.worldChunksFolderPath}/${chunk.x},${chunk.z}.hwc`, chunkFileWriter.toBuffer(), () => {
+				writeFile(`${this.worldChunksFolderPath}/${Chunk.CreateCoordPair(chunk.x, chunk.z)}.hwc`, chunkFileWriter.toBuffer(), () => {
 					const cPair = Chunk.CreateCoordPair(chunk.x, chunk.z);
 					if (!this.chunksOnDisk.includes(cPair)) {
 						this.chunksOnDisk.push(cPair);
@@ -124,7 +124,7 @@ export class WorldSaveManager {
 					chunkFileWriter.writeInt(data.length);
 					chunkFileWriter.writeBuffer(data);
 
-					writeFile(`${this.worldChunksFolderPath}/${chunk.x},${chunk.z}.hwc`, chunkFileWriter.toBuffer(), () => {
+					writeFile(`${this.worldChunksFolderPath}/${Chunk.CreateCoordPair(chunk.x, chunk.z)}.hwc`, chunkFileWriter.toBuffer(), () => {
 						const cPair = Chunk.CreateCoordPair(chunk.x, chunk.z);
 						if (!this.chunksOnDisk.includes(cPair)) {
 							this.chunksOnDisk.push(cPair);
@@ -141,7 +141,7 @@ export class WorldSaveManager {
 
 	readChunkFromDisk(world:World, x:number, z:number) {
 		return new Promise<Chunk>((resolve, reject) => {
-			readFile(`${this.worldChunksFolderPath}/${x},${z}.hwc`, (err, data) => {
+			readFile(`${this.worldChunksFolderPath}/${Chunk.CreateCoordPair(x, z)}.hwc`, (err, data) => {
 				if (err) {
 					return reject(err);
 				}
@@ -174,6 +174,29 @@ export class WorldSaveManager {
 
 							const chunkData = new Reader(data);
 							const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2));
+							resolve(chunk);
+						});
+					}
+				} else if (fileVersion === 1) {
+					const saveCompressionType:SaveCompressionType = chunkFileReader.readUByte();
+					const chunkX = chunkFileReader.readUByte();
+					const chunkY = chunkFileReader.readUByte();
+					const chunkZ = chunkFileReader.readUByte();
+					const totalByteSize = chunkX * chunkZ * chunkY;
+
+					const contentLength = chunkFileReader.readInt();
+					if (saveCompressionType === SaveCompressionType.NONE) {
+						const chunkData = new Reader(chunkFileReader.readBuffer(contentLength));
+						const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2));
+						resolve(chunk);
+					} else if (saveCompressionType === SaveCompressionType.DEFLATE) {
+						inflate(chunkFileReader.readBuffer(contentLength), (err, data) => {
+							if (err) {
+								return reject(err);
+							}
+
+							const chunkData = new Reader(data);
+							const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2), chunkData.readUint8Array(totalByteSize / 2), chunkData.readUint8Array(totalByteSize / 2));
 							resolve(chunk);
 						});
 					}

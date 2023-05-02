@@ -1,5 +1,6 @@
 import { FunkyArray } from "../funkyArray";
 import { NibbleArray } from "../nibbleArray";
+import { Block } from "./blocks/Block";
 import { Player } from "./entities/Player";
 import { QueuedBlockUpdate } from "./queuedUpdateTypes/BlockUpdate";
 import { World } from "./World";
@@ -16,26 +17,39 @@ export class Chunk {
 
 	private blocks:Uint8Array;
 	private metadata:NibbleArray;
+	public skyLight:NibbleArray;
+	public blockLight:NibbleArray;
 
 	public static CreateCoordPair(x:number, z:number) {
 		return (x >= 0 ? 0 : 2147483648) | (x & 0x7fff) << 16 | (z >= 0 ? 0 : 0x8000) | z & 0x7fff;
 	}
 
-	public constructor(world:World, x:number, z:number, generateOrBlockData?:boolean|Uint8Array, metadata?:Uint8Array) {
+	public constructor(world:World, x:number, z:number, generateOrBlockData?:boolean|Uint8Array, metadata?:Uint8Array, blockLight?:Uint8Array, skyLight?:Uint8Array) {
 		this.world = world;
 		this.x = x;
 		this.z = z;
 		this.playersInChunk = new FunkyArray<number, Player>();
 
-		if (generateOrBlockData instanceof Uint8Array && metadata instanceof Uint8Array) {
+		if (generateOrBlockData instanceof Uint8Array && metadata instanceof Uint8Array && blockLight instanceof Uint8Array && skyLight instanceof Uint8Array) {
 			this.blocks = new Uint8Array(generateOrBlockData);
 			this.metadata = new NibbleArray(metadata);
+			this.skyLight = new NibbleArray(blockLight);
+			this.blockLight = new NibbleArray(skyLight);
+		} else if (generateOrBlockData instanceof Uint8Array && metadata instanceof Uint8Array && !(blockLight instanceof Uint8Array) && !(skyLight instanceof Uint8Array)) {
+			this.blocks = new Uint8Array(generateOrBlockData);
+			this.metadata = new NibbleArray(metadata);
+			this.skyLight = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
+			this.blockLight = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
+			this.calculateLighting();
 		} else {
 			this.blocks = new Uint8Array(16 * 16 * this.MAX_HEIGHT);
 			this.metadata = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
+			this.skyLight = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
+			this.blockLight = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
 
 			if (typeof(generateOrBlockData) === "boolean" && generateOrBlockData) {
 				this.world.generator.generate(this);
+				this.calculateLighting();
 			}
 		}
 	}
@@ -51,7 +65,32 @@ export class Chunk {
 	}
 
 	public calculateLighting() {
+		let blockId = 0;
+		for (let y = 0; y < 128; y++) {
+			let colLight = 255;
+			for (let x = 0; x < 16; x++) {
+				for (let z = 0; z < 16; z++) {
+					blockId = this.getBlockId(x, y, z);
+					if (blockId == 0) {
+						if (colLight <= 0) {
+							this.setBlockLight(0, x, y, z);
+							this.setSkyLight(0, x, y, z);
+						} else {
+							this.setBlockLight(Math.round((colLight / 255) * 15), x, y, z);
+							this.setSkyLight(Math.round((colLight / 255) * 15), x, y, z);
+						}
+						continue;
+					}
 
+					if (colLight <= 0) {
+						this.setBlockLight(0, x, y, z);
+					} else {
+						this.setBlockLight(Math.round((colLight / 255) * 15), x, y, z);
+						colLight -= (255 - Block.blocks[blockId].lightPassage);
+					}
+				}	
+			}
+		}
 	}
 
 	public queueBlockUpdateForOuterChunkBlock(blockId:number, metadata:number, x:number, y:number, z:number) {
@@ -91,7 +130,35 @@ export class Chunk {
 		return this.metadata.get(x << 11 | z << 7 | y);
 	}
 
+	public getBlockLight(x:number, y:number, z:number) {
+		return this.blockLight.get(x << 11 | z << 7 | y);
+	}
+
+	public setBlockLight(value:number, x:number, y:number, z:number) {
+		return this.blockLight.set(x << 11 | z << 7 | y, value);
+	}
+
+	public getSkyLight(x:number, y:number, z:number) {
+		return this.skyLight.get(x << 11 | z << 7 | y);
+	}
+
+	public setSkyLight(value:number, x:number, y:number, z:number) {
+		return this.skyLight.set(x << 11 | z << 7 | y, value);
+	}
+
+	public getBlockBuffer() {
+		return Buffer.from(this.blocks);
+	}
+
 	public getMetadataBuffer() {
+		return this.metadata.toBuffer();
+	}
+
+	public getBlockLightBuffer() {
+		return this.metadata.toBuffer();
+	}
+
+	public getSkyLightBuffer() {
 		return this.metadata.toBuffer();
 	}
 

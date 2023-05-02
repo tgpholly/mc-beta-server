@@ -64,7 +64,7 @@ export class Player extends EntityLiving {
 
 			// Mark any unaccounted chunks for unload
 			for (const coordPair of this.loadedChunks) {
-				if (!currentLoads.includes(coordPair)) {
+				if (!currentLoads.includes(coordPair) && this.world.chunkExists(coordPair)) {
 					this.justUnloaded.push(coordPair);
 					const chunkToUnload = this.world.getChunkByCoordPair(coordPair);
 					this.mpClient?.send(new PacketPreChunk(chunkToUnload.x, chunkToUnload.z, false).writeData());

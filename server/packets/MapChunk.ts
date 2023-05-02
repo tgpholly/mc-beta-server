@@ -33,29 +33,15 @@ export class PacketMapChunk implements IPacket {
 
 	public writeData() {
 		return new Promise<Buffer>((resolve, reject) => {
-			const blocks = new Writer(32768);
-			const lighting = new Writer(32768);
-
-			let blockMeta = false;
-			for (let x = 0; x < 16; x++) {
-				for (let z = 0; z < 16; z++) {
-					for (let y = 0; y < 128; y++) {
-						blocks.writeUByte(this.chunk.getBlockId(x, y, z));
-						if (blockMeta) {
-							// Light level 15 for 2 blocks (1111 1111)
-							lighting.writeUByte(0xff); // TODO: Lighting (Client seems to do it's own (when a block update happens) so it's not top priority)
-							lighting.writeUByte(0xff);
-						}
-						// Hack for nibble stuff
-						blockMeta = !blockMeta;
-					}
-				}
+			// TODO: Use block and sky nibble array buffers
+			const fakeLighting = new Writer(16384);
+			for (let i = 0; i < 16384; i++) {
+				fakeLighting.writeUByte(0xFF);
 			}
 
-			// Write meta and lighting data into block buffer for compression
-			blocks.writeBuffer(this.chunk.getMetadataBuffer()).writeBuffer(lighting.toBuffer());
+			const data = new Writer().writeBuffer(this.chunk.getBlockBuffer()).writeBuffer(this.chunk.getMetadataBuffer()).writeBuffer(fakeLighting.toBuffer()).writeBuffer(fakeLighting.toBuffer());//.writeBuffer(this.chunk.blockLight.toBuffer()).writeBuffer(this.chunk.skyLight.toBuffer());
 
-			deflate(blocks.toBuffer(), (err, data) => {
+			deflate(data.toBuffer(), (err, data) => {
 				if (err) {
 					return reject(err);
 				}
