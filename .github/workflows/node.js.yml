@@ -29,5 +29,6 @@ jobs:
     - run: npm ci
     # Don't run updateCheck for now
     #- run: npm run dev:updateCheck
+    - run: npm run initSubmodules
     - run: npm run build
     #- run: npm test
