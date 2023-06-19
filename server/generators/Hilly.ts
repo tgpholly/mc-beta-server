@@ -24,6 +24,7 @@ export class HillyGenerator implements IGenerator {
 	private caveGenerator3:Noise3D;
 	private caveGenerator4:Noise3D;
 	private caveGenerator5:Noise3D;
+	private caveGenerator6:Noise3D;
 
 	private underwaterGravelGenerator:Noise2D;
 	private underwaterSandGenerator:Noise2D;
@@ -49,13 +50,12 @@ export class HillyGenerator implements IGenerator {
 		this.caveGenerator3 = this.createGenerator3D();
 		this.caveGenerator4 = this.createGenerator3D();
 		this.caveGenerator5 = this.createGenerator3D();
+		this.caveGenerator6 = this.createGenerator3D();
 
 		this.underwaterGravelGenerator = this.createGenerator2D();
 		this.underwaterSandGenerator = this.createGenerator2D();
 		this.underwaterClayGenerator = this.createGenerator2D();
 		this.flowerGenerator = this.createGenerator2D();
-
-
 	}
 
 	private createGenerator2D() {
@@ -144,8 +144,7 @@ export class HillyGenerator implements IGenerator {
 						((this.caveGenerator1((chunk.x * 16 + x) / 16, caveY / 16, (chunk.z * 16 + z) / 16) +
 						this.caveGenerator2((chunk.x * 16 + x) / 8, caveY / 8, (chunk.z * 16 + z) / 8)) / 2) > 0.45
 						|| this.caveGenerator3((chunk.x * 16 + x) / 16, caveY / 16, (chunk.z * 16 + z) / 16) > 0.6 ||
-						this.caveGenerator4((chunk.x * 16 + x) / 16, caveY / 16, (chunk.z * 16 + z) / 16) > 0.6 ||
-						this.caveGenerator5((chunk.x * 16 + x) / 16, caveY / 16, (chunk.z * 16 + z) / 16) > 0.5
+						this.caveGenerator4((chunk.x * 16 + x) / 8, caveY / 8, (chunk.z * 16 + z) / 8) > 0.6
 					) {
 						if (caveY <= 3) {
 							chunk.setBlock(Block.lavaStill.blockId, x, caveY, z);

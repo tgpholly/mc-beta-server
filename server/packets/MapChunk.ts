@@ -36,12 +36,12 @@ export class PacketMapChunk implements IPacket {
 	public writeData() {
 		return new Promise<Buffer>((resolve, reject) => {
 			// TODO: Use block and sky nibble array buffers
-			const fakeLighting = createWriter(Endian.BE, 16384);
+			/*const fakeLighting = createWriter(Endian.BE, 16384);
 			for (let i = 0; i < 16384; i++) {
 				fakeLighting.writeUByte(0xFF);
-			}
+			}*/
 
-			const data = createWriter(Endian.BE).writeBuffer(this.chunk.getBlockBuffer()).writeBuffer(this.chunk.getMetadataBuffer()).writeBuffer(fakeLighting.toBuffer()).writeBuffer(fakeLighting.toBuffer());//.writeBuffer(this.chunk.blockLight.toBuffer()).writeBuffer(this.chunk.skyLight.toBuffer());
+			const data = createWriter(Endian.BE).writeBuffer(this.chunk.getBlockBuffer()).writeBuffer(this.chunk.getMetadataBuffer()).writeBuffer(this.chunk.blockLight.toBuffer()).writeBuffer(this.chunk.skyLight.toBuffer());//.writeBuffer(fakeLighting.toBuffer()).writeBuffer(fakeLighting.toBuffer());
 
 			deflate(data.toBuffer(), (err, data) => {
 				if (err) {

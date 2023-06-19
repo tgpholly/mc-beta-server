@@ -1,3 +1,4 @@
+import { Console } from "../console";
 import { FunkyArray } from "../funkyArray";
 import { NibbleArray } from "../nibbleArray";
 import { Block } from "./blocks/Block";
@@ -40,7 +41,7 @@ export class Chunk {
 			this.metadata = new NibbleArray(metadata);
 			this.skyLight = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
 			this.blockLight = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
-			//this.calculateLighting();
+			this.calculateLighting();
 		} else {
 			this.blocks = new Uint8Array(16 * 16 * this.MAX_HEIGHT);
 			this.metadata = new NibbleArray(16 * 16 * this.MAX_HEIGHT);
@@ -49,7 +50,7 @@ export class Chunk {
 
 			if (typeof(generateOrBlockData) === "boolean" && generateOrBlockData) {
 				this.world.generator.generate(this);
-				//this.calculateLighting();
+				this.calculateLighting();
 			}
 		}
 	}
@@ -57,7 +58,7 @@ export class Chunk {
 	public getTopBlockY(x:number, z:number) {
 		let castY = this.MAX_HEIGHT;
 		while (castY-- > 0) {
-			if (this.getBlockId(x, castY, z) !== 0) {
+			if (this.getBlockId(x >>> 0, castY, z >>> 0) !== 0) {
 				break;
 			}
 		}
@@ -66,10 +67,10 @@ export class Chunk {
 
 	public calculateLighting() {
 		let blockId = 0;
-		for (let y = 0; y < 128; y++) {
-			let colLight = 255;
-			for (let x = 0; x < 16; x++) {
-				for (let z = 0; z < 16; z++) {
+		for (let x = 0; x < 16; x++) {
+			for (let z = 0; z < 16; z++) {
+				let colLight = 255;
+				for (let y = this.MAX_HEIGHT - 1; y > 0; y--) {
 					blockId = this.getBlockId(x, y, z);
 					if (blockId == 0) {
 						if (colLight <= 0) {
@@ -79,16 +80,15 @@ export class Chunk {
 							this.setBlockLight(Math.round((colLight / 255) * 15), x, y, z);
 							this.setSkyLight(Math.round((colLight / 255) * 15), x, y, z);
 						}
-						continue;
-					}
-
-					if (colLight <= 0) {
-						this.setBlockLight(0, x, y, z);
 					} else {
-						this.setBlockLight(Math.round((colLight / 255) * 15), x, y, z);
-						colLight -= (255 - Block.blocks[blockId].lightPassage);
+						if (colLight <= 0) {
+							this.setBlockLight(0, x, y, z);
+						} else {
+							this.setBlockLight(Math.round((colLight / 255) * 15), x, y, z);
+							colLight -= (255 - Block.blocks[blockId].lightPassage);
+						}
 					}
-				}	
+				}
 			}
 		}
 	}

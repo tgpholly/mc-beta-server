@@ -87,7 +87,7 @@ export class MPClient {
 				packet.message = `Woosh!`;
 				const topBlock = this.entity.world.getChunk(this.entity.x >> 4, this.entity.z >> 4).getTopBlockY(this.entity.x & 0xf, this.entity.z & 0xf);
 				console.log(topBlock);
-				this.send(new PacketPlayerPositionLook(this.entity.x, topBlock, topBlock + 0.62, this.entity.z, this.entity.yaw, this.entity.pitch, false).writeData());
+				this.send(new PacketPlayerPosition(this.entity.x, topBlock + 4, topBlock + 4.62, this.entity.z, false).writeData());
 			}
 
 			if (packet.message !== "") {

@@ -2,10 +2,12 @@ export class Block {
 	public readonly blockId:number;
 	public static readonly blocks:Array<Block> = new Array<Block>();
 	public static readonly lightPassage:Array<number> = new Array<number>();
+	public static readonly blockNames:Array<string> = new Array<string>();
 
 	public constructor(blockId:number) {
 		Block.blocks[blockId] = this;
 		Block.lightPassage[blockId] = 0;
+		Block.blockNames[blockId] = "";
 		this.blockId = blockId;
 	}
 
@@ -17,34 +19,47 @@ export class Block {
 		Block.lightPassage[this.blockId] = value;
 	}
 
+	public get blockName() {
+		return Block.blockNames[this.blockId];
+	}
+
+	public set blockName(value:string) {
+		Block.blockNames[this.blockId] = value;
+	}
+
 	public setLightPassage(value:number) {
 		this.lightPassage = value;
 		return this;
 	}
 
+	public setBlockName(value:string) {
+		this.blockName = value;
+		return this;
+	}
+
 	// Define statics here
-	static readonly stone = new Block(1);
-	static readonly grass = new Block(2);
-	static readonly dirt = new Block(3);
+	static readonly stone = new Block(1).setBlockName("Stone");
+	static readonly grass = new Block(2).setBlockName("Grass");
+	static readonly dirt = new Block(3).setBlockName("Dirt");
 
-	static readonly bedrock = new Block(7);
+	static readonly bedrock = new Block(7).setBlockName("Bedrock");
 
-	static readonly waterStill = new Block(9).setLightPassage(3);
+	static readonly waterStill = new Block(9).setLightPassage(128).setBlockName("Still Water");
 
-	static readonly lavaStill = new Block(11);
+	static readonly lavaStill = new Block(11).setBlockName("Still Lava");
 
-	static readonly sand = new Block(12);
-	static readonly gravel = new Block(13);
+	static readonly sand = new Block(12).setBlockName("Sand");
+	static readonly gravel = new Block(13).setBlockName("Gravel");
 
-	static readonly wood = new Block(17);
-	static readonly leaves = new Block(18).setLightPassage(1);
+	static readonly wood = new Block(17).setBlockName("Wood");
+	static readonly leaves = new Block(18).setLightPassage(240).setBlockName("Leaves");
 
-	static readonly glass = new Block(20).setLightPassage(255);
+	static readonly glass = new Block(20).setLightPassage(255).setBlockName("Glass");
 
-	static readonly tallGrass = new Block(31);
+	static readonly tallGrass = new Block(31).setLightPassage(255).setBlockName("Tall Grass");
 
-	static readonly flowerDandelion = new Block(37);
-	static readonly flowerRose = new Block(38);
+	static readonly flowerDandelion = new Block(37).setLightPassage(255).setBlockName("Dandelion");
+	static readonly flowerRose = new Block(38).setLightPassage(255).setBlockName("Rose");
 
-	static readonly clay = new Block(82);
+	static readonly clay = new Block(82).setBlockName("Clay");
 }
