@@ -1,9 +1,7 @@
+import { createWriter, IReader, Endian } from "bufferstuff";
 import { Chunk } from "../Chunk";
-import { createWriter } from "../../bufferStuff/index";
 import { deflate } from "zlib";
-import { Endian } from "../../bufferStuff/Endian";
 import { IPacket } from "./IPacket";
-import { IReader } from "../../bufferStuff/readers/IReader";
 import { Packet } from "../enums/Packet";
 
 export class PacketMapChunk implements IPacket {

@@ -1,4 +1,4 @@
-import { IReader } from "../../bufferStuff/readers/IReader";
+import { IReader } from "bufferstuff";
 import { Packet } from "../enums/Packet";
 
 export interface IPacket {

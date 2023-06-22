@@ -1,5 +1,5 @@
 import { Console } from "../console";
-import { IReader } from "../bufferStuff/readers/IReader";
+import { IReader } from "bufferstuff";
 import { MinecraftServer } from "./MinecraftServer";
 import { Packet } from "./enums/Packet";
 import { PacketAnimation } from "./packets/Animation";

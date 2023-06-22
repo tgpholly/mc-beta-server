@@ -1,7 +1,5 @@
-import { createWriter } from "../../bufferStuff/index";
-import { Endian } from "../../bufferStuff/Endian";
+import { createWriter, IReader, Endian } from "bufferstuff";
 import { IPacket } from "./IPacket";
-import { IReader } from "../../bufferStuff/readers/IReader";
 import { Packet } from "../enums/Packet";
 
 export class PacketPlayerPositionLook implements IPacket {

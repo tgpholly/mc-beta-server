@@ -1,11 +1,10 @@
 import { readFileSync, readFile, writeFile, existsSync, mkdirSync, writeFileSync, readdirSync } from "fs";
-import { createWriter, createReader } from "../bufferStuff/index";
+import { createWriter, createReader, Endian } from "bufferstuff";
 import { Config } from "../config";
 import { Chunk } from "./Chunk";
 import { SaveCompressionType } from "./enums/SaveCompressionType";
 import { deflate, inflate } from "zlib";
 import { World } from "./World";
-import { Endian } from "../bufferStuff/Endian";
 
 export class WorldSaveManager {
 	private readonly worldFolderPath;

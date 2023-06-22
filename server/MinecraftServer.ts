@@ -1,8 +1,7 @@
 import { Config } from "../config";
 import { Console } from "../console";
-import { createReader } from "../bufferStuff/index";
+import { createReader, IReader, Endian } from "bufferstuff";
 import { FunkyArray } from "../funkyArray";
-import { IReader } from "../bufferStuff/readers/IReader";
 import { Server, Socket, SocketAddress } from "net";
 import { MPClient } from "./MPClient";
 import { Packet } from "./enums/Packet";
@@ -18,7 +17,6 @@ import { Player } from "./entities/Player";
 import { SaveCompressionType } from "./enums/SaveCompressionType";
 import { WorldSaveManager } from "./WorldSaveManager";
 import { World } from "./World";
-import { Endian } from "../bufferStuff/Endian";
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;

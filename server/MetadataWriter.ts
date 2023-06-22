@@ -1,5 +1,4 @@
-import { createWriter } from "../bufferStuff/index";
-import { Endian } from "../bufferStuff/Endian";
+import { createWriter, Endian } from "bufferstuff";
 import { FunkyArray } from "../funkyArray";
 import { MetadataFieldType } from "./enums/MetadataFieldType";
 
