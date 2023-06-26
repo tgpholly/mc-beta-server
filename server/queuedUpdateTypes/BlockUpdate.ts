@@ -1,4 +1,3 @@
-import { Chunk } from "../Chunk";
 import { IQueuedUpdate } from "./IQueuedUpdate";
 
 export class QueuedBlockUpdate implements IQueuedUpdate {

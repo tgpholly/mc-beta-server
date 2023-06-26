@@ -6,7 +6,6 @@
 	"scripts": {
 		"dev:updateCheck": "check-outdated",
 		"dev:run": "nodemon --watch './**/*.ts' index.ts",
-		"initSubmodules": "git submodule update --init --recursive",
 		"pack": "webpack",
 		"build": "tsc --build",
 		"_clean": "tsc --build --clean"

@@ -1,4 +1,3 @@
-import { FunkyArray } from "../../funkyArray";
 import { ItemStack } from "./ItemStack";
 import { ContainerSlot } from "./Slot";
 
