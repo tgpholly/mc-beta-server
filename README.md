@@ -41,10 +41,10 @@ me trying to understand minecraft beta's protocol
 <hr>
 
 ## Running the server
-```
-**** Heads Up! ****
+**Heads Up!**
 This server is under pretty heavy development with most likley breaking changes, I will try my best to keep compatibility in the save formats (or provide migration paths) with updates but cannot guarentee it.
-```
+
+
 To use the server either grab a [release](https://github.com/tgpholly/mc-beta-server/releases/latest) or build it yourself.
 
 ### Running from a release
