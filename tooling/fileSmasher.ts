@@ -5,9 +5,9 @@
 import { readdirSync, statSync, readFileSync, writeFileSync } from "fs";
 
 let tsFileData:Array<string> = new Array<string>();
-let tsFirstFileData:Array<string> = new Array<string>();
-let tsLastFileData:Array<string> = new Array<string>();
-let tsEverythingElse:Array<string> = new Array<string>();
+const tsFirstFileData:Array<string> = new Array<string>();
+const tsLastFileData:Array<string> = new Array<string>();
+const tsEverythingElse:Array<string> = new Array<string>();
 
 function readDir(nam:string) {
 	const files = readdirSync(nam);
