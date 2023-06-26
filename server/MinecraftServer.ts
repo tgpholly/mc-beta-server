@@ -2,7 +2,7 @@ import { Config } from "../config";
 import { Console } from "../console";
 import { createReader, IReader, Endian } from "bufferstuff";
 import { FunkyArray } from "../funkyArray";
-import { Server, Socket, SocketAddress } from "net";
+import { Server, Socket } from "net";
 import { MPClient } from "./MPClient";
 import { Packet } from "./enums/Packet";
 import { PacketKeepAlive } from "./packets/KeepAlive";

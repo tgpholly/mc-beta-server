@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { createWriteStream, mkdirSync, existsSync, fstat } from "fs";
+import { createWriteStream, mkdirSync, existsSync } from "fs";
 
 console.clear();
 
@@ -56,9 +56,8 @@ function log(tag:LogTag, log:string, logType:LogType = LogType.INFO) : void {
 	}
 }
 
-if (existsSync("./logs")) {
-	
-} else {
+// TODO: Keep old logs, rename on startup using file header?
+if (!existsSync("./logs")) {
 	mkdirSync("./logs/");
 }
 

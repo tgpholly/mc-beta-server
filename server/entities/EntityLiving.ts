@@ -80,6 +80,6 @@ export class EntityLiving extends Entity {
 		}
 
 		this.lastYaw = this.yaw;
-		this.lastPitch = this.lastPitch;
+		this.lastPitch = this.pitch;
 	}
 }

@@ -81,7 +81,7 @@ export class World {
 	}
 
 	public getChunkSafe(x:number, z:number) {
-		return new Promise<Chunk>((resolve, reject) => {
+		return new Promise<Chunk>((resolve) => {
 			const coordPair = Chunk.CreateCoordPair(x, z);
 			const existingChunk = this.chunks.get(coordPair);
 			if (!(existingChunk instanceof Chunk)) {

@@ -47,7 +47,7 @@ export class WorldSaveManager {
 			mkdirSync(this.worldChunksFolderPath);
 		} else {
 			const chunkFiles = readdirSync(this.worldChunksFolderPath);
-			for (let file of chunkFiles) {
+			for (const file of chunkFiles) {
 				if (file.endsWith(".hwc")) {
 					const numbers = file.split(".")[0].split(",");
 					this.chunksOnDisk.push(Chunk.CreateCoordPair(parseInt(numbers[0]), parseInt(numbers[1])));
@@ -86,9 +86,6 @@ export class WorldSaveManager {
 	}
 
 	public writeChunkToDisk(chunk:Chunk) {
-		return new Promise<boolean>((resolve, reject) => {
-			resolve(false);
-		});
 		return new Promise<boolean>((resolve, reject) => {
 			const saveType = this.config.saveCompression;
 			const chunkFileWriter = createWriter(Endian.BE, 10);
