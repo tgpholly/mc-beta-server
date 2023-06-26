@@ -23,8 +23,6 @@ export class HillyGenerator implements IGenerator {
 	private caveGenerator2:Noise3D;
 	private caveGenerator3:Noise3D;
 	private caveGenerator4:Noise3D;
-	private caveGenerator5:Noise3D;
-	private caveGenerator6:Noise3D;
 
 	private underwaterGravelGenerator:Noise2D;
 	private underwaterSandGenerator:Noise2D;
@@ -49,8 +47,6 @@ export class HillyGenerator implements IGenerator {
 		this.caveGenerator2 = this.createGenerator3D();
 		this.caveGenerator3 = this.createGenerator3D();
 		this.caveGenerator4 = this.createGenerator3D();
-		this.caveGenerator5 = this.createGenerator3D();
-		this.caveGenerator6 = this.createGenerator3D();
 
 		this.underwaterGravelGenerator = this.createGenerator2D();
 		this.underwaterSandGenerator = this.createGenerator2D();

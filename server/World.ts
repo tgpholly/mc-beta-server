@@ -70,7 +70,7 @@ export class World {
 		return this.chunks.has(coordPairOrX);
 	}
 
-	public getChunk(x:number, z:number, generate:boolean = true) {
+	public getChunk(x:number, z:number) {
 		const coordPair = Chunk.CreateCoordPair(x, z);
 		const existingChunk = this.chunks.get(coordPair);
 		if (!(existingChunk instanceof Chunk)) {
