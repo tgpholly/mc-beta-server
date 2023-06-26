@@ -44,7 +44,7 @@ export class MetadataWriter {
 
 	public writeBuffer() {
 		const writer = createWriter(Endian.BE, this.calculateBufferSize());
-		for (let key of this.entries.keys) {
+		for (const key of this.entries.keys) {
 			const entry = this.entries.get(key);
 			if (entry instanceof MetadataEntry) {
 				writer.writeByte((entry.type << 5 | key & 0x1f) & 0xff);

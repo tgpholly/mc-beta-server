@@ -1,4 +1,3 @@
-import { Console } from "../console";
 import { FunkyArray } from "../funkyArray";
 import { NibbleArray } from "../nibbleArray";
 import { Block } from "./blocks/Block";
