@@ -1,0 +1,6 @@
+{
+	"port": 25565,
+	"maxPlayers": 20,
+	"saveCompression": "DEFLATE",
+	"worldName": "world"
+}
