@@ -5,6 +5,7 @@ me trying to understand minecraft beta's protocol
 
 **Implemented:**
  - Basic flat terrain generation
+ - Basic (top to bottom, no spread) Lighting
  - "Decent" terrain generation using OpenSimplex Noise
  - Concept of worlds
  - Chunk management (loading / unloading)
