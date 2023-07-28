@@ -2,7 +2,7 @@
 // for when you're just too lazy to
 // do it properly.
 
-import { readdirSync, statSync, readFileSync, writeFileSync } from "fs";
+import { readdirSync, lstatSync, readFileSync, writeFileSync } from "fs";
 
 let tsFileData:Array<string> = new Array<string>();
 const tsFirstFileData:Array<string> = new Array<string>();
@@ -18,7 +18,7 @@ function readDir(nam:string) {
 
 		// This is a very dumb way of checking for folders
 		// protip: don't do this.
-		if (statSync(`${nam}/${file}`).size == 0) {
+		if (lstatSync(`${nam}/${file}`).isDirectory()) {
 			readDir(`${nam}/${file}`);
 		} else if (file.endsWith(".ts")) {
 			if (file == "index.ts") {
