@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as dyetty from "dyetty";
 import { createWriteStream, mkdirSync, existsSync } from "fs";
 
 console.clear();
@@ -17,10 +17,10 @@ enum LogTag {
 }
 
 const LogTags = [
-	chalk.bgGreen(chalk.black("  INFO  ")),
-	chalk.bgCyan(chalk.black("  CHAT  ")),
-	chalk.bgYellow(chalk.black("  WARN  ")),
-	chalk.bgRed(" ERRR ")
+	dyetty.bgGreen(dyetty.black("  INFO  ")),
+	dyetty.bgCyan(dyetty.black("  CHAT  ")),
+	dyetty.bgYellow(dyetty.black("  WARN  ")),
+	dyetty.bgRed(" ERRR ")
 ] as const;
 
 const TagsForFile = [
@@ -48,11 +48,11 @@ function log(tag:LogTag, log:string, logType:LogType = LogType.INFO) : void {
 	Console.QUEUED_FOR_LOG += `${stringTime} ${fileTag} ${log}\n`;
 	switch (logType) {
 		case LogType.INFO:
-			return console.log(`${chalk.green(stringTime)} ${consoleTag} ${log}`);
+			return console.log(`${dyetty.green(stringTime)} ${consoleTag} ${log}`);
 		case LogType.WARN:
-			return console.warn(`${chalk.green(stringTime)} ${consoleTag} ${log}`);
+			return console.warn(`${dyetty.green(stringTime)} ${consoleTag} ${log}`);
 		case LogType.ERROR:
-			return console.error(`${chalk.green(stringTime)} ${consoleTag} ${log}`);
+			return console.error(`${dyetty.green(stringTime)} ${consoleTag} ${log}`);
 	}
 }
 
