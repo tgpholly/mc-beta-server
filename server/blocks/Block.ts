@@ -1,3 +1,5 @@
+import { World } from "../World";
+
 export class Block {
 	public readonly blockId:number;
 	public static readonly blocks:Array<Block> = new Array<Block>();
@@ -35,6 +37,15 @@ export class Block {
 	public setBlockName(value:string) {
 		this.blockName = value;
 		return this;
+	}
+
+	public neighborBlockChange(world:World, x:number, y:number, z:number, blockId:number) {
+		if (blockId === Block.flowerDandelion.blockId || blockId === Block.flowerRose.blockId || blockId === Block.tallGrass.blockId) {
+			const block = world.getBlockId(x, y - 1, z);
+			if (block !== Block.grass.blockId && block !== Block.dirt.blockId) {
+				world.setBlockWithNotify(x, y, z, 0);
+			}
+		}
 	}
 
 	// Define statics here

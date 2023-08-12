@@ -1,6 +1,7 @@
 import { FunkyArray } from "../funkyArray";
 import { Chunk } from "./Chunk";
 import { WorldSaveManager } from "./WorldSaveManager";
+import { Block } from "./blocks/Block";
 import { IEntity } from "./entities/IEntity";
 import { Player } from "./entities/Player";
 //import { FlatGenerator } from "./generators/Flat";
@@ -156,6 +157,32 @@ export class World {
 			chunk.playersInChunk.forEach(player => {
 				player.mpClient?.send(blockUpdatePacket);
 			});
+		}
+	}
+
+	public setBlockWithNotify(x:number, y:number, z:number, blockId:number) {
+		this.setBlock(blockId, x, y, z, true);
+		this.notifyNeighborBlocksOfChange(x, y, z, blockId);
+	}
+	
+	public setBlockAndMetadataWithNotify(x:number, y:number, z:number, blockId:number, metadata:number) {
+		this.setBlockWithMetadata(blockId, metadata, x, y, z, true);
+		this.notifyNeighborBlocksOfChange(x, y, z, blockId);
+	}
+
+	public notifyNeighborBlocksOfChange(x:number, y:number, z:number, blockId:number) {
+		this.notifyNeighborBlockOfChange(x - 1, y, z, blockId);
+		this.notifyNeighborBlockOfChange(x + 1, y, z, blockId);
+		this.notifyNeighborBlockOfChange(x, y - 1, z, blockId);
+		this.notifyNeighborBlockOfChange(x, y + 1, z, blockId);
+		this.notifyNeighborBlockOfChange(x, y, z - 1, blockId);
+		this.notifyNeighborBlockOfChange(x, y, z + 1, blockId);
+	}
+
+	private notifyNeighborBlockOfChange(x:number, y:number, z:number, blockId:number) {
+		const block = Block.blocks[this.getBlockId(x, y, z)];
+		if (block != null && block.blockId !== 0) {
+			block.neighborBlockChange(this, x, y, z, block.blockId);
 		}
 	}
 

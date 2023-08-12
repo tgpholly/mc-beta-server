@@ -70,7 +70,7 @@ export class Console {
 			Console.QUEUED_FOR_LOG = "";
 			Console.logFileWriteStream.write(strRef);
 		}
-	}, 1000 * 10);
+	}, 5000);
 
 	public static printInfo(s:string) : void {
 		log(LogTag.INFO, s);
