@@ -1,5 +1,5 @@
 import { Config } from "../config";
-import { Console } from "../console";
+import { Console } from "hsconsole";
 import { createReader, IReader, Endian } from "bufferstuff";
 import { FunkyArray } from "../funkyArray";
 import { Server, Socket } from "net";
@@ -17,6 +17,7 @@ import { Player } from "./entities/Player";
 import { SaveCompressionType } from "./enums/SaveCompressionType";
 import { WorldSaveManager } from "./WorldSaveManager";
 import { World } from "./World";
+import { Chunk } from "./Chunk";
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
@@ -50,6 +51,37 @@ export class MinecraftServer {
 
 	public constructor(config:Config) {
 		this.config = config;
+
+		process.on("SIGINT", async (signal) => {
+			Console.printInfo("Shutting down...");
+			// Stop the server timer
+			clearInterval(this.serverClock);
+			// Disconnect all players
+			const kickPacket = new PacketDisconnectKick("Server shutting down.").writeData();
+			this.sendToAllClients(kickPacket);
+			// Shut down the tcp server
+			this.server.close();
+			// Save chunks
+			Console.printInfo("Saving worlds...");
+			let savedWorldCount = 0;
+			let savedChunkCount = 0;
+			await this.worlds.forEach(async (world) => {
+				if (world.chunks.length !== 0) {
+					await world.chunks.forEach(async (chunk) => {
+						await world.unloadChunk(Chunk.CreateCoordPair(chunk.x, chunk.z));
+						savedChunkCount++;
+					});
+				}
+				savedWorldCount++;
+			});
+			Console.printInfo(`Saved ${savedChunkCount} chunks from ${savedWorldCount} world(s).`);
+
+			// Flush final console log to disk and close all writers
+			Console.cleanup();
+
+			// hsconsole is gone now so we have to use built in.
+			console.log("Goodbye");
+		});
 
 		if (this.config.saveCompression === SaveCompressionType.NONE) {
 			Console.printWarn("=============- WARNING -=============");

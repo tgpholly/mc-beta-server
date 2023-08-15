@@ -1,4 +1,4 @@
-import { Console } from "../console";
+import { Console } from "hsconsole";
 import { IReader } from "bufferstuff";
 import { MinecraftServer } from "./MinecraftServer";
 import { Packet } from "./enums/Packet";
@@ -80,7 +80,7 @@ export class MPClient {
 				Console.printInfo(packet.message = `Teleported ${this.entity.username} to ${message[1]} ${message[2]} ${message[3]}`);
 			} else if (message[0] === "/csay") {
 				const consoleMessage = `[CONSOLE] ${message.slice(1, message.length).join(" ")}`;
-				Console.printChat(consoleMessage);
+				Console.printInfo(`[CHAT] ${consoleMessage}`);
 				this.mcServer.sendToAllClients(new PacketChat(consoleMessage).writeData());
 			} else if (message[0] === "/top") {
 				// TODO: Figure out why this is broken
@@ -98,7 +98,7 @@ export class MPClient {
 		}
 
 		packet.message = `<${this.entity.username}> ${packet.message}`;
-		Console.printChat(packet.message);
+		Console.printInfo(`[CHAT] ${packet.message}`);
 		this.mcServer.sendToAllClients(packet.writeData());
 	}
 
