@@ -42,10 +42,10 @@ const splitLines = combinedFiles.split("\n");
 const resultLines:Array<string> = new Array<string>();
 
 // Insert allowed imports
-resultLines.push(`import * as dyetty from "dyetty";
-import { createWriteStream, mkdirSync, existsSync, readFileSync, readFile, writeFile, writeFileSync, readdirSync } from "fs";
+resultLines.push(`import { createWriteStream, mkdirSync, existsSync, readFileSync, readFile, writeFile, writeFileSync, readdirSync } from "fs";
 import { deflate, inflate } from "zlib";
 import { createWriter, createReader, IReader, Endian } from "bufferstuff";
+import { Console } from "hsconsole";
 import { Server, Socket } from "net";`);
 
 // Let's process the file to make it usable
