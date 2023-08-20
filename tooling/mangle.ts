@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { minify } from "terser";
 
 (async () => {
-	const mangled = await minify(readFileSync("./build/index.js").toString(), {
+	const mangled = await minify(readFileSync("./build/combined.js").toString(), {
 		mangle: true,
 		toplevel: true,
 	});

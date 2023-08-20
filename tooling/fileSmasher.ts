@@ -23,7 +23,7 @@ function readDir(nam:string) {
 		} else if (file.endsWith(".ts")) {
 			if (file == "index.ts") {
 				tsLastFileData.push(readFileSync((`${nam}/${file}`).replace("//", "/")).toString());
-			} else if (nam.includes("enum")) {
+			} else if (nam.includes("enum") || file.includes("Behaviour")) {
 				tsFirstFileData.push(readFileSync((`${nam}/${file}`).replace("//", "/")).toString());
 			} else {
 				tsEverythingElse.push(readFileSync((`${nam}/${file}`).replace("//", "/")).toString());
