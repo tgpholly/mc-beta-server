@@ -67,6 +67,7 @@ export class MPClient {
 			//case Packets.UseBed: break;
 			case Packet.Animation:            this.handlePacketAnimation(new PacketAnimation().readData(reader)); break;
 			case Packet.EntityAction:         this.handlePacketEntityAction(new PacketEntityAction().readData(reader)); break;
+			case Packet.DisconnectKick:       this.handleDisconnectKick(); break;
 			default: Console.printWarn(`UNIMPLEMENTED PACKET: ${Packet[packetId]}`); break;
 		}
 	}
@@ -79,15 +80,12 @@ export class MPClient {
 				this.send(new PacketPlayerPositionLook(parseFloat(message[1]), parseFloat(message[2]), parseFloat(message[2]) + 0.62, parseFloat(message[3]), 0, 0, false).writeData());
 				Console.printInfo(packet.message = `Teleported ${this.entity.username} to ${message[1]} ${message[2]} ${message[3]}`);
 			} else if (message[0] === "/csay") {
-				const consoleMessage = `[CONSOLE] ${message.slice(1, message.length).join(" ")}`;
-				Console.printInfo(`[CHAT] ${consoleMessage}`);
-				this.mcServer.sendToAllClients(new PacketChat(consoleMessage).writeData());
+				this.mcServer.sendChatMessage(`[CONSOLE] ${message.slice(1, message.length).join(" ")}`);
 			} else if (message[0] === "/top") {
-				// TODO: Figure out why this is broken
 				packet.message = `Woosh!`;
 				const topBlock = this.entity.world.getChunk(this.entity.x >> 4, this.entity.z >> 4).getTopBlockY(this.entity.x & 0xf, this.entity.z & 0xf);
 				console.log(topBlock);
-				this.send(new PacketPlayerPosition(this.entity.x, topBlock + 4, topBlock + 4.62, this.entity.z, false).writeData());
+				this.send(new PacketPlayerPosition(this.entity.x, topBlock + 3, topBlock + 3.62, this.entity.z, false).writeData());
 			}
 
 			if (packet.message !== "") {
@@ -157,6 +155,10 @@ export class MPClient {
 			case 2: this.entity.crouching = false; break;
 			case 3: break; // TODO: Leave Bed
 		}
+	}
+
+	private handleDisconnectKick() {
+		this.socket.end();
 	}
 
 	public send(buffer:Buffer) {

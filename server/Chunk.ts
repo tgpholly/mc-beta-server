@@ -57,6 +57,8 @@ export class Chunk {
 	public getTopBlockY(x:number, z:number) {
 		let castY = this.MAX_HEIGHT;
 		while (castY-- > 0) {
+			const blockId = this.getBlockId(x >>> 0, castY, z >>> 0);
+			console.log(blockId === 0 ? "Air" : Block.blocks[blockId].blockName);
 			if (this.getBlockId(x >>> 0, castY, z >>> 0) !== 0) {
 				break;
 			}
@@ -161,7 +163,7 @@ export class Chunk {
 		return this.metadata.toBuffer();
 	}
 
-	public getData() {
+	public getBlockData() {
 		return this.blocks;
 	}
 }

@@ -18,6 +18,7 @@ import { SaveCompressionType } from "./enums/SaveCompressionType";
 import { WorldSaveManager } from "./WorldSaveManager";
 import { World } from "./World";
 import { Chunk } from "./Chunk";
+import { PacketTimeUpdate } from "./packets/TimeUpdate";
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
@@ -27,7 +28,7 @@ export class MinecraftServer {
 
 	private config:Config;
 	private server:Server;
-	private readonly serverClock:NodeJS.Timer;
+	private readonly serverClock:NodeJS.Timeout;
 	private tickCounter:number = 0;
 	private clients:FunkyArray<string, MPClient>;
 	private worlds:FunkyArray<number, World>;
@@ -52,7 +53,12 @@ export class MinecraftServer {
 	public constructor(config:Config) {
 		this.config = config;
 
+		let shuttingDown = false;
 		process.on("SIGINT", async (signal) => {
+			if (shuttingDown) {
+				return;
+			}
+			shuttingDown = true;
 			Console.printInfo("Shutting down...");
 			// Stop the server timer
 			clearInterval(this.serverClock);
@@ -63,6 +69,7 @@ export class MinecraftServer {
 			this.server.close();
 			// Save chunks
 			Console.printInfo("Saving worlds...");
+			// There's a race condition here. oops.
 			let savedWorldCount = 0;
 			let savedChunkCount = 0;
 			await this.worlds.forEach(async (world) => {
@@ -118,9 +125,10 @@ export class MinecraftServer {
 		(async () => {
 			const generateStartTime = Date.now();
 			Console.printInfo("Generating spawn area...");
-			for (let x = 0; x < 1; x++) {
-				for (let z = 0; z < 1; z++) {
-					await this.overworld.getChunkSafe(x, z);
+			for (let x = -5; x < 5; x++) {
+				for (let z = -5; z < 5; z++) {
+					const chunk = await this.overworld.getChunkSafe(x, z);
+					chunk.forceLoaded = true;
 				}	
 			}
 			Console.printInfo(`Done! Took ${Date.now() - generateStartTime}ms`);
@@ -130,8 +138,11 @@ export class MinecraftServer {
 			// Every 1 sec
 			if (this.tickCounter % MinecraftServer.TICK_RATE === 0)  {
 				if (this.clients.length !== 0) {
+					const timePacket = new PacketTimeUpdate(BigInt(this.tickCounter)).writeData();
 					this.clients.forEach(client => {
+						// Keep the client happy
 						client.send(this.keepalivePacket);
+						client.send(timePacket);
 					});
 				}
 			}
@@ -151,6 +162,11 @@ export class MinecraftServer {
 		this.clients.forEach(client => {
 			client.send(buffer);
 		});
+	}
+
+	sendChatMessage(text:string) {
+		this.sendToAllClients(new PacketChat(text).writeData());
+		Console.printInfo(`[CHAT] ${text}`);
 	}
 
 	handleLoginRequest(reader:IReader, socket:Socket, setMPClient:(mpclient:MPClient) => void) {
@@ -174,7 +190,7 @@ export class MinecraftServer {
 			clientEntity.mpClient = client;
 			this.clients.set(loginPacket.username, client);
 
-			this.sendToAllClients(new PacketChat(`\u00a7e${loginPacket.username} joined the game`).writeData());
+			this.sendChatMessage(`\u00a7e${loginPacket.username} joined the game`);
 
 			socket.write(new PacketLoginRequest(clientEntity.entityId, "", 0, 0).writeData());
 			socket.write(new PacketSpawnPosition(8, 64, 8).writeData());
@@ -207,7 +223,7 @@ export class MinecraftServer {
 		const playerDisconnect = (err:Error) => {
 			mpClient.entity.world.removeEntity(mpClient.entity);
 			this.clients.remove(mpClient.entity.username);
-			this.sendToAllClients(new PacketChat(`\u00a7e${mpClient.entity.username} left the game`).writeData());
+			this.sendChatMessage(`\u00a7e${mpClient.entity.username} left the game`);
 			if (typeof(err) !== "boolean") {
 				Console.printError(`Client disconnected with error: ${err.message}`);
 			}

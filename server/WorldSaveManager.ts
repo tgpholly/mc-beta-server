@@ -98,7 +98,7 @@ export class WorldSaveManager {
 			chunkFileWriter.writeUByte(16); // Chunk Z
 
 			const chunkData = createWriter(Endian.BE)
-				.writeBuffer(Buffer.from(chunk.getData()))
+				.writeBuffer(Buffer.from(chunk.getBlockData()))
 				.writeBuffer(chunk.getMetadataBuffer())
 				.writeBuffer(chunk.getBlockLightBuffer())
 				.writeBuffer(chunk.getSkyLightBuffer()).toBuffer();

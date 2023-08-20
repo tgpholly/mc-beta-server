@@ -57,7 +57,7 @@ export class FunkyArray<T, TT> {
 	}
 
 	public forEach(callback: (value:TT) => void) {
-		return new Promise<boolean>((resolve, reject) => {
+		return new Promise<boolean>(async (resolve, reject) => {
 			if (this.items.size === 0) {
 				return resolve(true);
 			}
@@ -66,7 +66,7 @@ export class FunkyArray<T, TT> {
 				const iterator = this.items.values();
 				let result:IteratorResult<TT, TT>;
 				while (!(result = iterator.next()).done) {
-					callback(result.value);
+					await callback(result.value);
 				}
 				resolve(true);
 			} catch (e) {
