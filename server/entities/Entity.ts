@@ -37,6 +37,14 @@ export class Entity implements IEntity {
 		this.health = 20;
 	}
 
+	sendToNearby(buffer:Buffer) {
+		this.world.sendToNearbyClients(this, buffer);
+	}
+
+	sendToAllNearby(buffer:Buffer) {
+		this.world.sendToNearbyClients(this, buffer);
+	}
+
 	updateMetadata() {
 		const crouchStateChanged = this.crouching !== this.lastCrouchState;
 		const fireStateChanged = this.fire > 0 !== this.lastFireState;
@@ -51,7 +59,7 @@ export class Entity implements IEntity {
 				metadata.addMetadataEntry(0, new MetadataEntry(MetadataFieldType.Byte, Number(this.fire > 0) + Number(this.crouching) * 2));
 			}
 
-			this.world.sendToNearbyAllNearbyClients(this, new PacketEntityMetadata(this.entityId, metadata.writeBuffer()).writeData());
+			this.sendToNearby(new PacketEntityMetadata(this.entityId, metadata.writeBuffer()).writeData());
 
 			this.lastCrouchState = this.crouching;
 			this.lastFireState = this.fire > 0;
@@ -67,6 +75,10 @@ export class Entity implements IEntity {
 	}
 
 	damageFrom(damage:number, entity?:IEntity) {
+		if (this.health <= 0) {
+			return;
+		}
+
 		if (entity === undefined) {
 			this.health -= damage;
 		}
