@@ -1,9 +1,16 @@
 import { World } from "../World";
+import { BlockBehaviourFlower } from "./BlockBehaviourFlower";
+import { IBlockBehaviour } from "./IBlockBehaviour";
+
+abstract class Behaviour {
+	public static flower = new BlockBehaviourFlower();
+}
 
 export class Block {
 	public readonly blockId:number;
 	public static readonly blocks:Array<Block> = new Array<Block>();
 	public static readonly lightPassage:Array<number> = new Array<number>();
+	public static readonly blockBehaviours:Array<IBlockBehaviour> = new Array<IBlockBehaviour>();
 	public static readonly blockNames:Array<string> = new Array<string>();
 
 	public constructor(blockId:number) {
@@ -29,6 +36,19 @@ export class Block {
 		Block.blockNames[this.blockId] = value;
 	}
 
+	public get behaviour() {
+		return Block.blockBehaviours[this.blockId];
+	}
+
+	public set behaviour(value:IBlockBehaviour) {
+		Block.blockBehaviours[this.blockId] = value;
+	}
+
+	public setBehaviour(value:IBlockBehaviour) {
+		this.behaviour = value;
+		return this;
+	}
+
 	public setLightPassage(value:number) {
 		this.lightPassage = value;
 		return this;
@@ -40,11 +60,8 @@ export class Block {
 	}
 
 	public neighborBlockChange(world:World, x:number, y:number, z:number, blockId:number) {
-		if (blockId === Block.flowerDandelion.blockId || blockId === Block.flowerRose.blockId || blockId === Block.tallGrass.blockId) {
-			const block = world.getBlockId(x, y - 1, z);
-			if (block !== Block.grass.blockId && block !== Block.dirt.blockId) {
-				world.setBlockWithNotify(x, y, z, 0);
-			}
+		if (this.behaviour !== undefined) {
+			this.behaviour.neighborBlockChange(world, x, y, z, blockId);
 		}
 	}
 
@@ -67,7 +84,7 @@ export class Block {
 
 	static readonly glass = new Block(20).setLightPassage(255).setBlockName("Glass");
 
-	static readonly tallGrass = new Block(31).setLightPassage(255).setBlockName("Tall Grass");
+	static readonly tallGrass = new Block(31).setLightPassage(255).setBehaviour(Behaviour.flower).setBlockName("Tall Grass");
 
 	static readonly flowerDandelion = new Block(37).setLightPassage(255).setBlockName("Dandelion");
 	static readonly flowerRose = new Block(38).setLightPassage(255).setBlockName("Rose");
