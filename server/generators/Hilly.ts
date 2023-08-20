@@ -89,11 +89,11 @@ export class HillyGenerator implements IGenerator {
 				const oceanValue = this.oceanGenerator((chunk.x * 16 + x) / 128, (chunk.z * 16 + z) / 128) * 100;
 				orgColY = colWaterY = colY = 60 + this.fastRound((
 					this.generator((chunk.x * 16 + x) / 16, (chunk.z * 16 + z) / 16) * 16 +
-					this.generator1((chunk.x * 16 + x) / 16, (chunk.z * 16 + z) / 16) * 16 +
+					this.generator1((chunk.z * 16 + z) / 16, (chunk.x * 16 + x) / 16) * 16 +
 					this.generator2((chunk.x * 16 + x) / 8, (chunk.z * 16 + z) / 8) * 8 +
-					this.generator3((chunk.x * 16 + x) / 4, (chunk.z * 16 + z) / 4) * 4 +
+					this.generator3((chunk.z * 16 + z) / 4, (chunk.x * 16 + x) / 4) * 4 +
 					this.generator4((chunk.x * 16 + x) / 4, (chunk.z * 16 + z) / 4) * 4 +
-					this.generator5((chunk.x * 16 + x) / 10, (chunk.z * 16 + z) / 10) * 10 +
+					this.generator5((chunk.z * 16 + z) / 10, (chunk.x * 16 + x) / 10) * 10 +
 					this.generator6((chunk.x * 16 + x) / 16, (chunk.z * 16 + z) / 16) * 16 +
 					oceanValue +
 					(Math.max(this.hillGenerator((chunk.x * 16 + x) / 128, (chunk.z * 16 + z) / 128), 0) * 50 + Math.min(oceanValue, 0))
