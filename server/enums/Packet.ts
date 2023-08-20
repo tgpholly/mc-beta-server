@@ -22,6 +22,7 @@ export enum Packet {
 	EntityAction = 0x13,
 	NamedEntitySpawn = 0x14,
 
+	EntityStatus = 0x26,
 	EntityMetadata = 0x28,
 	
 	PreChunk = 0x32,

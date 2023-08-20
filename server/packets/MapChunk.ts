@@ -39,14 +39,40 @@ export class PacketMapChunk implements IPacket {
 				fakeLighting.writeUByte(0xFF);
 			}*/
 
-			const data = createWriter(Endian.BE).writeBuffer(this.chunk.getBlockBuffer()).writeBuffer(this.chunk.getMetadataBuffer()).writeBuffer(this.chunk.blockLight.toBuffer()).writeBuffer(this.chunk.skyLight.toBuffer());//.writeBuffer(fakeLighting.toBuffer()).writeBuffer(fakeLighting.toBuffer());
+			const data = createWriter(Endian.BE)
+				// Write Chunk Blocks
+				.writeBuffer(this.chunk.getBlockBuffer())
+				// Write Chunk Blocks Metadata
+				.writeBuffer(this.chunk.getMetadataBuffer())
+				// Write Chunk Block Light
+				.writeBuffer(this.chunk.blockLight.toBuffer())
+				// Write Chunk Sky Light
+				.writeBuffer(this.chunk.skyLight.toBuffer());
 
 			deflate(data.toBuffer(), (err, data) => {
 				if (err) {
 					return reject(err);
 				}
 
-				resolve(createWriter(Endian.BE, 18).writeUByte(this.packetId).writeInt(this.x << 4).writeShort(this.y).writeInt(this.z << 4).writeUByte(this.sizeX).writeUByte(this.sizeY).writeUByte(this.sizeZ).writeInt(data.length).writeBuffer(data).toBuffer());
+				resolve(createWriter(Endian.BE, 18)
+					// Write PacketID
+					.writeUByte(this.packetId)
+					// Write Chunk X
+					.writeInt(this.x << 4)
+					// Write Chunk Y
+					.writeShort(this.y)
+					// Write Chunk Z
+					.writeInt(this.z << 4)
+					// Write Chunk Size X
+					.writeUByte(this.sizeX)
+					// Write Chunk Size Y
+					.writeUByte(this.sizeY)
+					// Write Chunk Size Z
+					.writeUByte(this.sizeZ)
+					// Write Compressed Chunk Data Length
+					.writeInt(data.length)
+					// Write Compressed Chunk Data
+					.writeBuffer(data).toBuffer());
 			});
 		});
 	}
