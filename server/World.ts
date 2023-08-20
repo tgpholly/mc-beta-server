@@ -121,11 +121,19 @@ export class World {
 		return this.getChunk(chunkX, chunkZ).getBlockId(x & 0xf, y, z & 0xf);
 	}
 
+	public getChunkBlockId(chunk:Chunk, x:number, y:number, z:number) {
+		return chunk.getBlockId(x & 0xf, y, z & 0xf);
+	}
+
 	public getBlockMetadata(x:number, y:number, z:number) {
 		const chunkX = x >> 4,
 			  chunkZ = z >> 4;
 
 		return this.getChunk(chunkX, chunkZ).getBlockMetadata(x & 0xf, y, z & 0xf);
+	}
+
+	public getChunkBlockMetadata(chunk:Chunk, x:number, y:number, z:number) {
+		return chunk.getBlockMetadata(x & 0xf, y, z & 0xf);
 	}
 
 	public setBlock(blockId:number, x:number, y:number, z:number, doBlockUpdate?:boolean) {

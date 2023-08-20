@@ -48,7 +48,7 @@ export class EntityLiving extends Entity {
 	}
 
 	isInWater() {
-		return this.world.getBlockId(this.x, this.y + this.headHeight, this.z) === Block.waterStill.blockId;
+		return this.world.getChunkBlockId(this.chunk, this.x, this.y + this.headHeight, this.z) === Block.waterStill.blockId;
 	}
 
 	private constrainRot(rot:number) {
@@ -101,6 +101,7 @@ export class EntityLiving extends Entity {
 
 		// Drowning
 		if (this.isInWater()) {
+			console.log("in water!");
 			if (this.timeInWater == Number.MIN_SAFE_INTEGER) {
 				this.timeInWater = 320;
 			}

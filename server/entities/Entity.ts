@@ -1,3 +1,4 @@
+import { Chunk } from "../Chunk";
 import { MetadataEntry, MetadataWriter } from "../MetadataWriter";
 import { World } from "../World";
 import { MetadataFieldType } from "../enums/MetadataFieldType";
@@ -21,6 +22,8 @@ export class Entity implements IEntity {
 
 	public fire:number;
 
+	public chunk:Chunk;
+
 	public crouching:boolean;
 	private lastCrouchState:boolean;
 	private lastFireState:boolean;
@@ -33,6 +36,8 @@ export class Entity implements IEntity {
 		this.world = world;
 		this.x = this.y = this.z = this.lastX = this.lastY = this.lastZ = 0;
 		this.crouching = this.lastCrouchState = this.lastFireState = false;
+
+		this.chunk = world.getChunk(this.x >> 4, this.z >> 4);
 
 		this.health = 20;
 	}
@@ -84,8 +89,17 @@ export class Entity implements IEntity {
 		}
 	}
 
+	updateEntityChunk() {
+		const bitX = this.x >> 4;
+		const bitZ = this.z >> 4;
+		if (bitX != this.lastX >> 4 || bitZ != this.lastZ >> 4) {
+			this.chunk = this.world.getChunk(bitX, bitZ);
+		}
+	}
+
 	onTick() {
 		this.updateMetadata();
+		this.updateEntityChunk();
 
 		if (this.fire > 0) {
 			if (this.fire % 20 === 0) {
