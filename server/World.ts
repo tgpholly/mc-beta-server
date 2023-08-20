@@ -13,7 +13,7 @@ import { IQueuedUpdate } from "./queuedUpdateTypes/IQueuedUpdate";
 
 export class World {
 	public static ENTITY_MAX_SEND_DISTANCE = 50;
-	private static READ_CHUNKS_FROM_DISK = false;
+	private static READ_CHUNKS_FROM_DISK = true;
 
 	private readonly saveManager;
 
@@ -88,10 +88,7 @@ export class World {
 			if (!(existingChunk instanceof Chunk)) {
 				if (World.READ_CHUNKS_FROM_DISK && this.saveManager.chunksOnDisk.includes(coordPair)) {
 					return this.saveManager.readChunkFromDisk(this, x, z)
-						.then(chunk => {
-							//console.log("Loaded " + x + "," + z + " from disk");
-							resolve(this.chunks.set(coordPair, chunk));		
-						});
+						.then(chunk => resolve(this.chunks.set(coordPair, chunk)));
 				} else {
 					resolve(this.chunks.set(coordPair, new Chunk(this, x, z, true)));
 					if (World.READ_CHUNKS_FROM_DISK) {

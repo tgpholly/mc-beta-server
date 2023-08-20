@@ -49,8 +49,8 @@ export class WorldSaveManager {
 			const chunkFiles = readdirSync(this.worldChunksFolderPath);
 			for (const file of chunkFiles) {
 				if (file.endsWith(".hwc")) {
-					const numbers = file.split(".")[0].split(",");
-					this.chunksOnDisk.push(Chunk.CreateCoordPair(parseInt(numbers[0]), parseInt(numbers[1])));
+					const name = file.split(".")[0];
+					this.chunksOnDisk.push(parseInt(name.startsWith("-") ? name.replace("-", "-0x") : `0x${name}`));
 				}
 			}
 		}
