@@ -42,7 +42,7 @@ const splitLines = combinedFiles.split("\n");
 const resultLines:Array<string> = new Array<string>();
 
 // Insert allowed imports
-resultLines.push(`import { createWriteStream, mkdirSync, existsSync, readFileSync, readFile, writeFile, writeFileSync, readdirSync } from "fs";
+resultLines.push(`import { createWriteStream, mkdirSync, existsSync, readFileSync, readFile, writeFile, writeFileSync, readdirSync, renameSync } from "fs";
 import { deflate, inflate } from "zlib";
 import { createWriter, createReader, IReader, Endian } from "bufferstuff";
 import { Console } from "hsconsole";
@@ -57,7 +57,7 @@ for (const line of splitLines) {
 	}
 	// Fix up classes, interfaces and such.
 	//resultLines.push(line);
-	resultLines.push(line.replace("export class", "class").replace("export interface", "interface").replace("export enum", "enum").replace("export type", "type"));
+	resultLines.push(line.replace("export default function", "function").replace("export class", "class").replace("export interface", "interface").replace("export enum", "enum").replace("export type", "type"));
 }
 
 writeFileSync("./combined.ts", resultLines.join("\n"));
