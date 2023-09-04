@@ -4,3 +4,4 @@ bundle/
 world/
 logs/
 combined.ts
+config.json
