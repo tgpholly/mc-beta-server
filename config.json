@@ -1,7 +1,0 @@
-{
-	"port": 25565,
-	"maxPlayers": 20,
-	"seed": "fuck you boltimore",
-	"saveCompression": "NONE",
-	"worldName": "world"
-}
