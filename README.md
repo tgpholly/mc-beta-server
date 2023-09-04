@@ -8,13 +8,14 @@ me trying to understand minecraft beta's protocol
 
 <hr>
 
-<img src="https://eusv.net/images/mc-beta-server-readme-0.webp" alt="Minecraft landscape with trees and ocean">
+<img src="https://eusv.net/images/mc-beta-server-readme-1-overworld.webp" alt="Minecraft landscape with trees, caves, flowers, shrubs and an ocean.">
+<img src="https://eusv.net/images/mc-beta-server-readme-1-nether.webp" alt="WIP Minecraft Nether with very simple terrain.">
 
 **Implemented:**
  - Basic flat terrain generation
  - Basic (top to bottom, no spread) Lighting
  - "Decent" terrain generation using OpenSimplex Noise
- - Concept of worlds
+ - Multi-World support
  - Chunk management (loading / unloading)
  - Cross chunk structure generation (trees, buildings, etc...)
  - World/Chunk saving to disk
@@ -23,6 +24,8 @@ me trying to understand minecraft beta's protocol
 **WIP:**
  - Entities:
    - Players
+ - Dimensions:
+   - Nether
 
 **To Implement:**
  - Block placement
