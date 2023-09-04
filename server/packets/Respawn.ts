@@ -4,19 +4,23 @@ import { Packet } from "../enums/Packet";
 
 export class PacketRespawn implements IPacket {
 	public packetId = Packet.Respawn;
-	public health:number;
+	public dimension:number;
 
-	public constructor(health:number) {
-		this.health = health;
+	public constructor(dimension?:number) {
+		if (typeof(dimension) == "number") {
+			this.dimension = dimension;
+		} else {
+			this.dimension = Number.MIN_VALUE;
+		}
 	}
 
 	public readData(reader:IReader) {
-		this.health = reader.readShort();
+		this.dimension = reader.readByte();
 
 		return this;
 	}
 
 	public writeData() {
-		return createWriter(Endian.BE, 3).writeUByte(this.packetId).writeShort(this.health).toBuffer();
+		return createWriter(Endian.BE, 2).writeUByte(this.packetId).writeByte(this.dimension).toBuffer();
 	}
 }

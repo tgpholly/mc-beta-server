@@ -13,11 +13,13 @@ import { PacketPlayerDigging } from "./packets/PlayerDigging";
 import { Player } from "./entities/Player";
 import { Socket } from "net";
 import { Vec3 } from "./Vec3";
+import { PacketRespawn } from "./packets/Respawn";
+import { PacketSpawnPosition } from "./packets/SpawnPosition";
 
 export class MPClient {
 	private readonly mcServer:MinecraftServer;
 	private readonly socket:Socket;
-	public readonly entity:Player;
+	public entity:Player;
 
 	private diggingAt:Vec3;
 
@@ -77,15 +79,25 @@ export class MPClient {
 		if (message[0].startsWith("/")) {
 			packet.message = "";
 			if (message[0] === "/tp") {
-				this.send(new PacketPlayerPositionLook(parseFloat(message[1]), parseFloat(message[2]), parseFloat(message[2]) + 0.62, parseFloat(message[3]), 0, 0, false).writeData());
+				const x = this.entity.x = parseFloat(message[1]);
+				const y = this.entity.y = parseFloat(message[2]);
+				const z = this.entity.z = parseFloat(message[3]);
+				this.send(new PacketPlayerPositionLook(x, y, y + 0.62, z, 0, 0, false).writeData());
 				Console.printInfo(packet.message = `Teleported ${this.entity.username} to ${message[1]} ${message[2]} ${message[3]}`);
 			} else if (message[0] === "/csay") {
 				this.mcServer.sendChatMessage(`[CONSOLE] ${message.slice(1, message.length).join(" ")}`);
 			} else if (message[0] === "/top") {
 				packet.message = `Woosh!`;
 				const topBlock = this.entity.world.getChunk(this.entity.x >> 4, this.entity.z >> 4).getTopBlockY(this.entity.x & 0xf, this.entity.z & 0xf);
-				console.log(topBlock);
 				this.send(new PacketPlayerPosition(this.entity.x, topBlock + 3, topBlock + 3.62, this.entity.z, false).writeData());
+			} else if (message[0] === "/tpx") {
+				const dimension = parseInt(message[1]);
+				if (this.mcServer.worlds.has(dimension)) {
+					packet.message = "\u00a76Switching dimensions...";	
+					this.switchDimension(dimension);
+				} else {
+					packet.message = `\u00a7cNo dimension by id "${dimension} exists!"`;
+				}
 			}
 
 			if (packet.message !== "") {
@@ -155,6 +167,26 @@ export class MPClient {
 			case 2: this.entity.crouching = false; break;
 			case 3: break; // TODO: Leave Bed
 		}
+	}
+
+	private switchDimension(dimension:number) {
+		const world = this.mcServer.worlds.get(dimension);
+		if (world == undefined) {
+			return;
+		}
+
+		this.entity.world.removeEntity(this.entity);
+		this.entity.world = world;
+		world.addEntity(this.entity);
+
+		this.send(new PacketRespawn(dimension).writeData());
+		//this.send(new PacketSpawnPosition(8, 64, 8).writeData());
+		this.entity.x = 8;
+		this.entity.y = 70;
+		this.entity.z = 8;
+		this.send(new PacketPlayerPositionLook(8, 70, 70.62, 8, 0, 0, false).writeData());
+
+		this.entity.forceUpdatePlayerChunks();
 	}
 
 	private handleDisconnectKick() {

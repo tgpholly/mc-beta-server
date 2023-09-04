@@ -33,7 +33,7 @@ export class MinecraftServer {
 	private readonly serverClock:NodeJS.Timeout;
 	private tickCounter:number = 0;
 	private clients:FunkyArray<string, MPClient>;
-	private worlds:FunkyArray<number, World>;
+	public worlds:FunkyArray<number, World>;
 	public saveManager:WorldSaveManager;
 	private overworld:World;
 	private nether:World;

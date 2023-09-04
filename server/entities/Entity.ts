@@ -28,6 +28,8 @@ export class Entity implements IEntity {
 	private lastCrouchState:boolean;
 	private lastFireState:boolean;
 
+	private queuedChunkUpdate:boolean;
+
 	public constructor(world:World) {
 		this.entityId = Entity.nextEntityId++;
 		
@@ -35,7 +37,7 @@ export class Entity implements IEntity {
 
 		this.world = world;
 		this.x = this.y = this.z = this.lastX = this.lastY = this.lastZ = 0;
-		this.crouching = this.lastCrouchState = this.lastFireState = false;
+		this.crouching = this.lastCrouchState = this.lastFireState = this.queuedChunkUpdate = false;
 
 		this.chunk = world.getChunk(this.x >> 4, this.z >> 4);
 
@@ -92,8 +94,13 @@ export class Entity implements IEntity {
 	updateEntityChunk() {
 		const bitX = this.x >> 4;
 		const bitZ = this.z >> 4;
-		if (bitX != this.lastX >> 4 || bitZ != this.lastZ >> 4) {
-			this.chunk = this.world.getChunk(bitX, bitZ);
+		if (bitX != this.lastX >> 4 || bitZ != this.lastZ >> 4 || this.queuedChunkUpdate) {
+			if (this.world.chunkExists(bitX, bitZ)) {
+				this.chunk = this.world.getChunk(bitX, bitZ);
+				this.queuedChunkUpdate = false;
+			} else {
+				this.queuedChunkUpdate = true;
+			}
 		}
 	}
 

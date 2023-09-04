@@ -101,7 +101,6 @@ export class EntityLiving extends Entity {
 
 		// Drowning
 		if (this.isInWater()) {
-			console.log("in water!");
 			if (this.timeInWater == Number.MIN_SAFE_INTEGER) {
 				this.timeInWater = 320;
 			}

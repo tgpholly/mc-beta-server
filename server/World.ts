@@ -61,6 +61,10 @@ export class World {
 					}
 				}
 			}
+			// Clear player chunk list (they may be switching dimensions)
+			entity.loadedChunks = new Array<number>();
+			entity.justUnloaded = new Array<number>();
+
 			this.players.remove(entity.entityId);
 		}
 

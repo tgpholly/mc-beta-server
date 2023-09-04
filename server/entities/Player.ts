@@ -7,6 +7,8 @@ import { EntityLiving } from "./EntityLiving";
 import { PacketPreChunk } from "../packets/PreChunk";
 import { PacketUpdateHealth } from "../packets/UpdateHealth";
 
+const CHUNK_LOAD_RANGE = 5;
+
 export class Player extends EntityLiving {
 	public username:string;
 	private server:MinecraftServer;
@@ -32,6 +34,10 @@ export class Player extends EntityLiving {
 		this.lastHealth = this.health;
 	}
 
+	public forceUpdatePlayerChunks() {
+		this.firstUpdate = true;
+	}
+
 	private async updatePlayerChunks() {
 		const bitX = this.x >> 4;
 		const bitZ = this.z >> 4;
@@ -47,8 +53,8 @@ export class Player extends EntityLiving {
 
 			// Load or keep any chunks we need
 			const currentLoads = [];
-			for (let x = bitX - 10; x < bitX + 10; x++) {
-				for (let z = bitZ - 10; z < bitZ + 10; z++) {
+			for (let x = bitX - CHUNK_LOAD_RANGE; x < bitX + CHUNK_LOAD_RANGE; x++) {
+				for (let z = bitZ - CHUNK_LOAD_RANGE; z < bitZ + CHUNK_LOAD_RANGE; z++) {
 					const coordPair = Chunk.CreateCoordPair(x, z);
 					if (!this.loadedChunks.includes(coordPair)) {
 						const chunk = await this.world.getChunkSafe(x, z);
