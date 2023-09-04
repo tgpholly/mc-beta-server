@@ -1,14 +1,16 @@
-import { readFileSync, readFile, writeFile, existsSync, mkdirSync, writeFileSync, readdirSync } from "fs";
+import { readFileSync, readFile, writeFile, existsSync, mkdirSync, writeFileSync, readdirSync, renameSync } from "fs";
 import { createWriter, createReader, Endian } from "bufferstuff";
 import { Config } from "../config";
 import { Chunk } from "./Chunk";
 import { SaveCompressionType } from "./enums/SaveCompressionType";
 import { deflate, inflate } from "zlib";
 import { World } from "./World";
+import { FunkyArray } from "../funkyArray";
+import { Console } from "hsconsole";
 
 export class WorldSaveManager {
 	private readonly worldFolderPath;
-	private readonly worldChunksFolderPath;
+	private readonly oldWorldChunksFolderPath;
 	private readonly worldPlayerDataFolderPath;
 	private readonly infoFilePath;
 
@@ -18,13 +20,13 @@ export class WorldSaveManager {
 	public worldLastLoadDate = new Date();
 	public worldSeed = Number.MIN_VALUE;
 
-	public chunksOnDisk:Array<number>;
+	public chunksOnDisk:FunkyArray<number, Array<number>>;
 
-	public constructor(config:Config, numericalSeed:number) {
-		this.chunksOnDisk = new Array<number>();
+	public constructor(config:Config, dimensions:Array<number>, numericalSeed:number) {
+		this.chunksOnDisk = new FunkyArray<number, Array<number>>();
 
 		this.worldFolderPath = `./${config.worldName}`;
-		this.worldChunksFolderPath = `${this.worldFolderPath}/chunks`;
+		this.oldWorldChunksFolderPath = `${this.worldFolderPath}/chunks`;
 		this.worldPlayerDataFolderPath = `${this.worldFolderPath}/playerdata`;
 		this.infoFilePath = `${this.worldFolderPath}/info.hwd`;
 
@@ -43,14 +45,20 @@ export class WorldSaveManager {
 			this.createInfoFile(numericalSeed);
 		}
 
-		if (!existsSync(this.worldChunksFolderPath)) {
-			mkdirSync(this.worldChunksFolderPath);
-		} else {
-			const chunkFiles = readdirSync(this.worldChunksFolderPath);
-			for (const file of chunkFiles) {
-				if (file.endsWith(".hwc")) {
-					const name = file.split(".")[0];
-					this.chunksOnDisk.push(parseInt(name.startsWith("-") ? name.replace("-", "-0x") : `0x${name}`));
+		for (const dimension of dimensions) {
+			const chunksArray = new Array<number>();
+			this.chunksOnDisk.set(dimension, chunksArray);
+
+			const chunkFolderPath = `${this.worldFolderPath}/DIM${dimension}`;
+			if (!existsSync(chunkFolderPath)) {
+				mkdirSync(chunkFolderPath);
+			} else {
+				const chunkFiles = readdirSync(chunkFolderPath);
+				for (const file of chunkFiles) {
+					if (file.endsWith(".hwc")) {
+						const name = file.split(".")[0];
+						chunksArray.push(parseInt(name.startsWith("-") ? name.replace("-", "-0x") : `0x${name}`));
+					}
 				}
 			}
 		}
@@ -63,7 +71,7 @@ export class WorldSaveManager {
 	private createInfoFile(numericalSeed:number) {
 		const infoFileWriter = createWriter(Endian.BE, 26);
 		infoFileWriter.writeUByte(0xFD); // Info File Magic
-		infoFileWriter.writeUByte(0); // File Version
+		infoFileWriter.writeUByte(1); // File Version
 		infoFileWriter.writeLong(this.worldCreationDate.getTime()); // World creation date
 		infoFileWriter.writeLong(this.worldLastLoadDate.getTime()); // Last load date
 		infoFileWriter.writeLong(numericalSeed);
@@ -78,10 +86,17 @@ export class WorldSaveManager {
 		}
 
 		const fileVersion = infoFileReader.readByte();
-		if (fileVersion === 0) {
+		if (fileVersion === 0 || fileVersion === 1) {
 			this.worldCreationDate = new Date(Number(infoFileReader.readLong()));
 			infoFileReader.readLong(); // Last load time is currently ignored
 			this.worldSeed = Number(infoFileReader.readLong());
+
+			// Upgrade v0 to v1
+			if (fileVersion === 0) {
+				Console.printInfo("Upgrading world to format v1 from v0");
+				renameSync(`${this.worldFolderPath}/chunks`, `${this.worldFolderPath}/DIM0`);
+				this.createInfoFile(this.worldSeed);
+			}
 		}
 	}
 
@@ -103,14 +118,16 @@ export class WorldSaveManager {
 				.writeBuffer(chunk.getBlockLightBuffer())
 				.writeBuffer(chunk.getSkyLightBuffer()).toBuffer();
 
+			const codArr = this.chunksOnDisk.get(chunk.world.dimension);
 			if (saveType === SaveCompressionType.NONE) {
 				chunkFileWriter.writeInt(chunkData.length); // Data length
 				chunkFileWriter.writeBuffer(chunkData); // Chunk data
 
-				writeFile(`${this.worldChunksFolderPath}/${Chunk.CreateCoordPair(chunk.x, chunk.z).toString(16)}.hwc`, chunkFileWriter.toBuffer(), () => {
+				writeFile(`${this.worldFolderPath}/DIM${chunk.world.dimension}/${Chunk.CreateCoordPair(chunk.x, chunk.z).toString(16)}.hwc`, chunkFileWriter.toBuffer(), () => {
 					const cPair = Chunk.CreateCoordPair(chunk.x, chunk.z);
-					if (!this.chunksOnDisk.includes(cPair)) {
-						this.chunksOnDisk.push(cPair);
+					
+					if (!codArr?.includes(cPair)) {
+						codArr?.push(cPair);
 					}
 
 					resolve(true);
@@ -124,10 +141,10 @@ export class WorldSaveManager {
 					chunkFileWriter.writeInt(data.length);
 					chunkFileWriter.writeBuffer(data);
 
-					writeFile(`${this.worldChunksFolderPath}/${Chunk.CreateCoordPair(chunk.x, chunk.z).toString(16)}.hwc`, chunkFileWriter.toBuffer(), () => {
+					writeFile(`${this.worldFolderPath}/DIM${chunk.world.dimension}/${Chunk.CreateCoordPair(chunk.x, chunk.z).toString(16)}.hwc`, chunkFileWriter.toBuffer(), () => {
 						const cPair = Chunk.CreateCoordPair(chunk.x, chunk.z);
-						if (!this.chunksOnDisk.includes(cPair)) {
-							this.chunksOnDisk.push(cPair);
+						if (!codArr?.includes(cPair)) {
+							codArr?.push(cPair);
 						}
 						//console.log(`Wrote ${chunk.x},${chunk.z} to disk`);
 						resolve(true);
@@ -141,7 +158,7 @@ export class WorldSaveManager {
 
 	readChunkFromDisk(world:World, x:number, z:number) {
 		return new Promise<Chunk>((resolve, reject) => {
-			readFile(`${this.worldChunksFolderPath}/${Chunk.CreateCoordPair(x, z).toString(16)}.hwc`, (err, data) => {
+			readFile(`${this.worldFolderPath}/DIM${world.dimension}/${Chunk.CreateCoordPair(x, z).toString(16)}.hwc`, (err, data) => {
 				if (err) {
 					return reject(err);
 				}

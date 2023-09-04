@@ -19,6 +19,8 @@ import { WorldSaveManager } from "./WorldSaveManager";
 import { World } from "./World";
 import { Chunk } from "./Chunk";
 import { PacketTimeUpdate } from "./packets/TimeUpdate";
+import { HillyGenerator } from "./generators/Hilly";
+import { NetherGenerator } from "./generators/Nether";
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
@@ -34,6 +36,7 @@ export class MinecraftServer {
 	private worlds:FunkyArray<number, World>;
 	public saveManager:WorldSaveManager;
 	private overworld:World;
+	private nether:World;
 
 	// https://stackoverflow.com/a/7616484
 	// Good enough for the world seed.
@@ -103,13 +106,14 @@ export class MinecraftServer {
 		let worldSeed = typeof(this.config.seed) === "string" ? this.hashCode(this.config.seed) : this.config.seed;
 
 		// Init save manager and load seed from it if possible
-		this.saveManager = new WorldSaveManager(this.config, worldSeed);
+		this.saveManager = new WorldSaveManager(this.config, [0, -1], worldSeed);
 		if (this.saveManager.worldSeed !== Number.MIN_VALUE) {
 			worldSeed = this.saveManager.worldSeed;
 		}
 
 		this.worlds = new FunkyArray<number, World>();
-		this.worlds.set(0, this.overworld = new World(this.saveManager, worldSeed));
+		this.worlds.set(0, this.overworld = new World(this.saveManager, 0, worldSeed, new HillyGenerator(worldSeed)));
+		this.worlds.set(-1, this.nether = new World(this.saveManager, -1, worldSeed, new NetherGenerator(worldSeed)));
 
 		// Generate spawn area (overworld)
 		/*(async () => {
@@ -122,16 +126,37 @@ export class MinecraftServer {
 			}
 			Console.printInfo(`Done! Took ${Date.now() - generateStartTime}ms`);
 		}).bind(this)();*/
+		let chunksGenerated = 0;
 		(async () => {
 			const generateStartTime = Date.now();
-			Console.printInfo("Generating spawn area...");
-			for (let x = -5; x < 5; x++) {
-				for (let z = -5; z < 5; z++) {
+			let timer = Date.now();
+			Console.printInfo("Generating spawn area for DIM0...");
+			for (let x = -10; x < 10; x++) {
+				for (let z = -10; z < 10; z++) {
 					const chunk = await this.overworld.getChunkSafe(x, z);
 					chunk.forceLoaded = true;
-				}	
+					chunksGenerated++;
+					if (Date.now() - timer >= 1000) {
+						Console.printInfo(`Progress [${chunksGenerated}/400] ${((chunksGenerated / 400) * 100).toFixed(2)}%`);
+						timer = Date.now();
+					}
+				}
+			}
+			chunksGenerated = 0;
+			Console.printInfo("Generating spawn area for DIM-1...");
+			for (let x = -10; x < 10; x++) {
+				for (let z = -10; z < 10; z++) {
+					const chunk = await this.nether.getChunkSafe(x, z);
+					chunk.forceLoaded = true;
+					chunksGenerated++;
+					if (Date.now() - timer >= 1000) {
+						Console.printInfo(`Progress [${chunksGenerated}/400] ${((chunksGenerated / 400) * 100).toFixed(2)}%`);
+						timer = Date.now();
+					}
+				}
 			}
 			Console.printInfo(`Done! Took ${Date.now() - generateStartTime}ms`);
+			this.initServer();
 		}).bind(this)();
 
 		this.serverClock = setInterval(() => {
@@ -155,7 +180,10 @@ export class MinecraftServer {
 
 		this.server = new Server();
 		this.server.on("connection", this.onConnection.bind(this));
-		this.server.listen(config.port, () => Console.printInfo(`Minecraft server started at ${config.port}`));
+	}
+
+	initServer() {
+		this.server.listen(this.config.port, () => Console.printInfo(`Minecraft server started at ${this.config.port}`));
 	}
 
 	sendToAllClients(buffer:Buffer) {
@@ -180,7 +208,8 @@ export class MinecraftServer {
 			return;
 		}
 		
-		const world = this.worlds.get(0);
+		const dimension = 0;
+		const world = this.worlds.get(dimension);
 		if (world instanceof World) {
 			const clientEntity = new Player(this, world, loginPacket.username);
 			world.addEntity(clientEntity);
@@ -192,7 +221,7 @@ export class MinecraftServer {
 
 			this.sendChatMessage(`\u00a7e${loginPacket.username} joined the game`);
 
-			socket.write(new PacketLoginRequest(clientEntity.entityId, "", 0, 0).writeData());
+			socket.write(new PacketLoginRequest(clientEntity.entityId, "", 0, dimension).writeData());
 			socket.write(new PacketSpawnPosition(8, 64, 8).writeData());
 
 			const thisPlayerSpawn = new PacketNamedEntitySpawn(clientEntity.entityId, clientEntity.username, clientEntity.absX, clientEntity.absY, clientEntity.absZ, clientEntity.absYaw, clientEntity.absPitch, 0).writeData();

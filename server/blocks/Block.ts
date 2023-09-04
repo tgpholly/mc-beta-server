@@ -90,4 +90,6 @@ export class Block {
 	static readonly flowerRose = new Block(38).setLightPassage(255).setBlockName("Rose");
 
 	static readonly clay = new Block(82).setBlockName("Clay");
+
+	static readonly netherrack = new Block(87).setBlockName("Netherrack");
 }

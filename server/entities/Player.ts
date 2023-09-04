@@ -47,8 +47,8 @@ export class Player extends EntityLiving {
 
 			// Load or keep any chunks we need
 			const currentLoads = [];
-			for (let x = bitX - 6; x < bitX + 6; x++) {
-				for (let z = bitZ - 6; z < bitZ + 6; z++) {
+			for (let x = bitX - 10; x < bitX + 10; x++) {
+				for (let z = bitZ - 10; z < bitZ + 10; z++) {
 					const coordPair = Chunk.CreateCoordPair(x, z);
 					if (!this.loadedChunks.includes(coordPair)) {
 						const chunk = await this.world.getChunkSafe(x, z);

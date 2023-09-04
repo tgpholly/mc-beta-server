@@ -13,9 +13,10 @@ import { IQueuedUpdate } from "./queuedUpdateTypes/IQueuedUpdate";
 
 export class World {
 	public static ENTITY_MAX_SEND_DISTANCE = 50;
-	private static READ_CHUNKS_FROM_DISK = true;
+	private static READ_CHUNKS_FROM_DISK = false;
 
 	private readonly saveManager;
+	private readonly chunksOnDisk:Array<number>;
 
 	public chunks:FunkyArray<number, Chunk>;
 	public entites:FunkyArray<number, IEntity>;
@@ -25,15 +26,19 @@ export class World {
 	public queuedUpdates:Array<IQueuedUpdate>;
 	public generator:IGenerator;
 
-	public constructor(saveManager:WorldSaveManager, seed:number) {
+	public readonly dimension:number;
+
+	public constructor(saveManager:WorldSaveManager, dimension:number, seed:number, generator:IGenerator) {
+		this.dimension = dimension;
 		this.saveManager = saveManager;
+		this.chunksOnDisk = this.saveManager.chunksOnDisk.get(dimension) ?? new Array<number>;
 
 		this.chunks = new FunkyArray<number, Chunk>();
 		this.entites = new FunkyArray<number, IEntity>();
 		this.players = new FunkyArray<number, Player>();
 		this.queuedChunkBlocks = new Array<IQueuedUpdate>();
 		this.queuedUpdates = new Array<IQueuedUpdate>();
-		this.generator = new HillyGenerator(seed);
+		this.generator = generator;
 	}
 
 	public addEntity(entity:IEntity) {
@@ -86,7 +91,7 @@ export class World {
 			const coordPair = Chunk.CreateCoordPair(x, z);
 			const existingChunk = this.chunks.get(coordPair);
 			if (!(existingChunk instanceof Chunk)) {
-				if (World.READ_CHUNKS_FROM_DISK && this.saveManager.chunksOnDisk.includes(coordPair)) {
+				if (World.READ_CHUNKS_FROM_DISK && this.chunksOnDisk.includes(coordPair)) {
 					return this.saveManager.readChunkFromDisk(this, x, z)
 						.then(chunk => resolve(this.chunks.set(coordPair, chunk)));
 				} else {

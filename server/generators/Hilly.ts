@@ -4,6 +4,7 @@ import { IGenerator } from "./IGenerator";
 import { Noise2D, makeNoise2D } from "../../external/OpenSimplex2D";
 import { Noise3D, makeNoise3D } from "../../external/OpenSimplex3D";
 import { QueuedBlockUpdate } from "../queuedUpdateTypes/BlockUpdate";
+import mulberry32 from "../mulberry32";
 
 export class HillyGenerator implements IGenerator {
 	private seed:number;
@@ -31,7 +32,7 @@ export class HillyGenerator implements IGenerator {
 
 	public constructor(seed:number) {
 		this.seed = seed;
-		this.seedGenerator = this.mulberry32(this.seed);
+		this.seedGenerator = mulberry32(this.seed);
 
 		this.generator = this.createGenerator2D();
 		this.generator1 = this.createGenerator2D();
@@ -67,21 +68,10 @@ export class HillyGenerator implements IGenerator {
 		return num >= 0.5 ? (num | 0) + 1 : num | 0;
 	}
 
-	// https://stackoverflow.com/a/47593316
-	// This is good enough (and fast enough) for what is needed here.
-	private mulberry32(a:number) {
-		return function() {
-			let t = a += 0x6D2B79F5;
-			t = Math.imul(t ^ t >>> 15, t | 1);
-			t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-			return ((t ^ t >>> 14) >>> 0) / 4294967296;
-		}
-	}
-
 	public generate(chunk:Chunk) {
-		const treeRNG = this.mulberry32(this.seed + chunk.x + chunk.z);
-		const grassRNG = this.mulberry32(this.seed + chunk.x + chunk.z);
-		const flowerRNG = this.mulberry32(this.seed + chunk.x + chunk.z);
+		const treeRNG = mulberry32(this.seed + chunk.x + chunk.z);
+		const grassRNG = mulberry32(this.seed + chunk.x + chunk.z);
+		const flowerRNG = mulberry32(this.seed + chunk.x + chunk.z);
 
 		let colY = 0, colDirtMin = 0, colWaterY = 0, orgColY = 0;
 		for (let x = 0; x < 16; x++) {
