@@ -13,7 +13,7 @@ import { IQueuedUpdate } from "./queuedUpdateTypes/IQueuedUpdate";
 
 export class World {
 	public static ENTITY_MAX_SEND_DISTANCE = 50;
-	private static READ_CHUNKS_FROM_DISK = false;
+	private static READ_CHUNKS_FROM_DISK = true;
 
 	private readonly saveManager;
 	private readonly chunksOnDisk:Array<number>;
