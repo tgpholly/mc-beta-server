@@ -1,7 +1,8 @@
-import { ItemStack } from "../containers/ItemStack";
+import { ItemStack } from "./ItemStack";
 
-export interface IInventory {
+export default interface IInventory {
 	getInventoryName:() => string,
 	getInventorySize:() => number,
-	getSlotItemStack:(slotId:number) => ItemStack
+	getSlotItemStack:(slotId:number) => ItemStack | null
+	setSlotItemStack:(slotId:number, itemStack:ItemStack | null) => IInventory
 }

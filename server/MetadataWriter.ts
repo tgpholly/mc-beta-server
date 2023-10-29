@@ -35,6 +35,8 @@ export class MetadataWriter {
 				case MetadataFieldType.String:
 					if (typeof(entry.value) === "string") {
 						size += 2 + entry.value.length * 2; break;
+					} else {
+						throw "Non-string value assigned to a String MetadataEntry";
 					}
 			}
 		})

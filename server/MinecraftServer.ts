@@ -21,6 +21,7 @@ import { Chunk } from "./Chunk";
 import { PacketTimeUpdate } from "./packets/TimeUpdate";
 import { HillyGenerator } from "./generators/Hilly";
 import { NetherGenerator } from "./generators/Nether";
+import { PacketWindowItems } from "./packets/WindowItems";
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
@@ -233,6 +234,10 @@ export class MinecraftServer {
 			});
 
 			socket.write(new PacketPlayerPositionLook(8, 70, 70.62, 8, 0, 0, false).writeData());
+
+			const playerInventory = clientEntity.inventory;
+			socket.write(new PacketWindowItems(0, playerInventory.getInventorySize(), playerInventory.constructInventoryPayload()).writeData());
+			console.log(new PacketWindowItems(0, playerInventory.getInventorySize(), playerInventory.constructInventoryPayload()).writeData());
 		} else {
 			socket.write(new PacketDisconnectKick("Failed to find world to put player in.").writeData());
 		}

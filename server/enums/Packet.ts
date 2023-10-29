@@ -36,5 +36,10 @@ export enum Packet {
 	EntityLookRelativeMove = 0x21,
 	EntityTeleport = 0x22,
 
+	CloseWindow = 0x65,
+	WindowClick = 0x66,
+	SetSlot = 0x67,
+	WindowItems = 0x68,
+
 	DisconnectKick = 0xff
 }

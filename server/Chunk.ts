@@ -154,11 +154,11 @@ export class Chunk {
 	}
 
 	public getBlockLightBuffer() {
-		return this.metadata.toBuffer();
+		return this.blockLight.toBuffer();
 	}
 
 	public getSkyLightBuffer() {
-		return this.metadata.toBuffer();
+		return this.skyLight.toBuffer();
 	}
 
 	public getBlockData() {

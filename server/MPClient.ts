@@ -15,23 +15,30 @@ import { Socket } from "net";
 import { Vec3 } from "./Vec3";
 import { PacketRespawn } from "./packets/Respawn";
 import { PacketSpawnPosition } from "./packets/SpawnPosition";
+import { PacketPlayerBlockPlacement } from "./packets/PlayerBlockPlacement";
+import { Inventory } from "./inventories/Inventory";
+import { PacketHoldingChange } from "./packets/HoldingChange";
+import { PacketDisconnectKick } from "./packets/DisconnectKick";
 
 export class MPClient {
 	private readonly mcServer:MinecraftServer;
 	private readonly socket:Socket;
 	public entity:Player;
+	private inventory:Inventory;
 
+	private holdingIndex:number = 36; // First hotbar slot.
 	private diggingAt:Vec3;
 
 	public constructor(mcServer:MinecraftServer, socket:Socket, entity:Player) {
 		this.mcServer = mcServer;
 		this.socket = socket;
 		this.entity = entity;
+		this.inventory = entity.inventory;
 
 		this.diggingAt = new Vec3();
 	}
 
-	private mapCoordsToFace(pos:Vec3, face:number) {
+	private mapCoordsFromFace(pos:Vec3, face:number) {
 		switch (face) {
 			case 0:
 				pos.y--;
@@ -64,8 +71,8 @@ export class MPClient {
 			case Packet.PlayerLook:           this.handlePacketPlayerLook(new PacketPlayerLook().readData(reader)); break;
 			case Packet.PlayerPositionLook:   this.handlePacketPlayerPositionLook(new PacketPlayerPositionLook().readData(reader)); break;
 			case Packet.PlayerDigging:        this.handlePacketPlayerDigging(new PacketPlayerDigging().readData(reader)); break;
-			//case Packets.PlayerBlockPlacement: break;
-			//case Packets.HoldingChange: break;
+			case Packet.PlayerBlockPlacement: this.handlePacketBlockPlacement(new PacketPlayerBlockPlacement().readData(reader)); break;
+			case Packet.HoldingChange:        this.handlePacketHoldingChange(new PacketHoldingChange().readData(reader)); break;
 			//case Packets.UseBed: break;
 			case Packet.Animation:            this.handlePacketAnimation(new PacketAnimation().readData(reader)); break;
 			case Packet.EntityAction:         this.handlePacketEntityAction(new PacketEntityAction().readData(reader)); break;
@@ -152,6 +159,27 @@ export class MPClient {
 				this.entity.world.setBlockWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, 0);
 			}
 		}
+	}
+
+	private handlePacketBlockPlacement(packet:PacketPlayerBlockPlacement) {
+		this.diggingAt.set(packet.x, packet.y, packet.z);
+		this.mapCoordsFromFace(this.diggingAt, packet.face);
+
+		const itemStack = this.inventory.getSlotItemStack(this.holdingIndex);
+		if (itemStack != null && itemStack.size > 0 && this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z) === 0) {
+			itemStack.size--;
+			this.entity.world.setBlockAndMetadataWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, itemStack.itemID, itemStack.damage);
+		}
+	}
+
+	private handlePacketHoldingChange(packet:PacketHoldingChange) {
+		if (packet.slotId < 0 || packet.slotId > 8) {
+			this.send(new PacketDisconnectKick("Out of Bounds Holding Index!").writeData());
+			this.socket.end();
+			return;
+		}
+
+		this.holdingIndex = 36 + packet.slotId;
 	}
 
 	// Animation start

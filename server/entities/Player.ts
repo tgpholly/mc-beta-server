@@ -6,6 +6,9 @@ import { PacketMapChunk } from "../packets/MapChunk";
 import { EntityLiving } from "./EntityLiving";
 import { PacketPreChunk } from "../packets/PreChunk";
 import { PacketUpdateHealth } from "../packets/UpdateHealth";
+import { Inventory } from "../inventories/Inventory";
+import { ItemStack } from "../inventories/ItemStack";
+import { Block } from "../blocks/Block";
 
 const CHUNK_LOAD_RANGE = 5;
 
@@ -16,6 +19,7 @@ export class Player extends EntityLiving {
 	public loadedChunks:Array<number>;
 	public justUnloaded:Array<number>;
 	public mpClient?:MPClient;
+	public inventory:Inventory;
 
 	private lastHealth:number;
 
@@ -25,6 +29,12 @@ export class Player extends EntityLiving {
 		this.firstUpdate = true;
 		this.loadedChunks = new Array<number>();
 		this.justUnloaded = new Array<number>();
+
+		this.inventory = new Inventory(44, "Player Inventory");
+
+		this.inventory.setSlotItemStack(36, new ItemStack(Block.dirt, 1));
+		this.inventory.setSlotItemStack(37, new ItemStack(Block.dirt, 2));
+		this.inventory.setSlotItemStack(38, new ItemStack(Block.dirt, 3));
 
 		this.username = username;
 		this.x = 8;

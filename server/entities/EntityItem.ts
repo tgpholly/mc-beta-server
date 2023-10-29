@@ -1,5 +1,5 @@
 import { World } from "../World";
-import { ItemStack } from "../containers/ItemStack";
+import { ItemStack } from "../inventories/ItemStack";
 import { Entity } from "./Entity";
 
 export class EntityItem extends Entity {
