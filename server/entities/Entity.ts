@@ -1,8 +1,14 @@
 import { Chunk } from "../Chunk";
 import { MetadataEntry, MetadataWriter } from "../MetadataWriter";
+import { Rotation } from "../Rotation";
+import { Vec3 } from "../Vec3";
 import { World } from "../World";
 import { MetadataFieldType } from "../enums/MetadataFieldType";
+import { PacketEntityLook } from "../packets/EntityLook";
+import { PacketEntityLookRelativeMove } from "../packets/EntityLookRelativeMove";
 import { PacketEntityMetadata } from "../packets/EntityMetadata";
+import { PacketEntityRelativeMove } from "../packets/EntityRelativeMove";
+import { PacketEntityTeleport } from "../packets/EntityTeleport";
 import { IEntity } from "./IEntity";
 
 export class Entity implements IEntity {
@@ -11,14 +17,22 @@ export class Entity implements IEntity {
 	public entityId:number;
 
 	public world:World;
-	public x:number;
-	public y:number;
-	public z:number;
-	public lastX:number;
-	public lastY:number;
-	public lastZ:number;
+
+	public position:Vec3;
+	public lastPosition:Vec3;
+	public absPosition:Vec3;
+	public lastAbsPosition:Vec3;
+
+	public rotation:Rotation;
+	public lastRotation:Rotation;
+	public absRotation:Rotation;
+	public lastAbsRotation:Rotation;
+
+	public velocity:Vec3;
 
 	public health:number;
+	public wasHurt:boolean;
+	public isDead:boolean;
 
 	public fire:number;
 
@@ -36,12 +50,26 @@ export class Entity implements IEntity {
 		this.fire = 0;
 
 		this.world = world;
-		this.x = this.y = this.z = this.lastX = this.lastY = this.lastZ = 0;
+
+		this.position = new Vec3();
+		this.lastPosition = new Vec3();
+		this.absPosition = new Vec3();
+		this.lastAbsPosition = new Vec3();
+
+		this.rotation = new Rotation();
+		this.lastRotation = new Rotation();
+		this.absRotation = new Rotation();
+		this.lastAbsRotation = new Rotation();
+
+		this.velocity = new Vec3();
+
 		this.crouching = this.lastCrouchState = this.lastFireState = this.queuedChunkUpdate = false;
 
-		this.chunk = world.getChunk(this.x >> 4, this.z >> 4);
+		this.chunk = world.getChunk(this.position.x >> 4, this.position.z >> 4);
 
 		this.health = 20;
+		this.wasHurt = false;
+		this.isDead = false;
 	}
 
 	sendToNearby(buffer:Buffer) {
@@ -61,10 +89,7 @@ export class Entity implements IEntity {
 			// 1 = On Fire
 			// 2 = Player crouched
 			// 4 = Player on mount?
-			//metadata.addMetadataEntry(0, new MetadataEntry(MetadataFieldType.Byte, 1));
-			if (crouchStateChanged) {
-				metadata.addMetadataEntry(0, new MetadataEntry(MetadataFieldType.Byte, Number(this.fire > 0) + Number(this.crouching) * 2));
-			}
+			metadata.addMetadataEntry(0, new MetadataEntry(MetadataFieldType.Byte, Number(this.fire > 0) + Number(this.crouching) * 2));
 
 			this.sendToNearby(new PacketEntityMetadata(this.entityId, metadata.writeBuffer()).writeData());
 
@@ -74,9 +99,9 @@ export class Entity implements IEntity {
 	}
 
 	distanceTo(entity:IEntity) {
-		const dX = entity.x - this.x,
-			  dY = entity.y - this.y,
-			  dZ = entity.z - this.z;
+		const dX = entity.position.x - this.position.x,
+			  dY = entity.position.y - this.position.y,
+			  dZ = entity.position.z - this.position.z;
 			  
 		return Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2) + Math.pow(dZ, 2));
 	}
@@ -89,18 +114,58 @@ export class Entity implements IEntity {
 		if (entity === undefined) {
 			this.health -= damage;
 		}
+
+		this.wasHurt = true;
 	}
 
 	updateEntityChunk() {
-		const bitX = this.x >> 4;
-		const bitZ = this.z >> 4;
-		if (bitX != this.lastX >> 4 || bitZ != this.lastZ >> 4 || this.queuedChunkUpdate) {
+		const bitX = this.position.x >> 4;
+		const bitZ = this.position.z >> 4;
+		if (bitX != this.lastPosition.x >> 4 || bitZ != this.lastPosition.z >> 4 || this.queuedChunkUpdate) {
 			if (this.world.chunkExists(bitX, bitZ)) {
 				this.chunk = this.world.getChunk(bitX, bitZ);
 				this.queuedChunkUpdate = false;
 			} else {
 				this.queuedChunkUpdate = true;
 			}
+		}
+	}
+
+	private constrainRot(rot:number) {
+		return Math.min(Math.max(rot, -128), 127);
+	}
+
+	private sendPositionUpdate() {
+		this.absPosition.set(Math.floor(this.position.x * 32), Math.floor(this.position.y * 32), Math.floor(this.position.z * 32));
+
+		// This is suuuuuper jank
+		this.absRotation.set(
+			this.constrainRot(Math.floor(((this.rotation.yaw - 180 >= 0 ? this.rotation.yaw - 180 : (this.rotation.yaw - 180) % 360 + 360) % 360 / 360) * 256) - 128), // Yaw
+			this.constrainRot(Math.floor((this.rotation.pitch % 360 * 256) / 360)) // Pitch
+		);
+		const diffX = this.absPosition.x - this.lastAbsPosition.x;
+		const diffY = this.absPosition.y - this.lastAbsPosition.y;
+		const diffZ = this.absPosition.z - this.lastAbsPosition.z;
+		const diffYaw = this.absRotation.yaw - this.lastAbsRotation.yaw;
+		const diffPitch = this.absRotation.pitch - this.lastAbsRotation.pitch;
+
+		const doRelativeMove = Math.abs(diffX) >= 4 || Math.abs(diffY) >= 4 || Math.abs(diffZ) >= 4;
+		const doLook = Math.abs(diffYaw) >= 4 || Math.abs(diffPitch) >= 4;
+		if (Math.abs(diffX) > 128 || Math.abs(diffY) > 128 || Math.abs(diffZ) > 128) {
+			this.world.sendToNearbyClients(this, new PacketEntityTeleport(this.entityId, this.absPosition.x, this.absPosition.y, this.absPosition.z, this.absRotation.yaw, this.absRotation.pitch).writeData());
+		} else if (doRelativeMove && doLook) {
+			this.world.sendToNearbyClients(this, new PacketEntityLookRelativeMove(this.entityId, diffX, diffY, diffZ, this.absRotation.yaw, this.absRotation.pitch).writeData());
+		} else if (doRelativeMove) {
+			this.world.sendToNearbyClients(this, new PacketEntityRelativeMove(this.entityId, diffX, diffY, diffZ).writeData());
+		} else if (doLook) {
+			this.world.sendToNearbyClients(this, new PacketEntityLook(this.entityId, this.absRotation.yaw, this.absRotation.pitch).writeData());
+		}
+
+		if (doRelativeMove) {
+			this.lastAbsPosition.set(this.absPosition);
+		}
+		if (doLook) {
+			this.lastAbsRotation.set(this.absRotation);
 		}
 	}
 
@@ -116,8 +181,17 @@ export class Entity implements IEntity {
 			this.fire--;
 		}
 
-		this.lastX = this.x;
-		this.lastY = this.y;
-		this.lastZ = this.z;
+		if (!this.isDead && this.health <= 0) {
+			this.isDead = true;
+
+		}
+
+		if (this.wasHurt) {
+			this.wasHurt = false;
+		}
+
+		this.sendPositionUpdate();
+
+		this.lastPosition.set(this.position);
 	}
 }

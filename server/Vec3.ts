@@ -3,7 +3,7 @@ export class Vec3 {
 	public y:number;
 	public z:number;
 
-	public constructor(x?:number, y?:number, z?:number) {
+	public constructor(x?:Vec3 | number, y?:number, z?:number) {
 		if (typeof(x) === "number" && typeof(y) === "number" && typeof(z) === "number") {
 			this.x = x;
 			this.y = y;
@@ -12,14 +12,26 @@ export class Vec3 {
 			this.x = x;
 			this.y = x;
 			this.z = x;
+		} else if (x instanceof Vec3) {
+			this.x = x.x;
+			this.y = x.y;
+			this.z = x.z;
 		} else {
 			this.x = this.y = this.z = 0;
 		}
 	}
 
-	public set(x:number, y:number, z:number) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+	public set(x?:Vec3 | number, y?:number, z?:number) {
+		if (x instanceof Vec3) {
+			this.x = x.x;
+			this.y = x.y;
+			this.z = x.z;
+		} else if (typeof(x) === "number" && typeof(y) === "number" && typeof(z) === "number") {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		} else {
+			this.x = this.y = this.z = 0;
+		}
 	}
 }

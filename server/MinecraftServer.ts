@@ -225,10 +225,10 @@ export class MinecraftServer {
 			socket.write(new PacketLoginRequest(clientEntity.entityId, "", 0, dimension).writeData());
 			socket.write(new PacketSpawnPosition(8, 64, 8).writeData());
 
-			const thisPlayerSpawn = new PacketNamedEntitySpawn(clientEntity.entityId, clientEntity.username, clientEntity.absX, clientEntity.absY, clientEntity.absZ, clientEntity.absYaw, clientEntity.absPitch, 0).writeData();
+			const thisPlayerSpawn = new PacketNamedEntitySpawn(clientEntity.entityId, clientEntity.username, clientEntity.absPosition.x, clientEntity.absPosition.y, clientEntity.absPosition.z, clientEntity.absRotation.yaw, clientEntity.absRotation.pitch, clientEntity.mpClient?.getHeldItemStack()?.itemID).writeData();
 			world.players.forEach(player => {
 				if (player.entityId !== clientEntity.entityId && clientEntity.distanceTo(player) < World.ENTITY_MAX_SEND_DISTANCE) {
-					socket.write(new PacketNamedEntitySpawn(player.entityId, player.username, player.absX, player.absY, player.absZ, player.absYaw, player.absPitch, 0).writeData());
+					socket.write(new PacketNamedEntitySpawn(player.entityId, player.username, player.absPosition.x, player.absPosition.y, player.absPosition.z, player.absRotation.yaw, player.absRotation.pitch, player.mpClient?.getHeldItemStack()?.itemID).writeData());
 					player.mpClient?.send(thisPlayerSpawn);
 				}
 			});
@@ -237,7 +237,6 @@ export class MinecraftServer {
 
 			const playerInventory = clientEntity.inventory;
 			socket.write(new PacketWindowItems(0, playerInventory.getInventorySize(), playerInventory.constructInventoryPayload()).writeData());
-			console.log(new PacketWindowItems(0, playerInventory.getInventorySize(), playerInventory.constructInventoryPayload()).writeData());
 		} else {
 			socket.write(new PacketDisconnectKick("Failed to find world to put player in.").writeData());
 		}

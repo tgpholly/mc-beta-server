@@ -1,13 +1,19 @@
 import { World } from "../World";
+import { BlockBehaviour } from "./BlockBehaviour";
 import { BlockBehaviourFlower } from "./BlockBehaviourFlower";
+import { BlockBehaviourGrass } from "./BlockBehaviourGrass";
 import { IBlockBehaviour } from "./IBlockBehaviour";
 
 abstract class Behaviour {
+	public static base = new BlockBehaviour();
+
+	public static grass = new BlockBehaviourGrass();
 	public static flower = new BlockBehaviourFlower();
 }
 
 export class Block {
 	public readonly blockId:number;
+	
 	public static readonly blocks:Array<Block> = new Array<Block>();
 	public static readonly lightPassage:Array<number> = new Array<number>();
 	public static readonly blockBehaviours:Array<IBlockBehaviour> = new Array<IBlockBehaviour>();
@@ -17,6 +23,7 @@ export class Block {
 		Block.blocks[blockId] = this;
 		Block.lightPassage[blockId] = 0;
 		Block.blockNames[blockId] = "";
+		Block.blockBehaviours[blockId] = Behaviour.base;
 		this.blockId = blockId;
 	}
 
@@ -60,14 +67,16 @@ export class Block {
 	}
 
 	public neighborBlockChange(world:World, x:number, y:number, z:number, blockId:number) {
-		if (this.behaviour !== undefined) {
-			this.behaviour.neighborBlockChange(world, x, y, z, blockId);
-		}
+		this.behaviour.neighborBlockChange(world, x, y, z, blockId);
+	}
+
+	public droppedItem(blockId:number) {
+		this.behaviour.droppedItem(blockId);
 	}
 
 	// Define statics here
 	static readonly stone = new Block(1).setBlockName("Stone");
-	static readonly grass = new Block(2).setBlockName("Grass");
+	static readonly grass = new Block(2).setBehaviour(Behaviour.grass).setBlockName("Grass");
 	static readonly dirt = new Block(3).setBlockName("Dirt");
 
 	static readonly bedrock = new Block(7).setBlockName("Bedrock");

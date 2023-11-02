@@ -19,6 +19,9 @@ import { PacketPlayerBlockPlacement } from "./packets/PlayerBlockPlacement";
 import { Inventory } from "./inventories/Inventory";
 import { PacketHoldingChange } from "./packets/HoldingChange";
 import { PacketDisconnectKick } from "./packets/DisconnectKick";
+import { ItemStack } from "./inventories/ItemStack";
+import { PacketWindowItems } from "./packets/WindowItems";
+import { Block } from "./blocks/Block";
 
 export class MPClient {
 	private readonly mcServer:MinecraftServer;
@@ -86,24 +89,24 @@ export class MPClient {
 		if (message[0].startsWith("/")) {
 			packet.message = "";
 			if (message[0] === "/tp") {
-				const x = this.entity.x = parseFloat(message[1]);
-				const y = this.entity.y = parseFloat(message[2]);
-				const z = this.entity.z = parseFloat(message[3]);
+				const x = this.entity.position.x = parseFloat(message[1]);
+				const y = this.entity.position.y = parseFloat(message[2]);
+				const z = this.entity.position.z = parseFloat(message[3]);
 				this.send(new PacketPlayerPositionLook(x, y, y + 0.62, z, 0, 0, false).writeData());
 				Console.printInfo(packet.message = `Teleported ${this.entity.username} to ${message[1]} ${message[2]} ${message[3]}`);
 			} else if (message[0] === "/csay") {
 				this.mcServer.sendChatMessage(`[CONSOLE] ${message.slice(1, message.length).join(" ")}`);
 			} else if (message[0] === "/top") {
 				packet.message = `Woosh!`;
-				const topBlock = this.entity.world.getChunk(this.entity.x >> 4, this.entity.z >> 4).getTopBlockY(this.entity.x & 0xf, this.entity.z & 0xf);
-				this.send(new PacketPlayerPosition(this.entity.x, topBlock + 3, topBlock + 3.62, this.entity.z, false).writeData());
+				const topBlock = this.entity.chunk.getTopBlockY(this.entity.position.x & 0xf, this.entity.position.z & 0xf);
+				this.send(new PacketPlayerPosition(this.entity.position.x, topBlock + 3, topBlock + 3.62, this.entity.position.z, false).writeData());
 			} else if (message[0] === "/tpx") {
 				const dimension = parseInt(message[1]);
 				if (this.mcServer.worlds.has(dimension)) {
 					packet.message = "\u00a76Switching dimensions...";	
 					this.switchDimension(dimension);
 				} else {
-					packet.message = `\u00a7cNo dimension by id "${dimension} exists!"`;
+					packet.message = `\u00a7cNo dimension by id "${dimension}" exists!`;
 				}
 			}
 
@@ -124,22 +127,16 @@ export class MPClient {
 	}
 
 	private handlePacketPlayerPosition(packet:PacketPlayerPosition) {
-		this.entity.x = packet.x;
-		this.entity.y = packet.y;
-		this.entity.z = packet.z;
+		this.entity.position.set(packet.x, packet.y, packet.z);
 	}
 
 	private handlePacketPlayerLook(packet:PacketPlayerLook) {
-		this.entity.yaw = packet.yaw;
-		this.entity.pitch = packet.pitch;
+		this.entity.rotation.set(packet.yaw, packet.pitch);
 	}
 
 	private handlePacketPlayerPositionLook(packet:PacketPlayerPositionLook) {
-		this.entity.x = packet.x;
-		this.entity.y = packet.y;
-		this.entity.z = packet.z;
-		this.entity.yaw = packet.yaw;
-		this.entity.pitch = packet.pitch;
+		this.entity.position.set(packet.x, packet.y, packet.z);
+		this.entity.rotation.set(packet.yaw, packet.pitch);
 	}
 
 	private handlePacketPlayerDigging(packet:PacketPlayerDigging) {
@@ -155,20 +152,37 @@ export class MPClient {
 		if (packet.status === 0) {
 			// Started digging
 		} else if (packet.status === 2) {
-			if (this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z) != 0) {
+			let brokenBlockId:number;
+			if ((brokenBlockId = this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z)) != 0) {
+				const metadata = this.entity.world.getBlockMetadata(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z);
 				this.entity.world.setBlockWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, 0);
+				console.log("Metadata: ", metadata);
+				this.inventory.addItemStack(new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
+				this.send(new PacketWindowItems(0, this.inventory.getInventorySize(), this.inventory.constructInventoryPayload()).writeData());
 			}
 		}
+	}
+
+	public getHeldItemStack() {
+		return this.inventory.getSlotItemStack(this.holdingIndex);
 	}
 
 	private handlePacketBlockPlacement(packet:PacketPlayerBlockPlacement) {
 		this.diggingAt.set(packet.x, packet.y, packet.z);
 		this.mapCoordsFromFace(this.diggingAt, packet.face);
 
-		const itemStack = this.inventory.getSlotItemStack(this.holdingIndex);
-		if (itemStack != null && itemStack.size > 0 && this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z) === 0) {
-			itemStack.size--;
-			this.entity.world.setBlockAndMetadataWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, itemStack.itemID, itemStack.damage);
+		const itemStack = this.getHeldItemStack();
+		if (itemStack == null || itemStack.size == 0) {
+			return;
+		}
+
+		if (itemStack.isBlock) {
+			if (this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z) === 0) {
+				itemStack.size--;
+				this.entity.world.setBlockAndMetadataWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, itemStack.itemID, itemStack.damage);
+			}
+		} else {
+			// TODO: Handle item usage
 		}
 	}
 
@@ -209,9 +223,7 @@ export class MPClient {
 
 		this.send(new PacketRespawn(dimension).writeData());
 		//this.send(new PacketSpawnPosition(8, 64, 8).writeData());
-		this.entity.x = 8;
-		this.entity.y = 70;
-		this.entity.z = 8;
+		this.entity.position.set(8, 60, 8);
 		this.send(new PacketPlayerPositionLook(8, 70, 70.62, 8, 0, 0, false).writeData());
 
 		this.entity.forceUpdatePlayerChunks();

@@ -3,7 +3,7 @@ import { ItemStack } from "./ItemStack";
 import IInventory from "./IInventory";
 
 export class Inventory implements IInventory {
-	private itemStacks:Array<ItemStack | null>;
+	public itemStacks:Array<ItemStack | null>;
 
 	private size:number;
 	private name:string;
@@ -16,6 +16,20 @@ export class Inventory implements IInventory {
 
 		this.size = size;
 		this.name = name;
+	}
+
+	addItemStack(itemStack:ItemStack) {
+		// Check bottom inventory row (hotbar) first.
+		/*let workingItemStack:ItemStack | null;
+		for (let slotId = 9; slotId <= 35; slotId++) {
+			if (itemStack.size === 0) {
+				break;
+			}
+
+			if ((workingItemStack = this.itemStacks[slotId]) != null) {
+				workingItemStack.insert(itemStack);
+			}
+		}*/
 	}
 
 	getInventoryName() {

@@ -6,11 +6,8 @@ export class EntityItem extends Entity {
 	public age:number;
 	public itemStack:ItemStack;
 
-	public constructor(world:World, x:number, y:number, z:number, itemStack:ItemStack) {
+	public constructor(world:World, itemStack:ItemStack) {
 		super(world);
-		this.x = x;
-		this.y = y;
-		this.z = z;
 
 		this.itemStack = itemStack;
 
