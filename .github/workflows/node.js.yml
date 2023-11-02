@@ -31,7 +31,7 @@ jobs:
     #- run: npm run dev:updateCheck
     - run: npm run build
     - name: Upload build artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: mc-beta-server
-          path: build/index.min.js
+      uses: actions/upload-artifact@v3
+      with:
+        name: 'mc-beta-server'
+        path: 'build/index.min.js'
