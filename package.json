@@ -7,8 +7,7 @@
 		"dev:updateCheck": "check-outdated",
 		"dev:run": "nodemon --watch './**/*.ts' index.ts",
 		"build": "npm-run-all build:*",
-		"build:smash": "ts-node ./tooling/fileSmasher.ts",
-		"build:build": "tsc --build",
+		"build:build": "ncc build index.ts -o build",
 		"build:mangle": "ts-node ./tooling/mangle.ts",
 		"build:cleanup": "ts-node ./tooling/cleanup.ts",
 		"_clean": "tsc --build --clean"
@@ -29,11 +28,12 @@
 		"hsconsole": "^1.0.2"
 	},
 	"devDependencies": {
-		"@types/node": "^20.8.9",
+		"@types/node": "^20.8.10",
+		"@vercel/ncc": "^0.38.1",
 		"check-outdated": "^2.12.0",
 		"nodemon": "^3.0.1",
 		"npm-run-all": "^4.1.5",
-		"terser": "^5.22.0",
+		"terser": "^5.24.0",
 		"ts-loader": "^9.5.0",
 		"ts-node": "^10.9.1",
 		"typescript": "^5.2.2"
