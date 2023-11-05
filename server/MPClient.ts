@@ -71,7 +71,7 @@ export class MPClient {
 
 		switch (packetId) {
 			case Packet.Chat:                 this.handleChat(new PacketChat().readData(reader)); break;
-			case Packet.Respawn:			  this.handlePacketRespawn(new PacketRespawn().readData(reader)); break;
+			case Packet.Respawn:			  this.handlePacketRespawn(); break;
 			case Packet.Player:               this.handlePacketPlayer(new PacketPlayer().readData(reader)); break;
 			case Packet.PlayerPosition:       this.handlePacketPlayerPosition(new PacketPlayerPosition().readData(reader)); break;
 			case Packet.PlayerLook:           this.handlePacketPlayerLook(new PacketPlayerLook().readData(reader)); break;
@@ -125,7 +125,7 @@ export class MPClient {
 		this.mcServer.sendToAllClients(packet.writeData());
 	}
 
-	private handlePacketRespawn(packet:PacketRespawn) {
+	private handlePacketRespawn() {
 		if (this.entity.health > 0) {
 			return;
 		}
