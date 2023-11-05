@@ -4,6 +4,9 @@ import { Player } from "../entities/Player";
 import { Item } from "../items/Item";
 
 export class ItemStack {
+	private static ITEMSTACK_ID_ADDER = 0;
+	private readonly itemStackId:number;
+
 	public readonly itemID:number;
 	public readonly isBlock:boolean;
 	public size:number;
@@ -58,6 +61,16 @@ export class ItemStack {
 		this.maxSize = this.isBlock ? 64 : Item.getByShiftedItemId(this.itemID).maxStackSize;
 		this.maxDamage = this.isBlock ? 0 : Item.getByShiftedItemId(this.itemID).maxDamage;
 		this.canBeDamaged = this.maxDamage > 0;
+
+		this.itemStackId = ItemStack.ITEMSTACK_ID_ADDER++;
+	}
+
+	public static Compare(itemStack1:ItemStack, itemStack2:ItemStack) {
+		return itemStack1.itemStackId === itemStack2.itemStackId;
+	}
+
+	public compare(itemStack:ItemStack) {
+		return this.itemStackId === itemStack.itemStackId;
 	}
 
 	public insert(itemStack:ItemStack) {
