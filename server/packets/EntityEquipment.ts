@@ -26,6 +26,6 @@ export class PacketEntityEquipment implements IPacket {
 	}
 
 	public writeData() {
-		return createWriter(Endian.BE, 10).writeUByte(this.packetId).writeInt(this.entityId).writeShort(this.slot).writeShort(this.itemId).writeShort(this.damage).toBuffer();
+		return createWriter(Endian.BE, 11).writeUByte(this.packetId).writeInt(this.entityId).writeShort(this.slot).writeShort(this.itemId).writeShort(this.damage).toBuffer();
 	}
 }
