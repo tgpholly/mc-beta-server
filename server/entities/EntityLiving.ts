@@ -21,8 +21,10 @@ export class EntityLiving extends Entity {
 	public constructor(world:World) {
 		super(world);
 
-		this.fallDistance = this.timeInWater = 0;
+		this.timeInWater = 0;
 		this.headHeight = 1.62;
+
+		this.fallDistance = Number.MIN_VALUE;
 
 		this.lastHealth = this.health;
 	}
@@ -41,8 +43,8 @@ export class EntityLiving extends Entity {
 		}
 	}
 
-	isInWater() {
-		return this.world.getChunkBlockId(this.chunk, this.position.x, this.position.y + this.headHeight, this.position.z) === Block.waterStill.blockId;
+	isInWater(fromHead:boolean) {
+		return this.world.getChunkBlockId(this.chunk, this.position.x, this.position.y + (fromHead ? this.headHeight : 0), this.position.z) === Block.waterStill.blockId;
 	}
 
 	fall(distance:number) {
@@ -55,12 +57,8 @@ export class EntityLiving extends Entity {
 	onTick() {
 		super.onTick();
 
-		if (!this.onGround) {
-			this.fallDistance
-		}
-
 		// Drowning
-		if (this.isInWater()) {
+		if (this.isInWater(true)) {
 			if (this.timeInWater == Number.MIN_SAFE_INTEGER) {
 				this.timeInWater = 320;
 			}
@@ -70,6 +68,10 @@ export class EntityLiving extends Entity {
 			this.timeInWater--;				
 		} else {
 			this.timeInWater = Number.MIN_SAFE_INTEGER;
+		}
+
+		if (this.isInWater(false)) {
+			this.fallDistance = 0;
 		}
 	}
 }

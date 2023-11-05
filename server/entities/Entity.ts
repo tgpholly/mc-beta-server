@@ -187,8 +187,7 @@ export class Entity implements IEntity {
 
 	updateFalling(distance:number) {
 		if (this.onGround) {
-            if (this.fallDistance > 0)
-            {
+            if (this.fallDistance > 0) {
                 this.fall(this.fallDistance);
                 this.fallDistance = 0;
             }
