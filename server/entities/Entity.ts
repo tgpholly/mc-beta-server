@@ -9,6 +9,7 @@ import { PacketEntityLookRelativeMove } from "../packets/EntityLookRelativeMove"
 import { PacketEntityMetadata } from "../packets/EntityMetadata";
 import { PacketEntityRelativeMove } from "../packets/EntityRelativeMove";
 import { PacketEntityTeleport } from "../packets/EntityTeleport";
+import { PacketEntityVelocity } from "../packets/EntityVelocity";
 import { IEntity } from "./IEntity";
 
 export class Entity implements IEntity {
@@ -166,6 +167,10 @@ export class Entity implements IEntity {
 			this.sendToNearby(new PacketEntityRelativeMove(this.entityId, diffX, diffY, diffZ).writeData());
 		} else if (doLook) {
 			this.sendToNearby(new PacketEntityLook(this.entityId, this.absRotation.yaw, this.absRotation.pitch).writeData());
+		}
+
+		if (!this.motion.isZero) {
+			this.sendToNearby(new PacketEntityVelocity(this.entityId, this.motion.x, this.motion.y, this.motion.z).writeData());
 		}
 
 		if (doRelativeMove) {
