@@ -11,6 +11,11 @@ me trying to understand minecraft beta's protocol
 <img src="https://eusv.net/images/mc-beta-server-readme-1-overworld.webp" alt="Minecraft landscape with trees, caves, flowers, shrubs and an ocean.">
 <img src="https://eusv.net/images/mc-beta-server-readme-1-nether.webp" alt="WIP Minecraft Nether with very simple terrain.">
 
+**Goals:**
+ - Make this as fast as possible on a single thread.
+ - Only use thread pools if absolutely neccesary.
+ - Build the server in a way where it should be easy to multithread it.
+
 **Implemented:**
  - Basic flat terrain generation
  - Basic (top to bottom, no spread) Lighting
@@ -20,26 +25,24 @@ me trying to understand minecraft beta's protocol
  - Cross chunk structure generation (trees, buildings, etc...)
  - World/Chunk saving to disk
  - Block breaking
+ - Player Inventory
 
 **WIP:**
  - Entities:
    - Players
  - Dimensions:
    - Nether
+ - Inventories (containers, etc...)
 
 **To Implement:**
  - Block placement
  - Entities:
    - Items
    - Mobs
- - Inventories (player inventory, containers, etc...)
+ - Saving inventories
  - Sleeping in beds
  - Tile entities
  - Probably a bunch more things that i'm forgetting
- 
-**Long Term:**
- - Make this as fast as possible on a single thread.
- - Only use thread pools if absolutely neccesary.
 
 <hr>
 
