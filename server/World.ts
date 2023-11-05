@@ -8,6 +8,7 @@ import { Player } from "./entities/Player";
 import { HillyGenerator } from "./generators/Hilly";
 import { IGenerator } from "./generators/IGenerator";
 import { PacketBlockChange } from "./packets/BlockChange";
+import { PacketDestroyEntity } from "./packets/DestroyEntity";
 import { QueuedBlockUpdate } from "./queuedUpdateTypes/BlockUpdate";
 import { IQueuedUpdate } from "./queuedUpdateTypes/IQueuedUpdate";
 
@@ -66,6 +67,7 @@ export class World {
 			entity.justUnloaded = new Array<number>();
 
 			this.players.remove(entity.entityId);
+			this.sendToNearbyClients(entity, new PacketDestroyEntity(entity.entityId).writeData());
 		}
 
 		this.entites.remove(entity.entityId);
