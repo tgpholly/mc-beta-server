@@ -21,6 +21,10 @@ export class Vec3 {
 		}
 	}
 
+	public get isZero() {
+		return this.x === 0 && this.y === 0 && this.z === 0;
+	}
+
 	public set(x?:Vec3 | number, y?:number, z?:number) {
 		if (x instanceof Vec3) {
 			this.x = x.x;

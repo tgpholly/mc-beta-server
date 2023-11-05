@@ -17,6 +17,10 @@ export class Vec2 {
 		}
 	}
 
+	public get isZero() {
+		return this.x === 0 && this.y === 0;
+	}
+
 	public set(x?:Vec2 | number, y?:number) {
 		if (x instanceof Vec2) {
 			this.x = x.x;
