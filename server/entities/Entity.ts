@@ -144,7 +144,8 @@ export class Entity implements IEntity {
 	private sendPositionUpdate() {
 		this.absPosition.set(Math.floor(this.position.x * 32), Math.floor(this.position.y * 32), Math.floor(this.position.z * 32));
 
-		// This is suuuuuper jank
+		// This code *does* work, and it works well. But this is absolutely TERRIBLE!
+		// There is definitely a better way to do this.
 		this.absRotation.set(
 			this.constrainRot(Math.floor(((this.rotation.yaw - 180 >= 0 ? this.rotation.yaw - 180 : (this.rotation.yaw - 180) % 360 + 360) % 360 / 360) * 256) - 128), // Yaw
 			this.constrainRot(Math.floor((this.rotation.pitch % 360 * 256) / 360)) // Pitch
@@ -158,13 +159,13 @@ export class Entity implements IEntity {
 		const doRelativeMove = Math.abs(diffX) >= 4 || Math.abs(diffY) >= 4 || Math.abs(diffZ) >= 4;
 		const doLook = Math.abs(diffYaw) >= 4 || Math.abs(diffPitch) >= 4;
 		if (Math.abs(diffX) > 128 || Math.abs(diffY) > 128 || Math.abs(diffZ) > 128) {
-			this.world.sendToNearbyClients(this, new PacketEntityTeleport(this.entityId, this.absPosition.x, this.absPosition.y, this.absPosition.z, this.absRotation.yaw, this.absRotation.pitch).writeData());
+			this.sendToNearby(new PacketEntityTeleport(this.entityId, this.absPosition.x, this.absPosition.y, this.absPosition.z, this.absRotation.yaw, this.absRotation.pitch).writeData());
 		} else if (doRelativeMove && doLook) {
-			this.world.sendToNearbyClients(this, new PacketEntityLookRelativeMove(this.entityId, diffX, diffY, diffZ, this.absRotation.yaw, this.absRotation.pitch).writeData());
+			this.sendToNearby(new PacketEntityLookRelativeMove(this.entityId, diffX, diffY, diffZ, this.absRotation.yaw, this.absRotation.pitch).writeData());
 		} else if (doRelativeMove) {
-			this.world.sendToNearbyClients(this, new PacketEntityRelativeMove(this.entityId, diffX, diffY, diffZ).writeData());
+			this.sendToNearby(new PacketEntityRelativeMove(this.entityId, diffX, diffY, diffZ).writeData());
 		} else if (doLook) {
-			this.world.sendToNearbyClients(this, new PacketEntityLook(this.entityId, this.absRotation.yaw, this.absRotation.pitch).writeData());
+			this.sendToNearby(new PacketEntityLook(this.entityId, this.absRotation.yaw, this.absRotation.pitch).writeData());
 		}
 
 		if (doRelativeMove) {
