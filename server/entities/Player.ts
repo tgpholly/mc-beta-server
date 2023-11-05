@@ -11,6 +11,7 @@ import { ItemStack } from "../inventories/ItemStack";
 import { Block } from "../blocks/Block";
 import PlayerInventory from "../inventories/PlayerInventory";
 import { Item } from "../items/Item";
+import { PacketEntityEquipment } from "../packets/EntityEquipment";
 
 const CHUNK_LOAD_RANGE = 15;
 
@@ -22,6 +23,8 @@ export class Player extends EntityLiving {
 	public justUnloaded:Array<number>;
 	public mpClient?:MPClient;
 	public inventory:PlayerInventory;
+
+	public trackedEquipment:Array<ItemStack | null>;
 
 	public constructor(server:MinecraftServer, world:World, username:string) {
 		super(world);
@@ -38,10 +41,16 @@ export class Player extends EntityLiving {
 		this.inventory.setSlotItemStack(39, new ItemStack(Item.ironAxe, 1));
 		this.inventory.setSlotItemStack(43, new ItemStack(Block.dirt, 32));
 
+		this.trackedEquipment = new Array<ItemStack | null>();
+		for (let i = 0; i < 5; i++) {
+			this.trackedEquipment.push(null);
+		}
+
 		this.username = username;
 		this.position.set(8, 64, 8);
 	}
 
+	// Forces a player chunk update *next tick*
 	public forceUpdatePlayerChunks() {
 		this.firstUpdate = true;
 	}
@@ -90,13 +99,59 @@ export class Player extends EntityLiving {
 		}
 	}
 
+	private getEquipmentForVirtualSlot(slot:number) {
+		if (slot === 0) {
+			return this.mpClient?.getHeldItemStack() ?? null;
+		} else {
+			this.inventory.getSlotItemStack(4 + slot); // 5 - 8
+		}
+
+		return null;
+	}
+
+	private sendEquipment(equipmentId:number, itemStack:ItemStack | null) {
+		this.sendToNearby(new PacketEntityEquipment(this.entityId, equipmentId, itemStack == null ? -1 : itemStack.itemID, itemStack == null ? 0 : itemStack.damage).writeData());
+	}
+
+	private sendEquipmentPlayer(mpClient:MPClient, equipmentId:number, itemStack:ItemStack | null) {
+		mpClient.send(new PacketEntityEquipment(this.entityId, equipmentId, itemStack == null ? -1 : itemStack.itemID, itemStack == null ? 0 : itemStack.damage).writeData());
+	}
+
+	// For login.
+	public sendPlayerEquipment(playerToSendTo:Player) {
+		const mpClient = playerToSendTo.mpClient;
+		if (mpClient == null) {
+			return;
+		}
+
+		for (let slotId = 0; slotId < 5; slotId++) {
+			const itemStack = this.getEquipmentForVirtualSlot(slotId);
+			const trackedEquipment = this.trackedEquipment[slotId];
+
+			if ((itemStack == null || trackedEquipment == null) || !itemStack.compare(trackedEquipment)) {
+				this.trackedEquipment[slotId] = itemStack;
+				this.sendEquipmentPlayer(mpClient, slotId, itemStack);
+			}
+		}
+	}
+
 	public onTick() {
 		this.updatePlayerChunks();
 
-		// Calculate player motion
+		// Calculate player motion since we don't have it serverside.
 		this.motion.set(this.position.x - this.lastPosition.x, this.position.y - this.lastPosition.y, this.position.z - this.lastPosition.z);
 
 		super.onTick();
+
+		for (let slotId = 0; slotId < 5; slotId++) {
+			const itemStack = this.getEquipmentForVirtualSlot(slotId);
+			const trackedEquipment = this.trackedEquipment[slotId];
+
+			if ((itemStack == null || trackedEquipment == null) || !itemStack.compare(trackedEquipment)) {
+				this.trackedEquipment[slotId] = itemStack;
+				this.sendEquipment(slotId, itemStack);
+			}
+		}
 
 		if (this.health != this.lastHealth) {
 			this.lastHealth = this.health;

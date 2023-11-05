@@ -171,6 +171,9 @@ export class MinecraftServer {
 						client.send(timePacket);
 					});
 				}
+
+				// const memoryUsage = process.memoryUsage();
+				// console.log(`Memory Usage: ${(memoryUsage.heapUsed / 1024 / 1024).toFixed(1)}MB / ${(memoryUsage.heapTotal / 1024 / 1024).toFixed(1)}MB  ArrayBuffers: ${(memoryUsage.arrayBuffers / 1024 / 1024).toFixed(1)}MB`);
 			}
 
 			this.worlds.forEach(world => {
@@ -228,8 +231,13 @@ export class MinecraftServer {
 			const thisPlayerSpawn = new PacketNamedEntitySpawn(clientEntity.entityId, clientEntity.username, clientEntity.absPosition.x, clientEntity.absPosition.y, clientEntity.absPosition.z, clientEntity.absRotation.yaw, clientEntity.absRotation.pitch, clientEntity.mpClient?.getHeldItemStack()?.itemID).writeData();
 			world.players.forEach(player => {
 				if (player.entityId !== clientEntity.entityId && clientEntity.distanceTo(player) < World.ENTITY_MAX_SEND_DISTANCE) {
+					// Inform the joining player of the players around them
 					socket.write(new PacketNamedEntitySpawn(player.entityId, player.username, player.absPosition.x, player.absPosition.y, player.absPosition.z, player.absRotation.yaw, player.absRotation.pitch, player.mpClient?.getHeldItemStack()?.itemID).writeData());
+					player.sendPlayerEquipment(clientEntity);
+
+					// Inform players around the joining player of the joined player
 					player.mpClient?.send(thisPlayerSpawn);
+					clientEntity.sendPlayerEquipment(player);
 				}
 			});
 
