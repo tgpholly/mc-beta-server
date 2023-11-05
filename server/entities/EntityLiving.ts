@@ -24,7 +24,7 @@ export class EntityLiving extends Entity {
 		this.timeInWater = 0;
 		this.headHeight = 1.62;
 
-		this.fallDistance = Number.MIN_VALUE;
+		this.fallDistance = 0;
 
 		this.lastHealth = this.health;
 	}
