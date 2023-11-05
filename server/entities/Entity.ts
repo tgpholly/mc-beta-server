@@ -22,6 +22,7 @@ export class Entity implements IEntity {
 	public lastPosition:Vec3;
 	public absPosition:Vec3;
 	public lastAbsPosition:Vec3;
+	public motion:Vec3;
 
 	public rotation:Rotation;
 	public lastRotation:Rotation;
@@ -35,6 +36,9 @@ export class Entity implements IEntity {
 	public isDead:boolean;
 
 	public fire:number;
+	public fallDistance:number;
+
+	public onGround:boolean;
 
 	public chunk:Chunk;
 
@@ -47,7 +51,8 @@ export class Entity implements IEntity {
 	public constructor(world:World) {
 		this.entityId = Entity.nextEntityId++;
 		
-		this.fire = 0;
+		this.fire = this.fallDistance = 0;
+		this.onGround = false;
 
 		this.world = world;
 
@@ -55,6 +60,7 @@ export class Entity implements IEntity {
 		this.lastPosition = new Vec3();
 		this.absPosition = new Vec3();
 		this.lastAbsPosition = new Vec3();
+		this.motion = new Vec3();
 
 		this.rotation = new Rotation();
 		this.lastRotation = new Rotation();
@@ -77,7 +83,7 @@ export class Entity implements IEntity {
 	}
 
 	sendToAllNearby(buffer:Buffer) {
-		this.world.sendToNearbyClients(this, buffer);
+		this.world.sendToNearbyAllNearbyClients(this, buffer);
 	}
 
 	updateMetadata() {
@@ -169,9 +175,26 @@ export class Entity implements IEntity {
 		}
 	}
 
+	fall(distance:number) {
+		// TODO: Entity falling mount transfer
+	}
+
+	updateFalling(distance:number) {
+		if (this.onGround) {
+            if (this.fallDistance > 0)
+            {
+                this.fall(this.fallDistance);
+                this.fallDistance = 0;
+            }
+        } else if (distance < 0) {
+            this.fallDistance -= distance;
+        }
+	}
+
 	onTick() {
 		this.updateMetadata();
 		this.updateEntityChunk();
+		this.updateFalling(this.motion.y);
 
 		if (this.fire > 0) {
 			if (this.fire % 20 === 0) {

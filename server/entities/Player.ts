@@ -12,7 +12,7 @@ import { Block } from "../blocks/Block";
 import PlayerInventory from "../inventories/PlayerInventory";
 import { Item } from "../items/Item";
 
-const CHUNK_LOAD_RANGE = 5;
+const CHUNK_LOAD_RANGE = 15;
 
 export class Player extends EntityLiving {
 	public username:string;
@@ -22,8 +22,6 @@ export class Player extends EntityLiving {
 	public justUnloaded:Array<number>;
 	public mpClient?:MPClient;
 	public inventory:PlayerInventory;
-
-	private lastHealth:number;
 
 	public constructor(server:MinecraftServer, world:World, username:string) {
 		super(world);
@@ -42,8 +40,6 @@ export class Player extends EntityLiving {
 
 		this.username = username;
 		this.position.set(8, 64, 8);
-
-		this.lastHealth = this.health;
 	}
 
 	public forceUpdatePlayerChunks() {
@@ -97,11 +93,14 @@ export class Player extends EntityLiving {
 	public onTick() {
 		this.updatePlayerChunks();
 
+		// Calculate player motion
+		this.motion.set(this.position.x - this.lastPosition.x, this.position.y - this.lastPosition.y, this.position.z - this.lastPosition.z);
+
+		super.onTick();
+
 		if (this.health != this.lastHealth) {
 			this.lastHealth = this.health;
 			this.mpClient?.send(new PacketUpdateHealth(this.health).writeData());
 		}
-
-		super.onTick();
 	}
 }

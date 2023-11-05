@@ -28,6 +28,7 @@ export class MPClient {
 	private readonly socket:Socket;
 	public entity:Player;
 	private inventory:Inventory;
+	private dimension:number;
 
 	private holdingIndex:number = 36; // First hotbar slot.
 	private diggingAt:Vec3;
@@ -37,6 +38,7 @@ export class MPClient {
 		this.socket = socket;
 		this.entity = entity;
 		this.inventory = entity.inventory;
+		this.dimension = 0;
 
 		this.diggingAt = new Vec3();
 	}
@@ -69,6 +71,7 @@ export class MPClient {
 
 		switch (packetId) {
 			case Packet.Chat:                 this.handleChat(new PacketChat().readData(reader)); break;
+			case Packet.Respawn:			  this.handlePacketRespawn(new PacketRespawn().readData(reader)); break;
 			case Packet.Player:               this.handlePacketPlayer(new PacketPlayer().readData(reader)); break;
 			case Packet.PlayerPosition:       this.handlePacketPlayerPosition(new PacketPlayerPosition().readData(reader)); break;
 			case Packet.PlayerLook:           this.handlePacketPlayerLook(new PacketPlayerLook().readData(reader)); break;
@@ -122,24 +125,35 @@ export class MPClient {
 		this.mcServer.sendToAllClients(packet.writeData());
 	}
 
+	private handlePacketRespawn(packet:PacketRespawn) {
+		if (this.entity.health > 0) {
+			return;
+		}
+	}
+
 	private handlePacketPlayer(packet:PacketPlayer) {
 		this.entity.onGround = packet.onGround;
 	}
 
 	private handlePacketPlayerPosition(packet:PacketPlayerPosition) {
+		this.entity.onGround = packet.onGround;
 		this.entity.position.set(packet.x, packet.y, packet.z);
 	}
 
 	private handlePacketPlayerLook(packet:PacketPlayerLook) {
+		this.entity.onGround = packet.onGround;
 		this.entity.rotation.set(packet.yaw, packet.pitch);
 	}
 
 	private handlePacketPlayerPositionLook(packet:PacketPlayerPositionLook) {
+		this.entity.onGround = packet.onGround;
 		this.entity.position.set(packet.x, packet.y, packet.z);
 		this.entity.rotation.set(packet.yaw, packet.pitch);
 	}
 
 	private handlePacketPlayerDigging(packet:PacketPlayerDigging) {
+		console.log(packet.status);
+
 		// Special drop item case
 		if (packet.status === 4) {
 			// TODO: Handle dropping items
@@ -156,7 +170,6 @@ export class MPClient {
 			if ((brokenBlockId = this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z)) != 0) {
 				const metadata = this.entity.world.getBlockMetadata(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z);
 				this.entity.world.setBlockWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, 0);
-				console.log("Metadata: ", metadata);
 				this.inventory.addItemStack(new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
 				this.send(new PacketWindowItems(0, this.inventory.getInventorySize(), this.inventory.constructInventoryPayload()).writeData());
 			}

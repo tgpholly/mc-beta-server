@@ -1,12 +1,17 @@
 import { Block } from "../blocks/Block";
+import { IEntity } from "../entities/IEntity";
+import { Player } from "../entities/Player";
 import { Item } from "../items/Item";
 
 export class ItemStack {
 	public readonly itemID:number;
 	public readonly isBlock:boolean;
-	public readonly maxSize:number;
 	public size:number;
 	public damage:number;
+
+	private readonly maxSize:number;
+	private readonly maxDamage:number;
+	private readonly canBeDamaged:boolean;
 
 	public constructor(blockOrItemOrItemID:Block|Item|number, size?:number, damage?:number) {
 		if (blockOrItemOrItemID instanceof Block && size === undefined && damage === undefined) {
@@ -50,7 +55,9 @@ export class ItemStack {
 		}
 
 		this.isBlock = this.itemID < 256;
-		this.maxSize = !this.isBlock ? Item.getByShiftedItemId(this.itemID).maxStackSize : 64;
+		this.maxSize = this.isBlock ? 64 : Item.getByShiftedItemId(this.itemID).maxStackSize;
+		this.maxDamage = this.isBlock ? 0 : Item.getByShiftedItemId(this.itemID).maxDamage;
+		this.canBeDamaged = this.maxDamage > 0;
 	}
 
 	public insert(itemStack:ItemStack) {
@@ -69,7 +76,22 @@ export class ItemStack {
 			this.size += remainingSpace;
 			itemStack.size -= remainingSpace;
 		}
-	} 
+	}
+
+	public damageItem(damageAmount:number, entity:IEntity) {
+		if (!this.canBeDamaged) {
+			return;
+		}
+
+		this.damage += damageAmount;
+		if (this.damage > this.maxDamage) {
+			this.size--;
+			if (this.size < 0) {
+				this.size = 0;
+			}
+			this.damage = 0;
+		}
+	}
 
 	public get spaceAvaliable() {
 		// Stack size check for Item(s) and Block(s).

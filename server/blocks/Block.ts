@@ -2,12 +2,15 @@ import { World } from "../World";
 import { BlockBehaviour } from "./BlockBehaviour";
 import { BlockBehaviourFlower } from "./BlockBehaviourFlower";
 import { BlockBehaviourGrass } from "./BlockBehaviourGrass";
+import { BlockBehaviourStone } from "./BlockBehaviourStone";
 import { IBlockBehaviour } from "./IBlockBehaviour";
 
 abstract class Behaviour {
 	public static base = new BlockBehaviour();
 
+	public static stone = new BlockBehaviourStone();
 	public static grass = new BlockBehaviourGrass();
+
 	public static flower = new BlockBehaviourFlower();
 }
 
@@ -75,9 +78,10 @@ export class Block {
 	}
 
 	// Define statics here
-	static readonly stone = new Block(1).setBlockName("Stone");
+	static readonly stone = new Block(1).setBehaviour(Behaviour.stone).setBlockName("Stone");
 	static readonly grass = new Block(2).setBehaviour(Behaviour.grass).setBlockName("Grass");
 	static readonly dirt = new Block(3).setBlockName("Dirt");
+	static readonly cobblestone = new Block(4).setBlockName("Cobblestone");
 
 	static readonly bedrock = new Block(7).setBlockName("Bedrock");
 
