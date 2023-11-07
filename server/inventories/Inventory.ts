@@ -44,6 +44,15 @@ export class Inventory implements IInventory {
 		return this.itemStacks[slotId];
 	}
 
+	dropEmptyItemStacks() {
+		for (let i = 0; i < this.itemStacks.length; i++) {
+			const itemStack = this.itemStacks[i];
+			if (itemStack?.size === 0) {
+				this.itemStacks[i] = null;
+			}
+		}
+	}
+
 	setSlotItemStack(slotId:number, itemStack: ItemStack | null) {
 		if (slotId < 0 || slotId > this.size - 1) {
 			throw new Error(`Tried to set an Inventory ItemStack out of bounds! Requested slot: ${slotId}, Inventory Size: ${this.size}`);

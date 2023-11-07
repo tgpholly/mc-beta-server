@@ -155,8 +155,15 @@ export class MPClient {
 		this.entity.rotation.set(packet.yaw, packet.pitch);
 	}
 
+	private breakBlock(brokenBlockId:number, x:number, y:number, z:number) {
+		const metadata = this.entity.world.getBlockMetadata(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z);
+		this.entity.world.setBlockWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, 0);
+		this.inventory.addItemStack(new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
+		this.send(new PacketWindowItems(0, this.inventory.getInventorySize(), this.inventory.constructInventoryPayload()).writeData());
+	}
+
+	// TODO: Cap how far away a player is able to break blocks
 	private handlePacketPlayerDigging(packet:PacketPlayerDigging) {
-		console.log(packet.status);
 
 		// Special drop item case
 		if (packet.status === 4) {
@@ -165,17 +172,16 @@ export class MPClient {
 		}
 
 		this.diggingAt.set(packet.x, packet.y, packet.z);
-		//this.mapCoordsToFace(this.diggingAt, packet.face);
 
+		let brokenBlockId:number;
 		if (packet.status === 0) {
 			// Started digging
+			if ((brokenBlockId = this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z)) != 0 && Block.blocks[brokenBlockId].blockStrength() >= 1) {
+				this.breakBlock(brokenBlockId, this.diggingAt.x, this.diggingAt.y, this.diggingAt.z);
+			}
 		} else if (packet.status === 2) {
-			let brokenBlockId:number;
 			if ((brokenBlockId = this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z)) != 0) {
-				const metadata = this.entity.world.getBlockMetadata(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z);
-				this.entity.world.setBlockWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, 0);
-				this.inventory.addItemStack(new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
-				this.send(new PacketWindowItems(0, this.inventory.getInventorySize(), this.inventory.constructInventoryPayload()).writeData());
+				this.breakBlock(brokenBlockId, this.diggingAt.x, this.diggingAt.y, this.diggingAt.z);
 			}
 		}
 	}
@@ -197,6 +203,7 @@ export class MPClient {
 			if (this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z) === 0) {
 				itemStack.size--;
 				this.entity.world.setBlockAndMetadataWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, itemStack.itemID, itemStack.damage);
+				this.inventory.dropEmptyItemStacks();
 			}
 		} else {
 			// TODO: Handle item usage

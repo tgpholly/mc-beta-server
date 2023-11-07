@@ -19,6 +19,7 @@ export class Block {
 	
 	public static readonly blocks:Array<Block> = new Array<Block>();
 	public static readonly lightPassage:Array<number> = new Array<number>();
+	public static readonly hardness:Array<number> = new Array<number>();
 	public static readonly blockBehaviours:Array<IBlockBehaviour> = new Array<IBlockBehaviour>();
 	public static readonly blockNames:Array<string> = new Array<string>();
 
@@ -36,6 +37,14 @@ export class Block {
 
 	public set lightPassage(value:number) {
 		Block.lightPassage[this.blockId] = value;
+	}
+
+	public get hardness() {
+		return Block.hardness[this.blockId];
+	}
+
+	public set hardness(value:number) {
+		Block.hardness[this.blockId] = value;
 	}
 
 	public get blockName() {
@@ -77,32 +86,54 @@ export class Block {
 		this.behaviour.droppedItem(blockId);
 	}
 
+	public getHardness() {
+		return this.hardness;
+	}
+
+	public setHardness(value:number) {
+		this.hardness = value;
+		return this;
+	}
+
+	public setUnbreakable() {
+		return this.setHardness(-1);
+	}
+
+	public blockStrength() {
+		if (this.hardness < 0) {
+			return 0;
+		}
+		// TODO: Check if we can actually harvest a block with current tool
+		// TODO: Have the 1 be based on current tool ig
+		return 1 / this.hardness / 100;
+	}
+
 	// Define statics here
-	static readonly stone = new Block(1).setBehaviour(Behaviour.stone).setBlockName("Stone");
-	static readonly grass = new Block(2).setBehaviour(Behaviour.grass).setBlockName("Grass");
-	static readonly dirt = new Block(3).setBlockName("Dirt");
-	static readonly cobblestone = new Block(4).setBlockName("Cobblestone");
+	static readonly stone = new Block(1).setHardness(1.5).setBehaviour(Behaviour.stone).setBlockName("Stone");
+	static readonly grass = new Block(2).setHardness(0.6).setBehaviour(Behaviour.grass).setBlockName("Grass");
+	static readonly dirt = new Block(3).setHardness(0.5).setBlockName("Dirt");
+	static readonly cobblestone = new Block(4).setHardness(2).setBlockName("Cobblestone");
 
-	static readonly bedrock = new Block(7).setBlockName("Bedrock");
+	static readonly bedrock = new Block(7).setUnbreakable().setBlockName("Bedrock");
 
-	static readonly waterStill = new Block(9).setLightPassage(128).setBlockName("Still Water");
+	static readonly waterStill = new Block(9).setHardness(100).setLightPassage(128).setBlockName("Still Water");
 
-	static readonly lavaStill = new Block(11).setBlockName("Still Lava");
+	static readonly lavaStill = new Block(11).setHardness(100).setBlockName("Still Lava");
 
-	static readonly sand = new Block(12).setBlockName("Sand");
-	static readonly gravel = new Block(13).setBlockName("Gravel");
+	static readonly sand = new Block(12).setHardness(0.5).setBlockName("Sand");
+	static readonly gravel = new Block(13).setHardness(0.6).setBlockName("Gravel");
 
-	static readonly wood = new Block(17).setBlockName("Wood");
-	static readonly leaves = new Block(18).setLightPassage(240).setBlockName("Leaves");
+	static readonly wood = new Block(17).setHardness(2).setBlockName("Wood");
+	static readonly leaves = new Block(18).setHardness(0.2).setLightPassage(240).setBlockName("Leaves");
 
-	static readonly glass = new Block(20).setLightPassage(255).setBlockName("Glass");
+	static readonly glass = new Block(20).setHardness(0.3).setLightPassage(255).setBlockName("Glass");
 
-	static readonly tallGrass = new Block(31).setLightPassage(255).setBehaviour(Behaviour.flower).setBlockName("Tall Grass");
+	static readonly tallGrass = new Block(31).setHardness(0).setLightPassage(255).setBehaviour(Behaviour.flower).setBlockName("Tall Grass");
 
-	static readonly flowerDandelion = new Block(37).setLightPassage(255).setBlockName("Dandelion");
-	static readonly flowerRose = new Block(38).setLightPassage(255).setBlockName("Rose");
+	static readonly flowerDandelion = new Block(37).setHardness(0).setLightPassage(255).setBlockName("Dandelion");
+	static readonly flowerRose = new Block(38).setHardness(0).setLightPassage(255).setBlockName("Rose");
 
-	static readonly clay = new Block(82).setBlockName("Clay");
+	static readonly clay = new Block(82).setHardness(0.6).setBlockName("Clay");
 
-	static readonly netherrack = new Block(87).setBlockName("Netherrack");
+	static readonly netherrack = new Block(87).setHardness(0.4).setBlockName("Netherrack");
 }
