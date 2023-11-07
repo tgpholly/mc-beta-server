@@ -83,7 +83,11 @@ export class MPClient {
 			case Packet.Animation:            this.handlePacketAnimation(new PacketAnimation().readData(reader)); break;
 			case Packet.EntityAction:         this.handlePacketEntityAction(new PacketEntityAction().readData(reader)); break;
 			case Packet.DisconnectKick:       this.handleDisconnectKick(); break;
-			default: Console.printWarn(`UNIMPLEMENTED PACKET: ${Packet[packetId]}`); break;
+			default: return Console.printWarn(`UNIMPLEMENTED PACKET: ${Packet[packetId]}`);
+		}
+
+		if (reader.readOffset < reader.length - 1) {
+			this.handlePacket(reader);
 		}
 	}
 	

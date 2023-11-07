@@ -24,7 +24,7 @@
 	},
 	"homepage": "https://github.com/tgpholly/mc-beta-server#readme",
 	"dependencies": {
-		"bufferstuff": "^1.3.4",
+		"bufferstuff": "^1.4.2",
 		"hsconsole": "^1.0.2"
 	},
 	"devDependencies": {
