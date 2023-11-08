@@ -12,7 +12,7 @@ import { PacketPlayerPositionLook } from "./packets/PlayerPositionLook";
 import { PacketPlayerDigging } from "./packets/PlayerDigging";
 import { Player } from "./entities/Player";
 import { Socket } from "net";
-import { Vec3 } from "./Vec3";
+import Vec3 from "./Vec3";
 import { PacketRespawn } from "./packets/Respawn";
 import { PacketSpawnPosition } from "./packets/SpawnPosition";
 import { PacketPlayerBlockPlacement } from "./packets/PlayerBlockPlacement";

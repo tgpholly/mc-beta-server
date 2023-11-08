@@ -1,7 +1,8 @@
 import { Chunk } from "../Chunk";
 import { MetadataEntry, MetadataWriter } from "../MetadataWriter";
 import { Rotation } from "../Rotation";
-import { Vec3 } from "../Vec3";
+import { Vec2 } from "../Vec2";
+import Vec3 from "../Vec3";
 import { World } from "../World";
 import { MetadataFieldType } from "../enums/MetadataFieldType";
 import { PacketEntityLook } from "../packets/EntityLook";
@@ -16,6 +17,8 @@ export class Entity implements IEntity {
 	public static nextEntityId:number = 0;
 
 	public entityId:number;
+
+	public entitySize:Vec2;
 
 	public world:World;
 
@@ -51,6 +54,8 @@ export class Entity implements IEntity {
 
 	public constructor(world:World) {
 		this.entityId = Entity.nextEntityId++;
+
+		this.entitySize = new Vec2(0.6, 1.8);
 		
 		this.fire = this.fallDistance = 0;
 		this.onGround = false;

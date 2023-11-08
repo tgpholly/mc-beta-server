@@ -1,5 +1,5 @@
 import { Rotation } from "../Rotation";
-import { Vec3 } from "../Vec3";
+import Vec3 from "../Vec3";
 import { World } from "../World";
 import { Block } from "../blocks/Block";
 import { EntityStatus } from "../enums/EntityStatus";
