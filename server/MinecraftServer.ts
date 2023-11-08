@@ -136,16 +136,20 @@ export class MinecraftServer {
 			let timer = Date.now();
 
 			await this.worlds.forEach(async world => {
+				timer = Date.now();
 				let chunksGenerated = 0;
+				let chunksPerSecond = 0;
 				Console.printInfo(`Generating spawn area for DIM${world.dimension}...`);
 				for (let x = chunkFrom; x < chunkTo; x++) {
 					for (let z = chunkFrom; z < chunkTo; z++) {
 						const chunk = await world.getChunkSafe(x, z);
 						chunk.forceLoaded = true;
 						chunksGenerated++;
+						chunksPerSecond++;
 						if (Date.now() - timer >= 1000) {
-							Console.printInfo(`DIM${world.dimension} Progress [${chunksGenerated}/${chunkCount}] ${((chunksGenerated / chunkCount) * 100).toFixed(2)}%`);
+							Console.printInfo(`DIM${world.dimension} Progress [${chunksGenerated}/${chunkCount}] (${chunksPerSecond} chunks/s) ${((chunksGenerated / chunkCount) * 100).toFixed(2)}%`);
 							timer = Date.now();
+							chunksPerSecond = 0;
 						}
 					}
 				}
