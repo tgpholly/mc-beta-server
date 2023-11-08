@@ -166,7 +166,6 @@ export class MinecraftServer {
 						client.send(this.keepalivePacket);
 						client.send(timePacket);
 					});
-					console.log(this.tickCounter);
 				}
 
 				// const memoryUsage = process.memoryUsage();
