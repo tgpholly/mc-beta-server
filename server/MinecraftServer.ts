@@ -23,6 +23,10 @@ import { HillyGenerator } from "./generators/Hilly";
 import { NetherGenerator } from "./generators/Nether";
 import { PacketWindowItems } from "./packets/WindowItems";
 
+const chunkFrom = -15;
+const chunkTo = 15;
+const chunkCount = Math.abs(chunkFrom * 2) * (chunkTo * 2);
+
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
 	private static readonly TICK_RATE = 20;
@@ -127,49 +131,42 @@ export class MinecraftServer {
 			}
 			Console.printInfo(`Done! Took ${Date.now() - generateStartTime}ms`);
 		}).bind(this)();*/
-		let chunksGenerated = 0;
 		(async () => {
 			const generateStartTime = Date.now();
 			let timer = Date.now();
-			Console.printInfo("Generating spawn area for DIM0...");
-			for (let x = -10; x < 10; x++) {
-				for (let z = -10; z < 10; z++) {
-					const chunk = await this.overworld.getChunkSafe(x, z);
-					chunk.forceLoaded = true;
-					chunksGenerated++;
-					if (Date.now() - timer >= 1000) {
-						Console.printInfo(`Progress [${chunksGenerated}/400] ${((chunksGenerated / 400) * 100).toFixed(2)}%`);
-						timer = Date.now();
+
+			await this.worlds.forEach(async world => {
+				let chunksGenerated = 0;
+				Console.printInfo(`Generating spawn area for DIM${world.dimension}...`);
+				for (let x = chunkFrom; x < chunkTo; x++) {
+					for (let z = chunkFrom; z < chunkTo; z++) {
+						const chunk = await world.getChunkSafe(x, z);
+						chunk.forceLoaded = true;
+						chunksGenerated++;
+						if (Date.now() - timer >= 1000) {
+							Console.printInfo(`DIM${world.dimension} Progress [${chunksGenerated}/${chunkCount}] ${((chunksGenerated / chunkCount) * 100).toFixed(2)}%`);
+							timer = Date.now();
+						}
 					}
 				}
-			}
-			chunksGenerated = 0;
-			Console.printInfo("Generating spawn area for DIM-1...");
-			for (let x = -10; x < 10; x++) {
-				for (let z = -10; z < 10; z++) {
-					const chunk = await this.nether.getChunkSafe(x, z);
-					chunk.forceLoaded = true;
-					chunksGenerated++;
-					if (Date.now() - timer >= 1000) {
-						Console.printInfo(`Progress [${chunksGenerated}/400] ${((chunksGenerated / 400) * 100).toFixed(2)}%`);
-						timer = Date.now();
-					}
-				}
-			}
+			});
 			Console.printInfo(`Done! Took ${Date.now() - generateStartTime}ms`);
 			this.initServer();
 		}).bind(this)();
 
+		const timeUpdate = new PacketTimeUpdate(BigInt(this.tickCounter));
 		this.serverClock = setInterval(() => {
 			// Every 1 sec
 			if (this.tickCounter % MinecraftServer.TICK_RATE === 0)  {
 				if (this.clients.length !== 0) {
-					const timePacket = new PacketTimeUpdate(BigInt(this.tickCounter)).writeData();
+					timeUpdate.time = BigInt(this.tickCounter);
+					const timePacket = timeUpdate.writeData();
 					this.clients.forEach(client => {
 						// Keep the client happy
 						client.send(this.keepalivePacket);
 						client.send(timePacket);
 					});
+					console.log(this.tickCounter);
 				}
 
 				// const memoryUsage = process.memoryUsage();
