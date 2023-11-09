@@ -1,3 +1,4 @@
+import { IReader, IWriter } from "bufferstuff";
 import { Block } from "../blocks/Block";
 import { IEntity } from "../entities/IEntity";
 import { Player } from "../entities/Player";
@@ -63,6 +64,21 @@ export class ItemStack {
 		this.canBeDamaged = this.maxDamage > 0;
 
 		this.itemStackId = ItemStack.ITEMSTACK_ID_ADDER++;
+	}
+
+	public static FromSave(reader:IReader) {
+		const itemId = reader.readShort();
+		if (itemId === -1) {
+			return null;
+		}
+
+		return new ItemStack(itemId, reader.readByte(), reader.readShort());
+	}
+
+	public toSave(writer:IWriter) {
+		writer.writeShort(this.itemID)
+			  .writeByte(this.size)
+			  .writeShort(this.damage);
 	}
 
 	public static Compare(itemStack1:ItemStack, itemStack2:ItemStack) {

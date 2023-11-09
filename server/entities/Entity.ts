@@ -1,3 +1,4 @@
+import { IReader, IWriter } from "bufferstuff";
 import AABB from "../AABB";
 import { Chunk } from "../Chunk";
 import { MetadataEntry, MetadataWriter } from "../MetadataWriter";
@@ -36,8 +37,6 @@ export class Entity implements IEntity {
 	public lastRotation:Rotation;
 	public absRotation:Rotation;
 	public lastAbsRotation:Rotation;
-
-	public velocity:Vec3;
 
 	public health:number;
 	public wasHurt:boolean;
@@ -85,8 +84,6 @@ export class Entity implements IEntity {
 		this.absRotation = new Rotation();
 		this.lastAbsRotation = new Rotation();
 
-		this.velocity = new Vec3();
-
 		this.crouching = this.lastCrouchState = this.lastFireState = this.queuedChunkUpdate = false;
 
 		this.chunk = world.getChunk(this.position.x >> 4, this.position.z >> 4);
@@ -94,6 +91,24 @@ export class Entity implements IEntity {
 		this.health = 20;
 		this.wasHurt = false;
 		this.isDead = false;
+	}
+
+	public fromSave(reader:IReader) {
+		this.position.set(reader.readDouble(), reader.readDouble(), reader.readDouble());
+		this.motion.set(reader.readFloat(), reader.readFloat(), reader.readFloat());
+		this.rotation.set(reader.readFloat(), reader.readFloat());
+		this.fire = reader.readShort();
+		this.fallDistance = reader.readFloat();
+		this.health = reader.readByte();
+	}
+
+	public toSave(writer:IWriter) {
+		writer.writeDouble(this.position.x).writeDouble(this.position.y).writeDouble(this.position.z) // Position
+			  .writeDouble(this.motion.x).writeDouble(this.motion.y).writeDouble(this.motion.z) // Motion
+			  .writeFloat(this.rotation.x).writeFloat(this.rotation.y) // Rotation
+			  .writeShort(this.fire)
+			  .writeFloat(this.fallDistance)
+			  .writeByte(this.health);
 	}
 
 	sendToNearby(buffer:Buffer) {

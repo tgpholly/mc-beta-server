@@ -1,4 +1,4 @@
-import { Endian, createWriter } from "bufferstuff";
+import { Endian, IReader, IWriter, createWriter } from "bufferstuff";
 import { ItemStack } from "./ItemStack";
 import IInventory from "./IInventory";
 
@@ -16,6 +16,25 @@ export class Inventory implements IInventory {
 
 		this.size = size;
 		this.name = name;
+	}
+
+	public fromSave(reader:IReader) {
+		const inventorySize = reader.readByte();
+		for (let i = 0; i < inventorySize; i++) {
+			this.itemStacks[i] = ItemStack.FromSave(reader);
+		}
+	}
+
+	public toSave(writer:IWriter) {
+		writer.writeByte(this.size);
+		for (const itemStack of this.itemStacks) {
+			if (itemStack === null) {
+				writer.writeShort(-1);
+				continue;
+			}
+
+			itemStack.toSave(writer);
+		}
 	}
 
 	addItemStack(itemStack:ItemStack) {
