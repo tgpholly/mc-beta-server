@@ -77,6 +77,34 @@ export default class AABB {
 		return minY <= maxY ? maxY - minY : 0;
 	}
 
+	public static intersectionX(a: AABB, b: AABB) {
+		const minX = Math.max(a.min.x, b.min.x);
+		const maxX = Math.min(a.max.x, b.max.x);
+	
+		return minX <= maxX ? maxX - minX : 0;
+	}
+	
+	public intersectionX(aabb: AABB) {
+		const minX = Math.max(this.min.x, aabb.min.x);
+		const maxX = Math.min(this.max.x, aabb.max.x);
+	
+		return minX <= maxX ? maxX - minX : 0;
+	}
+	
+	public static intersectionZ(a: AABB, b: AABB) {
+		const minZ = Math.max(a.min.z, b.min.z);
+		const maxZ = Math.min(a.max.z, b.max.z);
+	
+		return minZ <= maxZ ? maxZ - minZ : 0;
+	}
+	
+	public intersectionZ(aabb: AABB) {
+		const minZ = Math.max(this.min.z, aabb.min.z);
+		const maxZ = Math.min(this.max.z, aabb.max.z);
+	
+		return minZ <= maxZ ? maxZ - minZ : 0;
+	}
+
 	public move(xOrVec3:Vec3 | number, y?:number, z?:number) {
 		if (this.pooled) {
 			throw new Error(`Attempted to move a pooled AABB. This is not allowed!`);

@@ -1,3 +1,4 @@
+import { Endian, createWriter } from "bufferstuff";
 import { FunkyArray } from "../funkyArray";
 import { Chunk } from "./Chunk";
 import { WorldSaveManager } from "./WorldSaveManager";
@@ -73,6 +74,11 @@ export class World {
 
 			this.players.remove(entity.entityId);
 			this.sendToNearbyClients(entity, new PacketDestroyEntity(entity.entityId).writeData());
+
+			const writer = createWriter(Endian.BE);
+			entity.toSave(writer);
+
+			this.saveManager.writePlayerSaveToDisk(entity.username, writer);
 		}
 
 		this.entites.remove(entity.entityId);

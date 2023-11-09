@@ -201,7 +201,7 @@ export class MinecraftServer {
 		Console.printInfo(`[CHAT] ${text}`);
 	}
 
-	handleLoginRequest(reader:IReader, socket:Socket, setMPClient:(mpclient:MPClient) => void) {
+	async handleLoginRequest(reader:IReader, socket:Socket, setMPClient:(mpclient:MPClient) => void) {
 		const loginPacket = new PacketLoginRequest().readData(reader);
 		if (loginPacket.protocolVersion !== MinecraftServer.PROTOCOL_VERSION) {
 			if (loginPacket.protocolVersion > MinecraftServer.PROTOCOL_VERSION) {
@@ -216,6 +216,11 @@ export class MinecraftServer {
 		const world = this.worlds.get(dimension);
 		if (world instanceof World) {
 			const clientEntity = new Player(this, world, loginPacket.username);
+			if (this.saveManager.playerDataOnDisk.includes(clientEntity.username)) {
+				clientEntity.fromSave(await this.saveManager.readPlayerDataFromDisk(clientEntity.username));
+			} else {
+				clientEntity.position.set(8, 70, 8);
+			}
 			world.addEntity(clientEntity);
 
 			const client = new MPClient(this, socket, clientEntity);
@@ -241,7 +246,7 @@ export class MinecraftServer {
 				}
 			});
 
-			socket.write(new PacketPlayerPositionLook(8, 70, 70.62, 8, 0, 0, false).writeData());
+			socket.write(new PacketPlayerPositionLook(clientEntity.position.x, clientEntity.position.y, clientEntity.position.y + 0.62, clientEntity.position.z, 0, 0, false).writeData());
 
 			const playerInventory = clientEntity.inventory;
 			socket.write(new PacketWindowItems(0, playerInventory.getInventorySize(), playerInventory.constructInventoryPayload()).writeData());

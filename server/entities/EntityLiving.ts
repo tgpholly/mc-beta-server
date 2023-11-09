@@ -1,3 +1,4 @@
+import { IReader, IWriter } from "bufferstuff";
 import { Rotation } from "../Rotation";
 import Vec3 from "../Vec3";
 import { World } from "../World";
@@ -13,7 +14,6 @@ import { Entity } from "./Entity";
 import { IEntity } from "./IEntity";
 
 export class EntityLiving extends Entity {
-	public fallDistance:number;
 	public timeInWater:number;
 	public headHeight:number;
 	public lastHealth:number;
@@ -24,19 +24,30 @@ export class EntityLiving extends Entity {
 		this.timeInWater = 0;
 		this.headHeight = 1.62;
 
-		this.fallDistance = 0;
-
 		this.lastHealth = this.health;
+	}
+
+	public fromSave(reader:IReader) {
+		super.fromSave(reader);
+
+		this.timeInWater = reader.readShort();
+	}
+	
+	public toSave(writer:IWriter) {
+		super.toSave(writer);
+
+		writer.writeShort(this.timeInWater == Number.MIN_SAFE_INTEGER ? 0 : this.timeInWater);
 	}
 
 	damageFrom(damage:number, entity?:IEntity) {
 		if (this.health <= 0) {
+			this.isDead = true;
 			return;
 		}
 		super.damageFrom(damage, entity);
 
 		// Send Damage Animation packet or death packet
-		if (this.health === 0) {
+		if (this.isDead) {
 			this.sendToAllNearby(new PacketEntityStatus(this.entityId, EntityStatus.Dead).writeData());
 		} else {
 			this.sendToAllNearby(new PacketEntityStatus(this.entityId, EntityStatus.Hurt).writeData());
@@ -56,6 +67,10 @@ export class EntityLiving extends Entity {
 
 	onTick() {
 		super.onTick();
+
+		if (!this.isPlayer && !this.motion.isZero) {
+			this.moveEntity(this.motion.x, this.motion.y, this.motion.z);
+		}
 
 		// Drowning
 		if (this.isInWater(true)) {

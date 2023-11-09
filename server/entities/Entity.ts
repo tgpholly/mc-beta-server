@@ -1,4 +1,4 @@
-import { IReader, IWriter } from "bufferstuff";
+import { Endian, IReader, IWriter, createWriter } from "bufferstuff";
 import AABB from "../AABB";
 import { Chunk } from "../Chunk";
 import { MetadataEntry, MetadataWriter } from "../MetadataWriter";
@@ -55,7 +55,7 @@ export class Entity implements IEntity {
 
 	public entityAABB:AABB;
 
-	private readonly isPlayer:boolean;
+	public readonly isPlayer:boolean;
 	private queuedChunkUpdate:boolean;
 
 	public constructor(world:World, isPlayer:boolean = false) {
@@ -104,7 +104,7 @@ export class Entity implements IEntity {
 
 	public toSave(writer:IWriter) {
 		writer.writeDouble(this.position.x).writeDouble(this.position.y).writeDouble(this.position.z) // Position
-			  .writeDouble(this.motion.x).writeDouble(this.motion.y).writeDouble(this.motion.z) // Motion
+			  .writeFloat(this.motion.x).writeFloat(this.motion.y).writeFloat(this.motion.z) // Motion
 			  .writeFloat(this.rotation.x).writeFloat(this.rotation.y) // Rotation
 			  .writeShort(this.fire)
 			  .writeFloat(this.fallDistance)
@@ -238,9 +238,14 @@ export class Entity implements IEntity {
 		this.entityAABB.move(this.position);
 		if (blockUnderEntity !== null) {
 			const blockBoundingBox = blockUnderEntity.getBoundingBox(Math.floor(this.positionBeforeMove.x), Math.floor(this.positionBeforeMove.y), Math.floor(this.positionBeforeMove.z));
+			// TODO: Handle X and Z collisions.
 			if (this.entityAABB.intersects(blockBoundingBox)) {
-				const intersection = this.entityAABB.intersectionY(blockBoundingBox);
-				this.position.add(0, intersection, 0);
+				const inersectionY = this.entityAABB.intersectionY(blockBoundingBox);
+				this.position.add(
+					0,
+					inersectionY,
+					0
+				);
 				this.motion.y = 0;
 				this.onGround = true;
 			}

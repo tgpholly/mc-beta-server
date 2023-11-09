@@ -1,5 +1,5 @@
 import { readFileSync, readFile, writeFile, existsSync, mkdirSync, writeFileSync, readdirSync, renameSync } from "fs";
-import { createWriter, createReader, Endian } from "bufferstuff";
+import { createWriter, createReader, Endian, IWriter, IReader } from "bufferstuff";
 import { Config } from "../config";
 import { Chunk } from "./Chunk";
 import { SaveCompressionType } from "./enums/SaveCompressionType";
@@ -7,6 +7,12 @@ import { deflate, inflate } from "zlib";
 import { World } from "./World";
 import { FunkyArray } from "../funkyArray";
 import { Console } from "hsconsole";
+
+enum FileMagic {
+	Chunk = 0xFC,
+	Info = 0xFD,
+	Player = 0xFE
+}
 
 export class WorldSaveManager {
 	private readonly worldFolderPath;
@@ -21,9 +27,11 @@ export class WorldSaveManager {
 	public worldSeed = Number.MIN_VALUE;
 
 	public chunksOnDisk:FunkyArray<number, Array<number>>;
+	public playerDataOnDisk:Array<string>;
 
 	public constructor(config:Config, dimensions:Array<number>, numericalSeed:number) {
 		this.chunksOnDisk = new FunkyArray<number, Array<number>>();
+		this.playerDataOnDisk = new Array<string>();
 
 		this.worldFolderPath = `./${config.worldName}`;
 		this.worldPlayerDataFolderPath = `${this.worldFolderPath}/playerdata`;
@@ -69,11 +77,18 @@ export class WorldSaveManager {
 		if (!existsSync(this.worldPlayerDataFolderPath)) {
 			mkdirSync(this.worldPlayerDataFolderPath);
 		}
+
+		const playerDataFiles = readdirSync(this.worldPlayerDataFolderPath);
+		for (const dataFile of playerDataFiles) {
+			if (dataFile.endsWith(".hpd")) {
+				this.playerDataOnDisk.push(dataFile.replace(".hpd", ""));
+			}
+		}
 	}
 
 	private createInfoFile(numericalSeed:number) {
 		const infoFileWriter = createWriter(Endian.BE, 26);
-		infoFileWriter.writeUByte(0xFD); // Info File Magic
+		infoFileWriter.writeUByte(FileMagic.Info); // Info File Magic
 		infoFileWriter.writeUByte(2); // File Version
 		infoFileWriter.writeLong(this.worldCreationDate.getTime()); // World creation date
 		infoFileWriter.writeLong(this.worldLastLoadDate.getTime()); // Last load date
@@ -84,7 +99,7 @@ export class WorldSaveManager {
 	private readInfoFile() {
 		const infoFileReader = createReader(Endian.BE, readFileSync(this.infoFilePath));
 		const fileMagic = infoFileReader.readUByte();
-		if (fileMagic !== 0xFD) {
+		if (fileMagic !== FileMagic.Info) {
 			throw new Error("World info file is invalid");
 		}
 
@@ -123,7 +138,7 @@ export class WorldSaveManager {
 		return new Promise<boolean>((resolve, reject) => {
 			const saveType = this.config.saveCompression;
 			const chunkFileWriter = createWriter(Endian.BE, 10);
-			chunkFileWriter.writeUByte(0xFC); // Chunk File Magic
+			chunkFileWriter.writeUByte(FileMagic.Chunk); // Chunk File Magic
 			// TODO: Change to 1 when lighting actually works
 			chunkFileWriter.writeUByte(1); // File Version
 			chunkFileWriter.writeUByte(saveType); // Save compression type
@@ -185,7 +200,7 @@ export class WorldSaveManager {
 				const chunkFileReader = createReader(Endian.BE, data);
 				
 				// Check file validity
-				if (chunkFileReader.readUByte() !== 0xFC) {
+				if (chunkFileReader.readUByte() !== FileMagic.Chunk) {
 					return reject(new Error("Chunk file is invalid"));
 				}
 
@@ -236,6 +251,47 @@ export class WorldSaveManager {
 							resolve(chunk);
 						});
 					}
+				}
+			});
+		});
+	}
+
+	writePlayerSaveToDisk(username:string, playerData:IWriter) {
+		return new Promise<boolean>((resolve, reject) => {
+			const playerDataWriter = createWriter(Endian.BE);
+			playerDataWriter.writeUByte(FileMagic.Player); // File magic
+			playerDataWriter.writeUByte(0); // File version
+			playerDataWriter.writeBuffer(playerData.toBuffer()); // Player data
+
+			writeFile(`${this.worldPlayerDataFolderPath}/${username}.hpd`, playerDataWriter.toBuffer(), (err) => {
+				if (err) {
+					return reject(err);
+				}
+
+				if (!this.playerDataOnDisk.includes(username)) {
+					this.playerDataOnDisk.push(username);
+				}
+
+				resolve(true);
+			})
+		});
+	}
+
+	readPlayerDataFromDisk(username:string) {
+		return new Promise<IReader>((resolve, reject) => {
+			readFile(`${this.worldPlayerDataFolderPath}/${username}.hpd`, (err, data) => {
+				if (err) {
+					return reject(err);
+				}
+
+				const reader = createReader(Endian.BE, data);
+				if (reader.readUByte() !== FileMagic.Player) {
+					return reject(new Error("Player data file is invalid"));
+				}
+
+				const fileVersion = reader.readUByte();
+				if (fileVersion === 0) {
+					resolve(reader);
 				}
 			});
 		});

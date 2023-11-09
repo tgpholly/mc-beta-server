@@ -12,6 +12,7 @@ import { Block } from "../blocks/Block";
 import PlayerInventory from "../inventories/PlayerInventory";
 import { Item } from "../items/Item";
 import { PacketEntityEquipment } from "../packets/EntityEquipment";
+import { IReader, IWriter } from "bufferstuff";
 
 const CHUNK_LOAD_RANGE = 15;
 
@@ -48,6 +49,18 @@ export class Player extends EntityLiving {
 
 		this.username = username;
 		this.position.set(8, 64, 8);
+	}
+
+	public fromSave(reader:IReader) {
+		super.fromSave(reader);
+
+		this.inventory.fromSave(reader);
+	}
+	
+	public toSave(writer:IWriter) {
+		super.toSave(writer);
+
+		this.inventory.toSave(writer);
 	}
 
 	// Forces a player chunk update *next tick*
