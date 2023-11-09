@@ -1,9 +1,11 @@
+import AABB from "../AABB";
 import { Chunk } from "../Chunk";
 import { MetadataEntry, MetadataWriter } from "../MetadataWriter";
 import { Rotation } from "../Rotation";
 import { Vec2 } from "../Vec2";
 import Vec3 from "../Vec3";
 import { World } from "../World";
+import { Block } from "../blocks/Block";
 import { MetadataFieldType } from "../enums/MetadataFieldType";
 import { PacketEntityLook } from "../packets/EntityLook";
 import { PacketEntityLookRelativeMove } from "../packets/EntityLookRelativeMove";
@@ -28,6 +30,8 @@ export class Entity implements IEntity {
 	public lastAbsPosition:Vec3;
 	public motion:Vec3;
 
+	private positionBeforeMove:Vec3;
+
 	public rotation:Rotation;
 	public lastRotation:Rotation;
 	public absRotation:Rotation;
@@ -50,12 +54,18 @@ export class Entity implements IEntity {
 	private lastCrouchState:boolean;
 	private lastFireState:boolean;
 
+	public entityAABB:AABB;
+
+	private readonly isPlayer:boolean;
 	private queuedChunkUpdate:boolean;
 
-	public constructor(world:World) {
+	public constructor(world:World, isPlayer:boolean = false) {
 		this.entityId = Entity.nextEntityId++;
 
+		this.isPlayer = isPlayer;
+
 		this.entitySize = new Vec2(0.6, 1.8);
+		this.entityAABB = new AABB(-this.entitySize.x / 2, 0, -this.entitySize.x / 2, this.entitySize.x / 2, this.entitySize.y, this.entitySize.x / 2);
 		
 		this.fire = this.fallDistance = 0;
 		this.onGround = false;
@@ -67,6 +77,8 @@ export class Entity implements IEntity {
 		this.absPosition = new Vec3();
 		this.lastAbsPosition = new Vec3();
 		this.motion = new Vec3();
+
+		this.positionBeforeMove = new Vec3();
 
 		this.rotation = new Rotation();
 		this.lastRotation = new Rotation();
@@ -199,6 +211,25 @@ export class Entity implements IEntity {
         } else if (distance < 0) {
             this.fallDistance -= distance;
         }
+	}
+
+	moveEntity(motionX:number, motionY:number, motionZ:number) {
+		this.positionBeforeMove.set(this.position);
+		const blockId = this.chunk.getBlockId(Math.floor(this.positionBeforeMove.x) & 0xf, Math.floor(this.positionBeforeMove.y), Math.floor(this.positionBeforeMove.z) & 0xf);
+		const blockUnderEntity = blockId > 0 ? Block.blocks[blockId] : null;
+
+		this.position.add(motionX, motionY, motionZ);
+		
+		this.entityAABB.move(this.position);
+		if (blockUnderEntity !== null) {
+			const blockBoundingBox = blockUnderEntity.getBoundingBox(Math.floor(this.positionBeforeMove.x), Math.floor(this.positionBeforeMove.y), Math.floor(this.positionBeforeMove.z));
+			if (this.entityAABB.intersects(blockBoundingBox)) {
+				const intersection = this.entityAABB.intersectionY(blockBoundingBox);
+				this.position.add(0, intersection, 0);
+				this.motion.y = 0;
+				this.onGround = true;
+			}
+		}
 	}
 
 	onTick() {

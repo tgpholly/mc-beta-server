@@ -1,3 +1,4 @@
+import AABB from "../AABB";
 import { World } from "../World";
 import { BlockBehaviour } from "./BlockBehaviour";
 import { BlockBehaviourFlower } from "./BlockBehaviourFlower";
@@ -20,6 +21,7 @@ export class Block {
 	public static readonly blocks:Array<Block> = new Array<Block>();
 	public static readonly lightPassage:Array<number> = new Array<number>();
 	public static readonly hardness:Array<number> = new Array<number>();
+	public static readonly blockAABBs:Array<AABB> = new Array<AABB>();
 	public static readonly blockBehaviours:Array<IBlockBehaviour> = new Array<IBlockBehaviour>();
 	public static readonly blockNames:Array<string> = new Array<string>();
 
@@ -45,6 +47,14 @@ export class Block {
 
 	public set hardness(value:number) {
 		Block.hardness[this.blockId] = value;
+	}
+
+	private get blockAABB() {
+		return Block.blockAABBs[this.blockId];
+	}
+
+	private set blockAABB(value:AABB) {
+		Block.blockAABBs[this.blockId] = value;
 	}
 
 	public get blockName() {
@@ -106,6 +116,10 @@ export class Block {
 		// TODO: Check if we can actually harvest a block with current tool
 		// TODO: Have the 1 be based on current tool ig
 		return 1 / this.hardness / 100;
+	}
+	
+	public getBoundingBox(x:number, y:number, z:number) {
+		return this.behaviour.getBoundingBox(x, y, z);
 	}
 
 	// Define statics here

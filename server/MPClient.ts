@@ -22,6 +22,7 @@ import { PacketDisconnectKick } from "./packets/DisconnectKick";
 import { ItemStack } from "./inventories/ItemStack";
 import { PacketWindowItems } from "./packets/WindowItems";
 import { Block } from "./blocks/Block";
+import { EntityItem } from "./entities/EntityItem";
 
 export class MPClient {
 	private readonly mcServer:MinecraftServer;
@@ -160,6 +161,9 @@ export class MPClient {
 		this.entity.world.setBlockWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, 0);
 		this.inventory.addItemStack(new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
 		this.send(new PacketWindowItems(0, this.inventory.getInventorySize(), this.inventory.constructInventoryPayload()).writeData());
+		/*const itemEntity = new EntityItem(this.entity.world, new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
+		itemEntity.position.set(x + 0.5, y + 0.5, z + 0.5);
+		this.entity.world.addEntity(itemEntity);*/
 	}
 
 	// TODO: Cap how far away a player is able to break blocks

@@ -2,6 +2,7 @@ import { FunkyArray } from "../funkyArray";
 import { Chunk } from "./Chunk";
 import { WorldSaveManager } from "./WorldSaveManager";
 import { Block } from "./blocks/Block";
+import { EntityItem } from "./entities/EntityItem";
 import { IEntity } from "./entities/IEntity";
 import { Player } from "./entities/Player";
 //import { FlatGenerator } from "./generators/Flat";
@@ -9,6 +10,7 @@ import { HillyGenerator } from "./generators/Hilly";
 import { IGenerator } from "./generators/IGenerator";
 import { PacketBlockChange } from "./packets/BlockChange";
 import { PacketDestroyEntity } from "./packets/DestroyEntity";
+import { PacketPickupSpawn } from "./packets/PickupSpawn";
 import { QueuedBlockUpdate } from "./queuedUpdateTypes/BlockUpdate";
 import { IQueuedUpdate } from "./queuedUpdateTypes/IQueuedUpdate";
 
@@ -46,6 +48,9 @@ export class World {
 		this.entites.set(entity.entityId, entity);
 		if (entity instanceof Player) {
 			this.players.set(entity.entityId, entity);
+		} else if (entity instanceof EntityItem) {
+			const packet = new PacketPickupSpawn(entity.entityId, entity.itemStack.itemID, entity.itemStack.size, entity.itemStack.damage, Math.round(entity.position.x * 32), Math.round(entity.position.y * 32), Math.round(entity.position.z * 32), 0, 0, 0).writeData();
+			entity.sendToNearby(packet);
 		}
 	}
 

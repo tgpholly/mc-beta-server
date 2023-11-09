@@ -18,8 +18,8 @@ export class EntityLiving extends Entity {
 	public headHeight:number;
 	public lastHealth:number;
 
-	public constructor(world:World) {
-		super(world);
+	public constructor(world:World, isPlayer:boolean = false) {
+		super(world, isPlayer);
 
 		this.timeInWater = 0;
 		this.headHeight = 1.62;

@@ -27,7 +27,7 @@ export class Player extends EntityLiving {
 	public trackedEquipment:Array<ItemStack | null>;
 
 	public constructor(server:MinecraftServer, world:World, username:string) {
-		super(world);
+		super(world, true);
 		this.server = server;
 		this.firstUpdate = true;
 		this.loadedChunks = new Array<number>();
@@ -140,6 +140,9 @@ export class Player extends EntityLiving {
 
 		// Calculate player motion since we don't have it serverside.
 		this.motion.set(this.position.x - this.lastPosition.x, this.position.y - this.lastPosition.y, this.position.z - this.lastPosition.z);
+		if (!this.motion.isZero) {
+			this.entityAABB.move(this.position);
+		}
 
 		super.onTick();
 
