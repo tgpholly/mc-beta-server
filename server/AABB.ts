@@ -35,8 +35,6 @@ export default class AABB {
 		if (!AABB.aabbPool.has(this.aabbPoolString)) {
 			AABB.aabbPool.set(this.aabbPoolString, this);
 		}
-		
-		console.log(this);
 	}
 
 	public static createAABBPoolString(minX:number, minY:number, minZ:number, maxX:number, maxY:number, maxZ:number) {
