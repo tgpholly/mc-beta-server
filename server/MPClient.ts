@@ -161,9 +161,12 @@ export class MPClient {
 		this.entity.world.setBlockWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, 0);
 		this.inventory.addItemStack(new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
 		this.send(new PacketWindowItems(0, this.inventory.getInventorySize(), this.inventory.constructInventoryPayload()).writeData());
-		/*const itemEntity = new EntityItem(this.entity.world, new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
-		itemEntity.position.set(x + 0.5, y + 0.5, z + 0.5);
-		this.entity.world.addEntity(itemEntity);*/
+		/*const itemId = Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId);
+		if (itemId !== -1) {
+			const itemEntity = new EntityItem(this.entity.world, new ItemStack(itemId, 1, metadata));
+			itemEntity.position.set(x + 0.5, y + 0.5, z + 0.5);
+			this.entity.world.addEntity(itemEntity);
+		}*/
 	}
 
 	// TODO: Cap how far away a player is able to break blocks

@@ -4,6 +4,7 @@ import { BlockBehaviour } from "./BlockBehaviour";
 import { BlockBehaviourFlower } from "./BlockBehaviourFlower";
 import { BlockBehaviourGrass } from "./BlockBehaviourGrass";
 import { BlockBehaviourStone } from "./BlockBehaviourStone";
+import { BlockBehaviourTallGrass } from "./BlockBehaviourTallGrass";
 import { IBlockBehaviour } from "./IBlockBehaviour";
 
 abstract class Behaviour {
@@ -12,6 +13,7 @@ abstract class Behaviour {
 	public static stone = new BlockBehaviourStone();
 	public static grass = new BlockBehaviourGrass();
 
+	public static tallGrass = new BlockBehaviourTallGrass();
 	public static flower = new BlockBehaviourFlower();
 }
 
@@ -142,10 +144,10 @@ export class Block {
 
 	static readonly glass = new Block(20).setHardness(0.3).setLightPassage(255).setBlockName("Glass");
 
-	static readonly tallGrass = new Block(31).setHardness(0).setLightPassage(255).setBehaviour(Behaviour.flower).setBlockName("Tall Grass");
+	static readonly tallGrass = new Block(31).setHardness(0).setLightPassage(255).setBehaviour(Behaviour.tallGrass).setBlockName("Tall Grass");
 
-	static readonly flowerDandelion = new Block(37).setHardness(0).setLightPassage(255).setBlockName("Dandelion");
-	static readonly flowerRose = new Block(38).setHardness(0).setLightPassage(255).setBlockName("Rose");
+	static readonly flowerDandelion = new Block(37).setHardness(0).setLightPassage(255).setBehaviour(Behaviour.flower).setBlockName("Dandelion");
+	static readonly flowerRose = new Block(38).setHardness(0).setLightPassage(255).setBehaviour(Behaviour.flower).setBlockName("Rose");
 
 	static readonly clay = new Block(82).setHardness(0.6).setBlockName("Clay");
 
