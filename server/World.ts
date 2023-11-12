@@ -73,7 +73,6 @@ export class World {
 			entity.justUnloaded = new Array<number>();
 
 			this.players.remove(entity.entityId);
-			this.sendToNearbyClients(entity, new PacketDestroyEntity(entity.entityId).writeData());
 
 			const writer = createWriter(Endian.BE);
 			entity.toSave(writer);
@@ -82,7 +81,7 @@ export class World {
 		}
 
 		this.entites.remove(entity.entityId);
-		// TODO: Inform clients about entity removal
+		this.sendToNearbyClients(entity, new PacketDestroyEntity(entity.entityId).writeData());
 	}
 
 	public chunkExists(coordPairOrX:number, chunkZ?:number) {
