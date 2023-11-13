@@ -1,5 +1,5 @@
 import { Console } from "hsconsole";
-import { IReader } from "bufferstuff";
+import { Endian, IReader, createWriter } from "bufferstuff";
 import { MinecraftServer } from "./MinecraftServer";
 import { Packet } from "./enums/Packet";
 import { PacketAnimation } from "./packets/Animation";
@@ -72,7 +72,7 @@ export class MPClient {
 
 		switch (packetId) {
 			case Packet.Chat:                 this.handleChat(new PacketChat().readData(reader)); break;
-			case Packet.Respawn:			  this.handlePacketRespawn(); break;
+			case Packet.Respawn:			  this.handlePacketRespawn(new PacketRespawn().readData(reader)); break;
 			case Packet.Player:               this.handlePacketPlayer(new PacketPlayer().readData(reader)); break;
 			case Packet.PlayerPosition:       this.handlePacketPlayerPosition(new PacketPlayerPosition().readData(reader)); break;
 			case Packet.PlayerLook:           this.handlePacketPlayerLook(new PacketPlayerLook().readData(reader)); break;
@@ -130,10 +130,29 @@ export class MPClient {
 		this.mcServer.sendToAllClients(packet.writeData());
 	}
 
-	private handlePacketRespawn() {
-		if (this.entity.health > 0) {
+	private handlePacketRespawn(packet:PacketRespawn) {
+		if (!this.entity.isDead && packet.dimension === this.entity.world.dimension) {
 			return;
 		}
+
+		const world = this.mcServer.worlds.get(this.entity.world.dimension);
+		if (world == undefined) {
+			return;
+		}
+
+		this.entity.world.removeEntity(this.entity);
+		const oldPlayerEntity = this.entity;
+
+		this.entity = new Player(this.mcServer, world, oldPlayerEntity.username);
+		this.entity.position.set(8, 70, 8);
+		world.addEntity(this.entity);
+
+		this.send(new PacketRespawn(world.dimension).writeData());
+		//this.send(new PacketSpawnPosition(8, 64, 8).writeData());
+		this.entity.position.set(this.entity.position.x, this.entity.position.y, this.entity.position.z);
+		this.send(new PacketPlayerPositionLook(this.entity.position.x, this.entity.position.y, this.entity.position.y + 0.62, this.entity.position.z, 0, 0, false).writeData());
+
+		this.entity.forceUpdatePlayerChunks();
 	}
 
 	private handlePacketPlayer(packet:PacketPlayer) {
