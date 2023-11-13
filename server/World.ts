@@ -74,10 +74,12 @@ export class World {
 
 			this.players.remove(entity.entityId);
 
-			const writer = createWriter(Endian.BE);
-			entity.toSave(writer);
+			if (!entity.isDead) {
+				const writer = createWriter(Endian.BE);
+				entity.toSave(writer);
 
-			this.saveManager.writePlayerSaveToDisk(entity.username, writer);
+				this.saveManager.writePlayerSaveToDisk(entity.username, writer);
+			}
 		}
 
 		this.entites.remove(entity.entityId);
