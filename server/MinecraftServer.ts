@@ -46,8 +46,6 @@ export class MinecraftServer {
 	private clients:FunkyArray<string, MPClient>;
 	public worlds:FunkyArray<number, World>;
 	public saveManager:WorldSaveManager;
-	private overworld:World;
-	private nether:World;
 
 	// https://stackoverflow.com/a/7616484
 	// Good enough for the world seed.
@@ -123,8 +121,8 @@ export class MinecraftServer {
 		}
 
 		this.worlds = new FunkyArray<number, World>();
-		this.worlds.set(0, this.overworld = new World(this.saveManager, 0, worldSeed, new HillyGenerator(worldSeed)));
-		this.worlds.set(-1, this.nether = new World(this.saveManager, -1, worldSeed, new NetherGenerator(worldSeed)));
+		this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new HillyGenerator(worldSeed)));
+		this.worlds.set(-1, new World(this.saveManager, -1, worldSeed, new NetherGenerator(worldSeed)));
 
 		// Generate spawn area (overworld)
 		/*(async () => {
