@@ -22,10 +22,16 @@ import { PacketTimeUpdate } from "./packets/TimeUpdate";
 import { HillyGenerator } from "./generators/Hilly";
 import { NetherGenerator } from "./generators/Nether";
 import { PacketWindowItems } from "./packets/WindowItems";
+import { getRandomValues } from "crypto";
 
 const chunkFrom = -15;
 const chunkTo = 15;
 const chunkCount = Math.abs(chunkFrom * 2) * (chunkTo * 2);
+
+function getRandomSeed() {
+	const arr = new Uint32Array(1);
+	return getRandomValues(arr)[0];
+}
 
 export class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
@@ -108,7 +114,7 @@ export class MinecraftServer {
 		this.clients = new FunkyArray<string, MPClient>();
 
 		// Convert seed if needed
-		let worldSeed = typeof(this.config.seed) === "string" ? this.hashCode(this.config.seed) : this.config.seed;
+		let worldSeed = typeof(this.config.seed) === "string" ? this.hashCode(this.config.seed) : typeof(this.config.seed) === "number" ? this.config.seed : getRandomSeed();
 
 		// Init save manager and load seed from it if possible
 		this.saveManager = new WorldSaveManager(this.config, [0, -1], worldSeed);
