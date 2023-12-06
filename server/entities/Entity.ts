@@ -58,6 +58,8 @@ export class Entity implements IEntity {
 	public readonly isPlayer:boolean;
 	private queuedChunkUpdate:boolean;
 
+	public markedForDisposal:boolean = false;
+
 	public constructor(world:World, isPlayer:boolean = false) {
 		this.entityId = Entity.nextEntityId++;
 
@@ -217,6 +219,11 @@ export class Entity implements IEntity {
 		// TODO: Entity falling mount transfer
 	}
 
+	kill() {
+		this.health = 0;
+		this.markedForDisposal = true;
+	}
+
 	updateFalling(distance:number) {
 		if (this.onGround) {
             if (this.fallDistance > 0) {
@@ -241,11 +248,7 @@ export class Entity implements IEntity {
 			// TODO: Handle X and Z collisions.
 			if (this.entityAABB.intersects(blockBoundingBox)) {
 				const inersectionY = this.entityAABB.intersectionY(blockBoundingBox);
-				this.position.add(
-					0,
-					inersectionY,
-					0
-				);
+				this.position.add(0, inersectionY, 0);
 				this.motion.y = 0;
 				this.onGround = true;
 			}
@@ -267,7 +270,6 @@ export class Entity implements IEntity {
 
 		if (!this.isDead && this.health <= 0) {
 			this.isDead = true;
-
 		}
 
 		if (this.wasHurt) {

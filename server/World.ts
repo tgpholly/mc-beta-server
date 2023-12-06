@@ -287,6 +287,10 @@ export class World {
 					entity.justUnloaded = new Array<number>();
 				}
 			}
+
+			if (entity.markedForDisposal) {
+				this.removeEntity(entity);
+			}
 		})
 	}
 }

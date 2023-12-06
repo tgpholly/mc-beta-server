@@ -7,6 +7,7 @@ export interface IEntity {
 	lastPosition:Vec3,
 	crouching:boolean,
 	isDead:boolean,
+	markedForDisposal:boolean,
 	updateMetadata:() => void,
 	distanceTo:(entity:IEntity) => number,
 	onTick:() => void

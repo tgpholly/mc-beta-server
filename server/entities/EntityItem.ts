@@ -46,7 +46,7 @@ export class EntityItem extends Entity {
 
 		this.age++;
 		if (this.age >= 6000) {
-			// TODO: Kill entity
+			this.kill();
 		}
 	}
 }
