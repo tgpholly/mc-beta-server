@@ -13,6 +13,9 @@ import PlayerInventory from "../inventories/PlayerInventory";
 import { Item } from "../items/Item";
 import { PacketEntityEquipment } from "../packets/EntityEquipment";
 import { IReader, IWriter } from "bufferstuff";
+import { EntityItem } from "./EntityItem";
+import { Entity } from "./Entity";
+import { PacketCollectItem } from "../packets/CollectItem";
 
 const CHUNK_LOAD_RANGE = 15;
 
@@ -34,7 +37,7 @@ export class Player extends EntityLiving {
 		this.loadedChunks = new Array<number>();
 		this.justUnloaded = new Array<number>();
 
-		this.inventory = new PlayerInventory();
+		this.inventory = new PlayerInventory(this);
 
 		this.inventory.setSlotItemStack(36, new ItemStack(Item.ironSword, 1));
 		this.inventory.setSlotItemStack(37, new ItemStack(Item.ironPickaxe, 1));
@@ -66,6 +69,14 @@ export class Player extends EntityLiving {
 	// Forces a player chunk update *next tick*
 	public forceUpdatePlayerChunks() {
 		this.firstUpdate = true;
+	}
+
+	public itemPickup(entity:Entity, stackSize:number) {
+		if (!this.isDead) {
+			if (entity instanceof EntityItem) {
+				this.sendToAllNearby(new PacketCollectItem(entity.entityId, this.entityId).writeData());
+			}
+		}
 	}
 
 	private async updatePlayerChunks() {

@@ -15,6 +15,7 @@ import { PacketEntityRelativeMove } from "../packets/EntityRelativeMove";
 import { PacketEntityTeleport } from "../packets/EntityTeleport";
 import { PacketEntityVelocity } from "../packets/EntityVelocity";
 import { IEntity } from "./IEntity";
+import { Player } from "./Player";
 
 export class Entity implements IEntity {
 	public static nextEntityId:number = 0;
@@ -111,6 +112,17 @@ export class Entity implements IEntity {
 			  .writeShort(this.fire)
 			  .writeFloat(this.fallDistance)
 			  .writeByte(this.health);
+	}
+
+	collidesWithPlayer(aabb:AABB) {
+		let collidedWith:Player | undefined;
+		this.world.players.forEach(player => {
+			if (this.entityAABB.intersects(player.entityAABB)) {
+				collidedWith = player;
+			}
+		});
+
+		return collidedWith;
 	}
 
 	sendToNearby(buffer:Buffer) {

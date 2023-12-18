@@ -14,6 +14,7 @@ import { PacketDestroyEntity } from "./packets/DestroyEntity";
 import { PacketPickupSpawn } from "./packets/PickupSpawn";
 import { QueuedBlockUpdate } from "./queuedUpdateTypes/BlockUpdate";
 import { IQueuedUpdate } from "./queuedUpdateTypes/IQueuedUpdate";
+import AABB from "./AABB";
 
 export class World {
 	public static ENTITY_MAX_SEND_DISTANCE = 50;
@@ -25,6 +26,7 @@ export class World {
 	public chunks:FunkyArray<number, Chunk>;
 	public entites:FunkyArray<number, IEntity>;
 	public players:FunkyArray<number, Player>;
+	public playerHitboxes:FunkyArray<number, AABB>;
 
 	public queuedChunkBlocks:Array<IQueuedUpdate>;
 	public queuedUpdates:Array<IQueuedUpdate>;
@@ -40,6 +42,7 @@ export class World {
 		this.chunks = new FunkyArray<number, Chunk>();
 		this.entites = new FunkyArray<number, IEntity>();
 		this.players = new FunkyArray<number, Player>();
+		this.playerHitboxes = new  FunkyArray<number, AABB>();
 		this.queuedChunkBlocks = new Array<IQueuedUpdate>();
 		this.queuedUpdates = new Array<IQueuedUpdate>();
 		this.generator = generator;
@@ -47,6 +50,7 @@ export class World {
 
 	public addEntity(entity:IEntity) {
 		this.entites.set(entity.entityId, entity);
+		this.playerHitboxes.set(entity.entityId, entity.entityAABB);
 		if (entity instanceof Player) {
 			this.players.set(entity.entityId, entity);
 		} else if (entity instanceof EntityItem) {
@@ -72,6 +76,7 @@ export class World {
 			entity.loadedChunks = new Array<number>();
 			entity.justUnloaded = new Array<number>();
 
+			this.playerHitboxes.remove(entity.entityId);
 			this.players.remove(entity.entityId);
 
 			if (!entity.isDead) {
@@ -274,8 +279,7 @@ export class World {
 			if (entity instanceof Player) {
 				if (entity.justUnloaded.length > 0) {
 					for (const coordPair of entity.justUnloaded) {
-						if (this.chunks.get(coordPair) != undefined)
-						{
+						if (this.chunks.get(coordPair) != undefined) {
 							const chunkToUnload = this.getChunkByCoordPair(coordPair);
 							chunkToUnload.playersInChunk.remove(entity.entityId);
 							if (!chunkToUnload.forceLoaded && chunkToUnload.playersInChunk.length === 0) {

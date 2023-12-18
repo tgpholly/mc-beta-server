@@ -1,6 +1,7 @@
 import { World } from "../World";
 import { ItemStack } from "../inventories/ItemStack";
 import { Entity } from "./Entity";
+import { Player } from "./Player";
 
 export class EntityItem extends Entity {
 	public age:number;
@@ -27,6 +28,15 @@ export class EntityItem extends Entity {
 		super.onTick();
 		if (this.pickupDelay > 0) {
 			this.pickupDelay--;
+		} else {
+			let playerCollided;
+			if (playerCollided = this.collidesWithPlayer(this.entityAABB)) {
+				playerCollided.inventory.addItemStack(this.itemStack);
+				playerCollided.itemPickup(this, this.itemStack.size);
+				if (this.itemStack.size <= 0) {
+					this.kill();
+				}
+			}
 		}
 
 		this.motion.add(0, -0.04, 0);

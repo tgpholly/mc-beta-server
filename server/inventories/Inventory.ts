@@ -38,6 +38,7 @@ export class Inventory implements IInventory {
 	}
 
 	addItemStack(itemStack:ItemStack) {
+		throw new Error("Adding items to non player inventories is unimplemented.");
 		// Check bottom inventory row (hotbar) first.
 		/*let workingItemStack:ItemStack | null;
 		for (let slotId = 9; slotId <= 35; slotId++) {
@@ -102,6 +103,18 @@ export class Inventory implements IInventory {
 				writer.writeByte(stack.size);
 				writer.writeShort(stack.damage);
 			}
+		}
+
+		return writer.toBuffer();
+	}
+
+	constructInventorySinglePayload(slotId:number) {
+		const stack = this.itemStacks[slotId];
+		const writer = createWriter(Endian.BE, stack == null ? 2 : 5);
+		writer.writeShort(stack == null ? -1 : stack.itemID);
+		if (stack != null) {
+			writer.writeByte(stack.size);
+			writer.writeShort(stack.damage);
 		}
 
 		return writer.toBuffer();

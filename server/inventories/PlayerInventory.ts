@@ -1,9 +1,14 @@
+import { Player } from "../entities/Player";
 import { Inventory } from "./Inventory";
 import { ItemStack } from "./ItemStack";
 
 export default class PlayerInventory extends Inventory {
-	public constructor() {
+	private player:Player;
+
+	public constructor(player:Player) {
 		super(44, "Player Inventory");
+
+		this.player = player;
 	}
 
 	addItemStack(itemStack:ItemStack) {
