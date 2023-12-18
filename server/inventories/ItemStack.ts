@@ -92,18 +92,19 @@ export class ItemStack {
 	public insert(itemStack:ItemStack) {
 		const remainingSpace = this.spaceAvaliable;
 		if (remainingSpace === 0) {
-			return;
+			return false;
 		}
 
 		if (remainingSpace >= itemStack.size) {
 			this.size += itemStack.size;
 			itemStack.size = 0;
-			return;
+			return true;
 		}
 
 		if (remainingSpace < itemStack.size) {
 			this.size += remainingSpace;
 			itemStack.size -= remainingSpace;
+			return true;
 		}
 	}
 
