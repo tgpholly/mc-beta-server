@@ -40,11 +40,10 @@ export class EntityLiving extends Entity {
 	}
 
 	damageFrom(damage:number, entity?:IEntity) {
+		super.damageFrom(damage, entity);
 		if (this.health <= 0) {
 			this.isDead = true;
-			return;
 		}
-		super.damageFrom(damage, entity);
 
 		// Send Damage Animation packet or death packet
 		if (this.isDead) {

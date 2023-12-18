@@ -16,6 +16,7 @@ import { IReader, IWriter } from "bufferstuff";
 import { EntityItem } from "./EntityItem";
 import { Entity } from "./Entity";
 import { PacketCollectItem } from "../packets/CollectItem";
+import { PacketPickupSpawn } from "../packets/PickupSpawn";
 
 const CHUNK_LOAD_RANGE = 15;
 
@@ -75,6 +76,16 @@ export class Player extends EntityLiving {
 		if (!this.isDead) {
 			if (entity instanceof EntityItem) {
 				this.sendToAllNearby(new PacketCollectItem(entity.entityId, this.entityId).writeData());
+			}
+		}
+	}
+
+	dropAllItems() {
+		for (const itemStack of this.inventory.itemStacks) {
+			if (itemStack) {
+				const item = new EntityItem(this.world, itemStack);
+				item.position.set(this.position);
+				this.world.addEntity(item);
 			}
 		}
 	}
@@ -181,6 +192,10 @@ export class Player extends EntityLiving {
 		}
 
 		if (this.health != this.lastHealth) {
+			if (this.health <= 0 && this.isDead) {
+				this.dropAllItems();
+			}
+
 			this.lastHealth = this.health;
 			this.mpClient?.send(new PacketUpdateHealth(this.health).writeData());
 		}
