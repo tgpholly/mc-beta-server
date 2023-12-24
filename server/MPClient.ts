@@ -23,6 +23,11 @@ import { ItemStack } from "./inventories/ItemStack";
 import { PacketWindowItems } from "./packets/WindowItems";
 import { Block } from "./blocks/Block";
 import { EntityItem } from "./entities/EntityItem";
+import AABB from "./AABB";
+import { PacketSoundEffect } from "./packets/SoundEffect";
+import { SoundEffects } from "./enums/SoundEffects";
+import { PacketUseEntity } from "./packets/UseEntity";
+import { EntityLiving } from "./entities/EntityLiving";
 
 export class MPClient {
 	private readonly mcServer:MinecraftServer;
@@ -72,6 +77,7 @@ export class MPClient {
 
 		switch (packetId) {
 			case Packet.Chat:                 this.handleChat(new PacketChat().readData(reader)); break;
+			case Packet.UseEntity:			  this.handleUseEntity(new PacketUseEntity().readData(reader)); break;
 			case Packet.Respawn:			  this.handlePacketRespawn(new PacketRespawn().readData(reader)); break;
 			case Packet.Player:               this.handlePacketPlayer(new PacketPlayer().readData(reader)); break;
 			case Packet.PlayerPosition:       this.handlePacketPlayerPosition(new PacketPlayerPosition().readData(reader)); break;
@@ -92,6 +98,16 @@ export class MPClient {
 		}
 	}
 	
+	private handleUseEntity(packet:PacketUseEntity) {
+		const attacker = this.entity.world.entites.get(packet.userId);
+		const target = this.entity.world.entites.get(packet.targetId);
+		if (attacker && target && target instanceof EntityLiving) {
+			if (packet.leftClick) {
+				target.damageFrom(2, attacker);
+			}
+		}
+	}
+
 	private handleChat(packet:PacketChat) {
 		const message = packet.message.split(" ");
 		if (message[0].startsWith("/")) {
@@ -180,11 +196,16 @@ export class MPClient {
 		this.entity.world.setBlockWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, 0);
 		//this.inventory.addItemStack(new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
 		//this.send(new PacketWindowItems(0, this.inventory.getInventorySize(), this.inventory.constructInventoryPayload()).writeData());
-		const itemId = Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId);
+		const blockBehaviour = Block.blockBehaviours[brokenBlockId];
+		const itemId = blockBehaviour.droppedItem(brokenBlockId);
 		if (itemId !== -1) {
-			const itemEntity = new EntityItem(this.entity.world, new ItemStack(itemId, 1, metadata));
-			itemEntity.position.set(x + 0.5, y + 0.5, z + 0.5);
-			this.entity.world.addEntity(itemEntity);
+			const itemCount = blockBehaviour.droppedCount(brokenBlockId);
+			for (let i = 0; i < ((itemCount - 1) >> 6) + 1; i++) {
+				const itemEntity = new EntityItem(this.entity.world, new ItemStack(itemId, Math.min(itemCount - 64 * i, 64), metadata));
+				itemEntity.position.set(x + 0.5, y + 0.5, z + 0.5);
+				this.entity.world.addEntity(itemEntity);
+				this.entity.sendToNearby(new PacketSoundEffect(SoundEffects.BLOCK_BREAK, x, y, z, brokenBlockId).writeData());
+			}
 		}
 	}
 
@@ -219,6 +240,10 @@ export class MPClient {
 	private handlePacketBlockPlacement(packet:PacketPlayerBlockPlacement) {
 		this.diggingAt.set(packet.x, packet.y, packet.z);
 		this.mapCoordsFromFace(this.diggingAt, packet.face);
+
+		if (this.entity.entityAABB.intersects(AABB.getAABB(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, this.diggingAt.x + 1, this.diggingAt.y + 1, this.diggingAt.z + 1))) {
+			return;
+		}
 
 		const itemStack = this.getHeldItemStack();
 		if (itemStack == null || itemStack.size == 0) {

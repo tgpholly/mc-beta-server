@@ -1,15 +1,8 @@
 import { IReader, IWriter } from "bufferstuff";
-import { Rotation } from "../Rotation";
-import Vec3 from "../Vec3";
 import { World } from "../World";
 import { Block } from "../blocks/Block";
 import { EntityStatus } from "../enums/EntityStatus";
-import { PacketAnimation } from "../packets/Animation";
-import { PacketEntityLook } from "../packets/EntityLook";
-import { PacketEntityLookRelativeMove } from "../packets/EntityLookRelativeMove";
-import { PacketEntityRelativeMove } from "../packets/EntityRelativeMove";
 import { PacketEntityStatus } from "../packets/EntityStatus";
-import { PacketEntityTeleport } from "../packets/EntityTeleport";
 import { Entity } from "./Entity";
 import { IEntity } from "./IEntity";
 

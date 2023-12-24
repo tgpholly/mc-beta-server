@@ -1,6 +1,7 @@
 import AABB from "../AABB";
 import { World } from "../World";
 import { BlockBehaviour } from "./BlockBehaviour";
+import { BlockBehaviourClay } from "./BlockBehaviourClay";
 import { BlockBehaviourFlower } from "./BlockBehaviourFlower";
 import { BlockBehaviourGrass } from "./BlockBehaviourGrass";
 import { BlockBehaviourStone } from "./BlockBehaviourStone";
@@ -15,6 +16,8 @@ abstract class Behaviour {
 
 	public static tallGrass = new BlockBehaviourTallGrass();
 	public static flower = new BlockBehaviourFlower();
+
+	public static clay = new BlockBehaviourClay();
 }
 
 export class Block {
@@ -98,6 +101,10 @@ export class Block {
 		this.behaviour.droppedItem(blockId);
 	}
 
+	public droppedCount(blockId:number) {
+		this.behaviour.droppedCount(blockId);
+	}
+
 	public getHardness() {
 		return this.hardness;
 	}
@@ -149,7 +156,7 @@ export class Block {
 	static readonly flowerDandelion = new Block(37).setHardness(0).setLightPassage(255).setBehaviour(Behaviour.flower).setBlockName("Dandelion");
 	static readonly flowerRose = new Block(38).setHardness(0).setLightPassage(255).setBehaviour(Behaviour.flower).setBlockName("Rose");
 
-	static readonly clay = new Block(82).setHardness(0.6).setBlockName("Clay");
+	static readonly clay = new Block(82).setHardness(0.6).setBehaviour(Behaviour.clay).setBlockName("Clay");
 
 	static readonly netherrack = new Block(87).setHardness(0.4).setBlockName("Netherrack");
 }

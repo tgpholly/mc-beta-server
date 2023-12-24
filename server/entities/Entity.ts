@@ -114,10 +114,10 @@ export class Entity implements IEntity {
 			  .writeByte(this.health);
 	}
 
-	collidesWithPlayer(aabb:AABB) {
+	async collidesWithPlayer(aabb:AABB) {
 		let collidedWith:Player | undefined;
-		this.world.players.forEach(player => {
-			if (this.entityAABB.intersects(player.entityAABB)) {
+		await this.world.players.forEach(player => {
+			if (this.entityAABB.intersects(player.entityAABB) && collidedWith == undefined) {
 				collidedWith = player;
 			}
 		});
@@ -165,6 +165,8 @@ export class Entity implements IEntity {
 		}
 
 		if (entity === undefined) {
+			this.health -= damage;
+		} else {
 			this.health -= damage;
 		}
 
@@ -249,18 +251,21 @@ export class Entity implements IEntity {
 
 	moveEntity(motionX:number, motionY:number, motionZ:number) {
 		this.positionBeforeMove.set(this.position);
-		const blockId = this.chunk.getBlockId(Math.floor(this.positionBeforeMove.x) & 0xf, Math.floor(this.positionBeforeMove.y), Math.floor(this.positionBeforeMove.z) & 0xf);
-		const blockUnderEntity = blockId > 0 ? Block.blocks[blockId] : null;
 
 		this.position.add(motionX, motionY, motionZ);
 		
 		this.entityAABB.move(this.position);
+
+		const blockId = this.chunk.getBlockId(Math.floor(this.position.x) & 0xf, Math.floor(this.position.y), Math.floor(this.position.z) & 0xf);
+		const blockUnderEntity = blockId > 0 ? Block.blocks[blockId] : null;
+
 		if (blockUnderEntity !== null) {
-			const blockBoundingBox = blockUnderEntity.getBoundingBox(Math.floor(this.positionBeforeMove.x), Math.floor(this.positionBeforeMove.y), Math.floor(this.positionBeforeMove.z));
+			const blockBoundingBox = blockUnderEntity.getBoundingBox(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.position.z));
 			// TODO: Handle X and Z collisions.
 			if (this.entityAABB.intersects(blockBoundingBox)) {
-				const inersectionY = this.entityAABB.intersectionY(blockBoundingBox);
-				this.position.add(0, inersectionY, 0);
+				const intersectionY = this.entityAABB.intersectionY(blockBoundingBox);
+				console.log(intersectionY);
+				this.position.add(0, intersectionY, 0);
 				this.motion.y = 0;
 				this.onGround = true;
 			}

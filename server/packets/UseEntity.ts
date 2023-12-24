@@ -8,10 +8,10 @@ export class PacketUseEntity implements IPacket {
 	public targetId:number;
 	public leftClick:boolean;
 
-	public constructor(userId:number, targetId:number, leftClick:boolean) {
-		this.userId = userId;
-		this.targetId = targetId;
-		this.leftClick = leftClick;
+	public constructor(userId?:number, targetId?:number, leftClick?:boolean) {
+		this.userId = userId ?? Number.MIN_VALUE;
+		this.targetId = targetId ?? Number.MIN_VALUE;
+		this.leftClick = leftClick ?? false;
 	}
 
 	public readData(reader:IReader) {

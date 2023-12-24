@@ -35,6 +35,8 @@ export enum Packet {
 	MultiBlockChange = 0x34,
 	BlockChange = 0x035,
 
+	SoundEffect = 0x3D,
+
 	Entity = 0x1E,
 	EntityRelativeMove = 0x1F,
 	EntityLook = 0x20,

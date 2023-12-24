@@ -24,13 +24,14 @@ export class EntityItem extends Entity {
 		this.health = 5;
 	}
 
-	onTick() {
+	async onTick() {
 		super.onTick();
 		if (this.pickupDelay > 0) {
 			this.pickupDelay--;
 		} else {
-			let playerCollided;
-			if (playerCollided = this.collidesWithPlayer(this.entityAABB)) {
+			let playerCollided = await this.collidesWithPlayer(this.entityAABB);
+			if (playerCollided !== undefined) {
+				console.log(playerCollided.username);
 				playerCollided.inventory.addItemStack(this.itemStack);
 				playerCollided.itemPickup(this, this.itemStack.size);
 				if (this.itemStack.size <= 0) {

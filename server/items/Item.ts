@@ -51,4 +51,6 @@ export class Item {
 	static ironPickaxe = new Item(1).setMaxDamage(MaxUses.IRON).setName("Iron Pickaxe");
 	static ironAxe = new Item(2).setMaxDamage(MaxUses.IRON).setName("Iron Axe");
 	static ironSword = new Item(11).setMaxDamage(MaxUses.IRON).setName("Iron Sword");
+
+	static clay = new Item(81).setName("Clay");
 }
