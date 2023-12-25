@@ -264,7 +264,6 @@ export class Entity implements IEntity {
 			// TODO: Handle X and Z collisions.
 			if (this.entityAABB.intersects(blockBoundingBox)) {
 				const intersectionY = this.entityAABB.intersectionY(blockBoundingBox);
-				console.log(intersectionY);
 				this.position.add(0, intersectionY, 0);
 				this.motion.y = 0;
 				this.onGround = true;

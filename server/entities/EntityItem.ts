@@ -31,7 +31,6 @@ export class EntityItem extends Entity {
 		} else {
 			let playerCollided = await this.collidesWithPlayer(this.entityAABB);
 			if (playerCollided !== undefined) {
-				console.log(playerCollided.username);
 				playerCollided.inventory.addItemStack(this.itemStack);
 				playerCollided.itemPickup(this, this.itemStack.size);
 				if (this.itemStack.size <= 0) {

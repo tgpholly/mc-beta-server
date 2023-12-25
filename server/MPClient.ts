@@ -1,5 +1,5 @@
 import { Console } from "hsconsole";
-import { Endian, IReader, createWriter } from "bufferstuff";
+import { IReader } from "bufferstuff";
 import { MinecraftServer } from "./MinecraftServer";
 import { Packet } from "./enums/Packet";
 import { PacketAnimation } from "./packets/Animation";
@@ -14,13 +14,10 @@ import { Player } from "./entities/Player";
 import { Socket } from "net";
 import Vec3 from "./Vec3";
 import { PacketRespawn } from "./packets/Respawn";
-import { PacketSpawnPosition } from "./packets/SpawnPosition";
 import { PacketPlayerBlockPlacement } from "./packets/PlayerBlockPlacement";
-import { Inventory } from "./inventories/Inventory";
 import { PacketHoldingChange } from "./packets/HoldingChange";
 import { PacketDisconnectKick } from "./packets/DisconnectKick";
 import { ItemStack } from "./inventories/ItemStack";
-import { PacketWindowItems } from "./packets/WindowItems";
 import { Block } from "./blocks/Block";
 import { EntityItem } from "./entities/EntityItem";
 import AABB from "./AABB";
@@ -28,12 +25,13 @@ import { PacketSoundEffect } from "./packets/SoundEffect";
 import { SoundEffects } from "./enums/SoundEffects";
 import { PacketUseEntity } from "./packets/UseEntity";
 import { EntityLiving } from "./entities/EntityLiving";
+import PlayerInventory from "./inventories/PlayerInventory";
 
 export class MPClient {
 	private readonly mcServer:MinecraftServer;
 	private readonly socket:Socket;
 	public entity:Player;
-	private inventory:Inventory;
+	private inventory:PlayerInventory;
 	private dimension:number;
 
 	private holdingIndex:number = 36; // First hotbar slot.
@@ -200,11 +198,12 @@ export class MPClient {
 		const itemId = blockBehaviour.droppedItem(brokenBlockId);
 		if (itemId !== -1) {
 			const itemCount = blockBehaviour.droppedCount(brokenBlockId);
+			this.entity.sendToNearby(new PacketSoundEffect(SoundEffects.BLOCK_BREAK, x, y, z, brokenBlockId).writeData());
 			for (let i = 0; i < ((itemCount - 1) >> 6) + 1; i++) {
 				const itemEntity = new EntityItem(this.entity.world, new ItemStack(itemId, Math.min(itemCount - 64 * i, 64), metadata));
 				itemEntity.position.set(x + 0.5, y + 0.5, z + 0.5);
+				itemEntity.pickupDelay = 10;
 				this.entity.world.addEntity(itemEntity);
-				this.entity.sendToNearby(new PacketSoundEffect(SoundEffects.BLOCK_BREAK, x, y, z, brokenBlockId).writeData());
 			}
 		}
 	}
@@ -214,7 +213,30 @@ export class MPClient {
 
 		// Special drop item case
 		if (packet.status === 4) {
-			// TODO: Handle dropping items
+			const itemStack = this.getHeldItemStack();
+			if (itemStack !== null && itemStack.size > 0) {
+				itemStack.size--;
+				const itemEntity = new EntityItem(this.entity.world, new ItemStack(itemStack.itemID, 1, itemStack.damage));
+				itemEntity.pickupDelay = 10;
+				itemEntity.position.set(this.entity.position.x, this.entity.position.y + 1.50, this.entity.position.z);
+				itemEntity.motion.set(
+					-Math.sin((this.entity.rotation.yaw / 180) * Math.PI) * Math.cos((this.entity.rotation.pitch / 180) * Math.PI) * 0.3,
+					-Math.sin((this.entity.rotation.pitch / 180) * Math.PI) * 0.3 + 0.1,
+					Math.cos((this.entity.rotation.yaw / 180) * Math.PI) * Math.cos((this.entity.rotation.pitch / 180) * Math.PI) * 0.3
+				);
+				// Add random motion vector
+				const twoPIRandomised = Math.random() * Math.PI * 2;
+				const rngMult = 0.02 * Math.random();
+				itemEntity.motion.add(
+					Math.cos(twoPIRandomised) * rngMult,
+					(Math.random() - Math.random()) * 0.1,
+					Math.sin(twoPIRandomised) * rngMult
+				);
+				this.entity.world.addEntity(itemEntity);
+
+				this.inventory.dropEmptyItemStacks();
+				this.inventory.sendUpdatedStacks([this.holdingIndex]);
+			}
 			return;
 		}
 

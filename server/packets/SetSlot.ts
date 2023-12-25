@@ -17,6 +17,12 @@ export class PacketSetSlot implements IPacket {
 			this.itemId = itemId;
 			this.itemCount = itemCount;
 			this.itemUses = itemUses;
+		} else if (typeof(windowId) === "number" && typeof(slot) === "number" && typeof(itemId) === "number") {
+			this.windowId = windowId;
+			this.slot = slot;
+			this.itemId = itemId;
+			this.itemCount = Number.MIN_VALUE;
+			this.itemUses = Number.MIN_VALUE;
 		} else {
 			this.windowId = Number.MIN_VALUE;
 			this.slot = Number.MIN_VALUE;
