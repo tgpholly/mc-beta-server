@@ -32,7 +32,7 @@ export class Entity implements IEntity {
 	public lastAbsPosition:Vec3;
 	public motion:Vec3;
 
-	private positionBeforeMove:Vec3;
+	private moveEntityBlockPosRel:Vec3;
 
 	public rotation:Rotation;
 	public lastRotation:Rotation;
@@ -80,7 +80,7 @@ export class Entity implements IEntity {
 		this.lastAbsPosition = new Vec3();
 		this.motion = new Vec3();
 
-		this.positionBeforeMove = new Vec3();
+		this.moveEntityBlockPosRel = new Vec3();
 
 		this.rotation = new Rotation();
 		this.lastRotation = new Rotation();
@@ -250,21 +250,27 @@ export class Entity implements IEntity {
 	}
 
 	moveEntity(motionX:number, motionY:number, motionZ:number) {
-		this.positionBeforeMove.set(this.position);
-
 		this.position.add(motionX, motionY, motionZ);
-		
 		this.entityAABB.move(this.position);
 
 		const blockId = this.chunk.getBlockId(Math.floor(this.position.x) & 0xf, Math.floor(this.position.y), Math.floor(this.position.z) & 0xf);
 		const blockUnderEntity = blockId > 0 ? Block.blocks[blockId] : null;
 
 		if (blockUnderEntity !== null) {
+			this.moveEntityBlockPosRel.set(this.position);
+			this.moveEntityBlockPosRel.sub(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.position.z));
+	
+			console.log(this.moveEntityBlockPosRel);
+
 			const blockBoundingBox = blockUnderEntity.getBoundingBox(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.position.z));
 			// TODO: Handle X and Z collisions.
 			if (this.entityAABB.intersects(blockBoundingBox)) {
 				const intersectionY = this.entityAABB.intersectionY(blockBoundingBox);
-				this.position.add(0, intersectionY, 0);
+				if (this.moveEntityBlockPosRel.y > 0.5) {
+					this.position.add(0, intersectionY, 0);
+				} else {
+					this.position.sub(0, intersectionY, 0);
+				}
 				this.motion.y = 0;
 				this.onGround = true;
 			}
