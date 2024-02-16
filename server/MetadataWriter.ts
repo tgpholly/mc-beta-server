@@ -1,12 +1,14 @@
 import { createWriter, Endian } from "bufferstuff";
 import { FunkyArray } from "../funkyArray";
 import { MetadataFieldType } from "./enums/MetadataFieldType";
+import Vec3 from "./Vec3";
+import { ItemStack } from "./inventories/ItemStack";
 
 export class MetadataEntry {
 	public type:MetadataFieldType;
-	public value:number|string;
+	public value:number|string|Vec3|ItemStack;
 
-	public constructor(type:MetadataFieldType, value:number|string) {
+	public constructor(type:MetadataFieldType, value:number|string|Vec3|ItemStack) {
 		this.type = type;
 		this.value = value;
 	}
@@ -38,6 +40,18 @@ export class MetadataWriter {
 					} else {
 						throw "Non-string value assigned to a String MetadataEntry";
 					}
+				case MetadataFieldType.Item:
+					if (entry.value instanceof ItemStack) {
+						size += 5;
+					} else {
+						throw "Non-ItemStack value assigned to an ItemStack MetadataEntry";
+					}
+				case MetadataFieldType.Vector:
+					if (entry.value instanceof Vec3) {
+						size += 12;
+					} else {
+						throw "Non-Vec3 value assigned to an Vec3 MetadataEntry";
+					}
 			}
 		})
 
@@ -59,6 +73,11 @@ export class MetadataWriter {
 					}
 				} else if (typeof(entry.value) === "string") {
 					writer.writeString16(entry.value);
+				} else if (entry.value instanceof ItemStack) {
+					writer.writeShort(entry.value.itemID).writeByte(entry.value.size).writeShort(entry.value.damage);
+				} else if (entry.value instanceof Vec3) {
+					const absVec = entry.value.toAbs();
+					writer.writeInt(absVec.x).writeInt(absVec.y).writeInt(absVec.z);
 				}
 			}
 		}

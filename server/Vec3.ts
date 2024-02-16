@@ -68,4 +68,8 @@ export default class Vec3 {
 			throw new Error(`Invalid arguments for Vec3.mult : ${typeof(x)}, ${typeof(y)}, ${typeof(z)}`);
 		}
 	}
+
+	toAbs() {
+		return new Vec3(Math.round(this.x * 32), Math.round(this.y * 32), Math.round(this.z * 32));
+	}
 }
