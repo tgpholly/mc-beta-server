@@ -1,5 +1,5 @@
 import { createWriter, Endian } from "bufferstuff";
-import { FunkyArray } from "../funkyArray";
+import FunkyArray from "funky-array";
 import { MetadataFieldType } from "./enums/MetadataFieldType";
 import Vec3 from "./Vec3";
 import { ItemStack } from "./inventories/ItemStack";

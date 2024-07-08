@@ -1,5 +1,5 @@
 import { Endian, createWriter } from "bufferstuff";
-import { FunkyArray } from "../funkyArray";
+import FunkyArray from "funky-array";
 import { Chunk } from "./Chunk";
 import { WorldSaveManager } from "./WorldSaveManager";
 import { Block } from "./blocks/Block";

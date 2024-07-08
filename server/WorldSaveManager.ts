@@ -5,7 +5,7 @@ import { Chunk } from "./Chunk";
 import { SaveCompressionType } from "./enums/SaveCompressionType";
 import { deflate, inflate } from "zlib";
 import { World } from "./World";
-import { FunkyArray } from "../funkyArray";
+import FunkyArray from "funky-array";
 import { Console } from "hsconsole";
 
 enum FileMagic {

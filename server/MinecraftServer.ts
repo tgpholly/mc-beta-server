@@ -1,7 +1,7 @@
 import { Config } from "../config";
 import { Console } from "hsconsole";
 import { createReader, IReader, Endian } from "bufferstuff";
-import { FunkyArray } from "../funkyArray";
+import FunkyArray from "funky-array";
 import { Server, Socket } from "net";
 import { MPClient } from "./MPClient";
 import { Packet } from "./enums/Packet";

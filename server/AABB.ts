@@ -1,4 +1,4 @@
-import { FunkyArray } from "../funkyArray";
+import FunkyArray from "funky-array";
 import Vec3 from "./Vec3";
 
 // Based on this MDN article:
