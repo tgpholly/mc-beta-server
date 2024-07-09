@@ -249,31 +249,40 @@ export class Entity implements IEntity {
         }
 	}
 
+	private getBlockAABBFor(x:number, y:number, z:number) {
+		const blockId = this.chunk.getBlockId(x, y, z);
+		const blockEntityIsTouching = blockId > 0 ? Block.blocks[blockId] : null;
+
+		if (blockEntityIsTouching != null) {
+			return blockEntityIsTouching.getBoundingBox(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.position.z));
+		}
+
+		return null;
+	}
+
 	moveEntity(motionX:number, motionY:number, motionZ:number) {
 		this.position.add(motionX, motionY, motionZ);
 		this.entityAABB.move(this.position);
 
-		const blockId = this.chunk.getBlockId(Math.floor(this.position.x) & 0xf, Math.floor(this.position.y), Math.floor(this.position.z) & 0xf);
-		const blockUnderEntity = blockId > 0 ? Block.blocks[blockId] : null;
+		let blockAABB = this.getBlockAABBFor(Math.floor(this.position.x) & 0xf, Math.floor(this.position.y), Math.floor(this.position.z) & 0xf);
 
-		if (blockUnderEntity !== null) {
+		if (blockAABB !== null) {
 			this.moveEntityBlockPosRel.set(this.position);
 			this.moveEntityBlockPosRel.sub(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.position.z));
 	
-			console.log(this.moveEntityBlockPosRel);
-
-			const blockBoundingBox = blockUnderEntity.getBoundingBox(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.position.z));
 			// TODO: Handle X and Z collisions.
-			if (this.entityAABB.intersects(blockBoundingBox)) {
-				const intersectionY = this.entityAABB.intersectionY(blockBoundingBox);
+			if (this.entityAABB.intersects(blockAABB)) {
+				const intersectionY = this.entityAABB.intersectionY(blockAABB);
 				if (this.moveEntityBlockPosRel.y > 0.5) {
-					this.position.add(0, intersectionY, 0);
+					motionY = intersectionY;
 				} else {
-					this.position.sub(0, intersectionY, 0);
+					motionY = -intersectionY;
 				}
-				this.motion.y = 0;
-				this.onGround = true;
 			}
+
+			this.position.add(0, motionY, 0);
+			this.motion.y = 0;
+			this.onGround = true;
 		}
 	}
 

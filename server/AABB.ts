@@ -11,6 +11,8 @@ export default class AABB {
 
 	public initMin:Vec3;
 	public initMax:Vec3;
+	public prevMin:Vec3;
+	public prevMax:Vec3;
 
 	public min:Vec3;
 	public max:Vec3;
@@ -28,6 +30,8 @@ export default class AABB {
 
 		this.initMin = new Vec3(this.min);
 		this.initMax = new Vec3(this.max);
+		this.prevMin = new Vec3(this.min);
+		this.prevMax = new Vec3(this.min);
 
 		this.pooled = pooled;
 		
@@ -105,13 +109,63 @@ export default class AABB {
 		return minZ <= maxZ ? maxZ - minZ : 0;
 	}
 
+	public static copy(aabb:AABB) {
+		const newAABB = new AABB(new Vec3(aabb.min), new Vec3(aabb.max));
+		newAABB.min.set(aabb.min);
+		newAABB.max.set(aabb.max);
+		return newAABB;
+	}
+
+	public copy() {
+		const newAABB = new AABB(new Vec3(this.min), new Vec3(this.max));
+		newAABB.min.set(this.min);
+		newAABB.max.set(this.max);
+		return newAABB;
+	}
+
+	// Can only revert one step
+	public revert() {
+		this.min.set(this.prevMin);
+		this.max.set(this.prevMax);
+	}
+
+	public set(aabb:AABB) {
+		this.prevMin.set(this.min);
+		this.prevMax.set(this.max);
+
+		this.min.set(aabb.min);
+		this.max.set(aabb.min);
+	}
+
 	public move(xOrVec3:Vec3 | number, y?:number, z?:number) {
 		if (this.pooled) {
 			throw new Error(`Attempted to move a pooled AABB. This is not allowed!`);
 		}
 
+		this.prevMin.set(this.min);
+		this.prevMax.set(this.max);
+
 		this.min.set(this.initMin);
 		this.max.set(this.initMax);
+		if (xOrVec3 instanceof Vec3) {
+			//this.pos.set(xOrVec3);
+			this.min.add(xOrVec3);
+			this.max.add(xOrVec3);
+		} else if (typeof(xOrVec3) === "number" && typeof(y) === "number" && typeof(z) === "number") {
+			//this.pos.set(xOrVec3, y, z);
+			this.min.add(xOrVec3, y, z);
+			this.max.add(xOrVec3, y, z);
+		}
+	}
+
+	public offset(xOrVec3:Vec3 | number, y?:number, z?:number) {
+		if (this.pooled) {
+			throw new Error(`Attempted to offset a pooled AABB. This is not allowed!`);
+		}
+
+		this.prevMin.set(this.min);
+		this.prevMax.set(this.max);
+
 		if (xOrVec3 instanceof Vec3) {
 			this.min.add(xOrVec3);
 			this.max.add(xOrVec3);

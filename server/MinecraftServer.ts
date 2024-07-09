@@ -23,6 +23,7 @@ import { HillyGenerator } from "./generators/Hilly";
 import { NetherGenerator } from "./generators/Nether";
 import { PacketWindowItems } from "./packets/WindowItems";
 import { getRandomValues } from "crypto";
+import { NewOverworld } from "./generators/NewOverworld";
 
 const chunkFrom = -15;
 const chunkTo = 15;
@@ -121,6 +122,7 @@ export class MinecraftServer {
 		}
 
 		this.worlds = new FunkyArray<number, World>();
+		//this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new NewOverworld(worldSeed)));
 		this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new HillyGenerator(worldSeed)));
 		this.worlds.set(-1, new World(this.saveManager, -1, worldSeed, new NetherGenerator(worldSeed)));
 

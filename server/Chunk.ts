@@ -7,6 +7,7 @@ import { World } from "./World";
 
 export class Chunk {
 	private readonly MAX_HEIGHT:number = 128;
+	private readonly FULLBRIGHT = false;
 	public readonly world:World;
 	public readonly x:number;
 	public readonly z:number;
@@ -65,6 +66,18 @@ export class Chunk {
 	}
 
 	public calculateLighting() {
+		if (this.FULLBRIGHT) {
+			for (let x = 0; x < 16; x++) {
+				for (let z = 0; z < 16; z++) {
+					for (let y = this.MAX_HEIGHT - 1; y > 0; y--) {
+						this.setBlockLight(15, x, y, z);
+						this.setSkyLight(15, x, y, z);
+					}
+				}
+			}
+			return;
+		}
+
 		let blockId = 0;
 		for (let x = 0; x < 16; x++) {
 			for (let z = 0; z < 16; z++) {
