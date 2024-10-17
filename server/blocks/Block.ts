@@ -236,7 +236,7 @@ export class Block {
 	static readonly snowBlock = new Block(80).setHardness(0.2).setBlockName("Snow"); // TODO: Behavior script
 	static readonly cactus = new Block(81).setHardness(0.4).setBlockName("Cactus"); // TODO: Behavior script
 	static readonly clay = new Block(82).setHardness(0.6).setBehaviour(Behaviour.clay).setBlockName("Clay");
-	static readonly sugarcane = new Block(83).setHardness(0).setBlockName("Sugar Cane"); // TODO: Behavior script
+	static readonly sugarcane = new Block(83).setHardness(0).setLightPassage(255).setBlockName("Sugar Cane"); // TODO: Behavior script
 	static readonly jukebox = new Block(84).setHardness(2).setBlockName("Jukebox"); // TODO: Behavior script
 	static readonly fence = new Block(85).setHardness(2).setBlockName("Fence"); // TODO: Behavior script
 	static readonly pumpkin = new Block(86).setHardness(1).setBlockName("Pumpkin");

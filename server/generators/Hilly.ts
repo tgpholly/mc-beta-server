@@ -70,6 +70,7 @@ export class HillyGenerator implements IGenerator {
 
 	public generate(chunk:Chunk) {
 		const treeRNG = mulberry32(this.seed + chunk.x + chunk.z);
+		const sugarcaneRNG = mulberry32(this.seed + chunk.x + chunk.z);
 		const grassRNG = mulberry32(this.seed + chunk.x + chunk.z);
 		const flowerRNG = mulberry32(this.seed + chunk.x + chunk.z);
 
@@ -165,6 +166,21 @@ export class HillyGenerator implements IGenerator {
 					}
 				}
 				
+				if (
+					chunk.getBlockId(x, orgColY + 1, z) !== Block.waterStill.blockId &&
+					chunk.getBlockId(x, orgColY, z) === Block.sand.blockId &&
+					(((x - 1) < 0 ? false : chunk.getBlockId(x - 1, orgColY, z) === Block.waterStill.blockId) || 
+					((x + 1) > 15 ? false : chunk.getBlockId(x + 1, orgColY, z) === Block.waterStill.blockId) || 
+					((z - 1) < 0 ? false : chunk.getBlockId(x, orgColY, z - 1) === Block.waterStill.blockId) || 
+					((z + 1) > 15 ? false : chunk.getBlockId(x, orgColY, z + 1) === Block.waterStill.blockId)) &&
+					sugarcaneRNG() > 0.695
+				) {
+					let sugarcaneYHeight = 1 + Math.floor(sugarcaneRNG() * 2.9);
+					while (sugarcaneYHeight > 0) {
+						chunk.setBlock(Block.sugarcane.blockId, x, orgColY + sugarcaneYHeight, z);
+						sugarcaneYHeight--;
+					}
+				}
 
 				// TODO: Move trees to it's own generator
 				if (chunk.getBlockId(x, orgColY + 1, z) !== Block.waterStill.blockId && chunk.getBlockId(x, orgColY, z) === Block.grass.blockId && treeRNG() > 0.995) {
