@@ -63,11 +63,6 @@ export class HillyGenerator implements IGenerator {
 		return makeNoise3D(this.seedGenerator() * Number.MAX_SAFE_INTEGER);
 	}
 
-	// This is soooo much faster than using Math.round in here
-	private fastRound(num:number) {
-		return num >= 0.5 ? (num | 0) + 1 : num | 0;
-	}
-
 	public generate(chunk:Chunk) {
 		const treeRNG = mulberry32(this.seed + chunk.x + chunk.z);
 		const sugarcaneRNG = mulberry32(this.seed + chunk.x + chunk.z);
@@ -78,7 +73,7 @@ export class HillyGenerator implements IGenerator {
 		for (let x = 0; x < 16; x++) {
 			for (let z = 0; z < 16; z++) {
 				const oceanValue = this.oceanGenerator((chunk.x * 16 + x) / 128, (chunk.z * 16 + z) / 128) * 100;
-				orgColY = colWaterY = colY = 60 + this.fastRound((
+				orgColY = colWaterY = colY = 60 + Math.round((
 					this.generator((chunk.x * 16 + x) / 16, (chunk.z * 16 + z) / 16) * 16 +
 					this.generator1((chunk.z * 16 + z) / 16, (chunk.x * 16 + x) / 16) * 16 +
 					this.generator2((chunk.x * 16 + x) / 8, (chunk.z * 16 + z) / 8) * 8 +
@@ -167,15 +162,15 @@ export class HillyGenerator implements IGenerator {
 				}
 				
 				if (
+					sugarcaneRNG() > 0.992 &&
 					chunk.getBlockId(x, orgColY + 1, z) !== Block.waterStill.blockId &&
-					chunk.getBlockId(x, orgColY, z) === Block.sand.blockId &&
+					chunk.getBlockId(x, orgColY, z) === Block.grass.blockId &&
 					(((x - 1) < 0 ? false : chunk.getBlockId(x - 1, orgColY, z) === Block.waterStill.blockId) || 
 					((x + 1) > 15 ? false : chunk.getBlockId(x + 1, orgColY, z) === Block.waterStill.blockId) || 
 					((z - 1) < 0 ? false : chunk.getBlockId(x, orgColY, z - 1) === Block.waterStill.blockId) || 
-					((z + 1) > 15 ? false : chunk.getBlockId(x, orgColY, z + 1) === Block.waterStill.blockId)) &&
-					sugarcaneRNG() > 0.695
+					((z + 1) > 15 ? false : chunk.getBlockId(x, orgColY, z + 1) === Block.waterStill.blockId))
 				) {
-					let sugarcaneYHeight = 1 + Math.floor(sugarcaneRNG() * 2.9);
+					let sugarcaneYHeight = 2 + Math.round(sugarcaneRNG() * 2.5);
 					while (sugarcaneYHeight > 0) {
 						chunk.setBlock(Block.sugarcane.blockId, x, orgColY + sugarcaneYHeight, z);
 						sugarcaneYHeight--;
@@ -186,7 +181,7 @@ export class HillyGenerator implements IGenerator {
 				if (chunk.getBlockId(x, orgColY + 1, z) !== Block.waterStill.blockId && chunk.getBlockId(x, orgColY, z) === Block.grass.blockId && treeRNG() > 0.995) {
 					const treeType = treeRNG() >= 0.5;
 					chunk.setBlock(Block.dirt.blockId, x, orgColY, z);
-					let tYT = 0, tY = tYT = orgColY + 4 + this.fastRound(treeRNG() - 0.2), tLY = 0;
+					let tYT = 0, tY = tYT = orgColY + 4 + Math.round(treeRNG() - 0.2), tLY = 0;
 					while (tY > orgColY) {
 						chunk.setBlockWithMetadata(Block.wood.blockId, treeType ? 2 : 0, x, tY, z);
 						if (tLY !== 0 && tLY < 3) {
