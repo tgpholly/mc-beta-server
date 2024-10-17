@@ -15,6 +15,7 @@ import { PacketPickupSpawn } from "./packets/PickupSpawn";
 import { QueuedBlockUpdate } from "./queuedUpdateTypes/BlockUpdate";
 import { IQueuedUpdate } from "./queuedUpdateTypes/IQueuedUpdate";
 import AABB from "./AABB";
+import Random from "./Random";
 
 export class World {
 	public static ENTITY_MAX_SEND_DISTANCE = 50;
@@ -31,6 +32,8 @@ export class World {
 	public queuedChunkBlocks:Array<IQueuedUpdate>;
 	public queuedUpdates:Array<IQueuedUpdate>;
 	public generator:IGenerator;
+
+	public random:Random = new Random();
 
 	public readonly dimension:number;
 
@@ -157,8 +160,18 @@ export class World {
 		return this.getChunk(chunkX, chunkZ).getBlockMetadata(x & 0xf, y, z & 0xf);
 	}
 
-	public getChunkBlockMetadata(chunk:Chunk, x:number, y:number, z:number) {
-		return chunk.getBlockMetadata(x & 0xf, y, z & 0xf);
+	public getBlockLight(x:number, y:number, z:number) {
+		const chunkX = x >> 4,
+			  chunkZ = z >> 4;
+
+		return this.getChunk(chunkX, chunkZ).getBlockLight(x & 0xf, y, z & 0xf);
+	}
+
+	public getSkyLight(x:number, y:number, z:number) {
+		const chunkX = x >> 4,
+			  chunkZ = z >> 4;
+
+		return this.getChunk(chunkX, chunkZ).getSkyLight(x & 0xf, y, z & 0xf);
 	}
 
 	public setBlock(blockId:number, x:number, y:number, z:number, doBlockUpdate?:boolean) {
@@ -193,11 +206,33 @@ export class World {
 		}
 	}
 
+	public setBlockMetadata(x:number, y:number, z:number, metadata:number, doBlockUpdate?:boolean) {
+		const chunkX = x >> 4, chunkZ = z >> 4;
+
+		const chunk = this.getChunk(chunkX, chunkZ);
+		const xc = x & 0xf, zc = z & 0xf;
+		chunk.setBlockMetadata(metadata, xc, y, zc);
+
+		if (doBlockUpdate) {
+			const blockId = chunk.getBlockId(xc, y, zc);
+			const blockUpdatePacket = new PacketBlockChange(x, y, z, blockId, metadata).writeData();
+			// Send block update to all players that have this chunk loaded
+			chunk.playersInChunk.forEach(player => {
+				player.mpClient?.send(blockUpdatePacket);
+			});
+		}
+	}
+
 	public setBlockWithNotify(x:number, y:number, z:number, blockId:number) {
 		this.setBlock(blockId, x, y, z, true);
 		this.notifyNeighborBlocksOfChange(x, y, z, blockId);
 	}
 	
+	public setBlockMetadataWithNotify(x:number, y:number, z:number, metadata:number) {
+		this.setBlockMetadata(x, y, z, metadata, true);
+		this.notifyNeighborBlocksOfChange(x, y, z, this.getBlockId(x, y, z));
+	}
+
 	public setBlockAndMetadataWithNotify(x:number, y:number, z:number, blockId:number, metadata:number) {
 		this.setBlockWithMetadata(blockId, metadata, x, y, z, true);
 		this.notifyNeighborBlocksOfChange(x, y, z, blockId);

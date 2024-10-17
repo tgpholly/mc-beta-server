@@ -123,6 +123,16 @@ export class Chunk {
 		this.blocks[x << 11 | z << 7 | y] = blockId;
 	}
 
+	public setBlockMetadata(metadata:number, x:number, y:number, z:number) {
+		const index = x << 11 | z << 7 | y;
+		if (x < 0 || x > 15 || y < 0 || y > 127 || z < 0 || z > 15) {
+			this.queueBlockUpdateForOuterChunkBlock(this.blocks[index], metadata, x, y, z);
+			return;
+		}
+
+		this.metadata.set(index, metadata);
+	}
+
 	public setBlockWithMetadata(blockId:number, metadata:number, x:number, y:number, z:number) {
 		if (x < 0 || x > 15 || y < 0 || y > 127 || z < 0 || z > 15) {
 			this.queueBlockUpdateForOuterChunkBlock(blockId, metadata, x, y, z);

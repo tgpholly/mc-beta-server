@@ -125,18 +125,7 @@ export class MinecraftServer {
 		//this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new NewOverworld(worldSeed)));
 		this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new HillyGenerator(worldSeed)));
 		this.worlds.set(-1, new World(this.saveManager, -1, worldSeed, new NetherGenerator(worldSeed)));
-
-		// Generate spawn area (overworld)
-		/*(async () => {
-			const generateStartTime = Date.now();
-			Console.printInfo("Generating spawn area...");
-			for (let x = -3; x < 3; x++) {
-				for (let z = -3; z < 3; z++) {
-					await this.overworld.getChunkSafe(x, z);
-				}	
-			}
-			Console.printInfo(`Done! Took ${Date.now() - generateStartTime}ms`);
-		}).bind(this)();*/
+		
 		(async () => {
 			const generateStartTime = Date.now();
 			let timer = Date.now();
