@@ -98,6 +98,7 @@ export class Block {
 	}
 
 	public setBehaviour(value:IBlockBehaviour) {
+		value.block = this;
 		this.behaviour = value;
 		return this;
 	}

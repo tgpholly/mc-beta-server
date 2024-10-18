@@ -272,7 +272,7 @@ export class MPClient {
 			return;
 		}
 
-		if (itemStack.isBlock) {
+		if (itemStack.isBlock && Block.blocks[itemStack.itemID].behaviour.canPlaceBlockAt(this.entity.world, this.diggingAt.x, this.diggingAt.y, this.diggingAt.z)) {
 			if (this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z) === 0) {
 				itemStack.size--;
 				this.entity.world.setBlockAndMetadataWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, itemStack.itemID, itemStack.damage);
