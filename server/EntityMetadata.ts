@@ -1,5 +1,5 @@
 import { MetadataEntry, MetadataWriter } from "./MetadataWriter";
-import { MetadataFieldType } from "./enums/MetadataFieldType";
+import MetadataFieldType from "./enums/MetadataFieldType";
 
 export default class EntityMetadata {
 	public onFire:boolean = false;

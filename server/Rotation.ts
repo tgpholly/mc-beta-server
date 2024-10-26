@@ -1,6 +1,6 @@
-import { Vec2 } from "./Vec2";
+import Vec2 from "./Vec2";
 
-export class Rotation extends Vec2 {
+export default class Rotation extends Vec2 {
 	public get yaw() {
 		return this.x;
 	}

@@ -1,8 +1,8 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
 
-export class PacketEntityStatus implements IPacket {
+export default class PacketEntityStatus implements IPacket {
 	public packetId = Packet.EntityStatus;
 	public entityId:number;
 	public status:number;

@@ -1,7 +1,7 @@
-import { Item } from "../items/Item";
-import { BlockBehaviour } from "./BlockBehaviour";
+import BlockBehaviour from "./BlockBehaviour";
+import Item from "../items/Item";
 
-export class BlockBehaviourClay extends BlockBehaviour {
+export default class BlockBehaviourClay extends BlockBehaviour {
 	public droppedItem(blockId:number) {
 		return Item.clay.shiftedItemID;
 	}

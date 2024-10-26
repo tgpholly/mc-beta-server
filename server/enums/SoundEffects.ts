@@ -1,4 +1,4 @@
-export enum SoundEffects {
+enum SoundEffects {
 	CLICK2 = 1000,
 	CLICK1 = 1001,
 	BOW_FIRE = 1002,
@@ -8,3 +8,5 @@ export enum SoundEffects {
 	SMOKE = 2000,
 	BLOCK_BREAK = 2001
 }
+
+export default SoundEffects;

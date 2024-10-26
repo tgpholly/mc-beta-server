@@ -1,8 +1,8 @@
+import BlockBehaviour from "./BlockBehaviour";
 import Random from "../Random";
-import { World } from "../World";
-import { BlockBehaviour } from "./BlockBehaviour";
+import World from "../World";
 
-export class BlockBehaviourSapling extends BlockBehaviour {
+export default class BlockBehaviourSapling extends BlockBehaviour {
 	public randomTick(world:World, x:number, y:number, z:number, random:Random) {
 		if (world.getBlockLight(x, y + 1, z) >= 9 && random.nextInt(30) === 0) {
 			const blockMetadata = world.getBlockMetadata(x, y, z);

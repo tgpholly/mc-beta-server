@@ -1,10 +1,9 @@
 import { IReader, IWriter } from "bufferstuff";
-import { Block } from "../blocks/Block";
-import { IEntity } from "../entities/IEntity";
-import { Player } from "../entities/Player";
-import { Item } from "../items/Item";
+import Block from "../blocks/Block";
+import IEntity from "../entities/IEntity";
+import Item from "../items/Item";
 
-export class ItemStack {
+export default class ItemStack {
 	private static ITEMSTACK_ID_ADDER = 0;
 	private readonly itemStackId:number;
 

@@ -1,4 +1,4 @@
-export class TrackedProperty<T> {
+export default class TrackedProperty<T> {
 	private trackedValue?:T;
 	private updateCallback?:(value:T) => void;
 

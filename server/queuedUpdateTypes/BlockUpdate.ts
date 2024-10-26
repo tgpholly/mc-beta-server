@@ -1,6 +1,6 @@
-import { IQueuedUpdate } from "./IQueuedUpdate";
+import IQueuedUpdate from "./IQueuedUpdate";
 
-export class QueuedBlockUpdate implements IQueuedUpdate {
+export default class QueuedBlockUpdate implements IQueuedUpdate {
 	public coordPair:number;
 	public x:number;
 	public y:number;

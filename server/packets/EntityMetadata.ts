@@ -1,10 +1,10 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
 
 const EMPTY_BUFFER = Buffer.alloc(0);
 
-export class PacketEntityMetadata implements IPacket {
+export default class PacketEntityMetadata implements IPacket {
 	public packetId = Packet.EntityMetadata;
 	public entityId:number;
 	public metadata:Buffer;

@@ -1,7 +1,7 @@
 import AABB from "../AABB"
 import Vec3 from "../Vec3"
 
-export interface IEntity {
+export default interface IEntity {
 	entityId:number,
 	position:Vec3,
 	motion:Vec3,

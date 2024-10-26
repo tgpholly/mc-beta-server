@@ -1,16 +1,16 @@
 import AABB from "../AABB";
-import { World } from "../World";
-import { BlockBehaviourSapling } from "./BlockBehaviorSapling";
-import { BlockBehaviourSugarcane } from "./BlockBehaviorSugarcane";
-import { BlockBehaviour } from "./BlockBehaviour";
-import { BlockBehaviourClay } from "./BlockBehaviourClay";
-import { BlockBehaviourFlower } from "./BlockBehaviourFlower";
-import { BlockBehaviourGrass } from "./BlockBehaviourGrass";
+import BlockBehaviour from "./BlockBehaviour";
+import BlockBehaviourSapling from "./BlockBehaviorSapling";
+import BlockBehaviourSugarcane from "./BlockBehaviorSugarcane";
+import BlockBehaviourClay from "./BlockBehaviourClay";
+import BlockBehaviourFlower from "./BlockBehaviourFlower";
+import BlockBehaviourGrass from "./BlockBehaviourGrass";
 import BlockBehaviourOre from "./BlockBehaviourOre";
 import BlockBehaviourRedstoneOre from "./BlockBehaviourRedstoneOre";
-import { BlockBehaviourStone } from "./BlockBehaviourStone";
-import { BlockBehaviourTallGrass } from "./BlockBehaviourTallGrass";
-import { IBlockBehaviour } from "./IBlockBehaviour";
+import BlockBehaviourStone from "./BlockBehaviourStone";
+import BlockBehaviourTallGrass from "./BlockBehaviourTallGrass";
+import IBlockBehaviour from "./IBlockBehaviour";
+import World from "../World";
 
 abstract class Behaviour {
 	public static base = new BlockBehaviour();
@@ -29,7 +29,7 @@ abstract class Behaviour {
 	public static sugarcane = new BlockBehaviourSugarcane();
 }
 
-export class Block {
+export default class Block {
 	public readonly blockId:number;
 	
 	public static readonly blocks:Array<Block> = new Array<Block>();

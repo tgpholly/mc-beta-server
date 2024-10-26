@@ -1,23 +1,23 @@
-import { Endian, IReader, IWriter, createWriter } from "bufferstuff";
-import AABB from "../AABB";
-import { Chunk } from "../Chunk";
+import { IReader, IWriter } from "bufferstuff";
 import { MetadataEntry, MetadataWriter } from "../MetadataWriter";
-import { Rotation } from "../Rotation";
-import { Vec2 } from "../Vec2";
+import AABB from "../AABB";
+import Block from "../blocks/Block";
+import Chunk from "../Chunk";
+import IEntity from "./IEntity";
+import MetadataFieldType from "../enums/MetadataFieldType";
+import PacketEntityLook from "../packets/EntityLook";
+import PacketEntityLookRelativeMove from "../packets/EntityLookRelativeMove";
+import PacketEntityMetadata from "../packets/EntityMetadata";
+import PacketEntityRelativeMove from "../packets/EntityRelativeMove";
+import PacketEntityTeleport from "../packets/EntityTeleport";
+import PacketEntityVelocity from "../packets/EntityVelocity";
+import Player from "./Player";
+import Rotation from "../Rotation";
+import Vec2 from "../Vec2";
 import Vec3 from "../Vec3";
-import { World } from "../World";
-import { Block } from "../blocks/Block";
-import { MetadataFieldType } from "../enums/MetadataFieldType";
-import { PacketEntityLook } from "../packets/EntityLook";
-import { PacketEntityLookRelativeMove } from "../packets/EntityLookRelativeMove";
-import { PacketEntityMetadata } from "../packets/EntityMetadata";
-import { PacketEntityRelativeMove } from "../packets/EntityRelativeMove";
-import { PacketEntityTeleport } from "../packets/EntityTeleport";
-import { PacketEntityVelocity } from "../packets/EntityVelocity";
-import { IEntity } from "./IEntity";
-import { Player } from "./Player";
+import World from "../World";
 
-export class Entity implements IEntity {
+export default class Entity implements IEntity {
 	public static nextEntityId:number = 0;
 
 	public entityId:number;
@@ -193,11 +193,11 @@ export class Entity implements IEntity {
 	private sendPositionUpdate() {
 		this.absPosition.set(Math.floor(this.position.x * 32), Math.floor(this.position.y * 32), Math.floor(this.position.z * 32));
 
-		// This code *does* work, and it works well. But this is absolutely TERRIBLE!
-		// There is definitely a better way to do this.
+		const yaw = this.rotation.yaw / 256 * 180;
+		const pitch = this.rotation.pitch / 256 * 180;
 		this.absRotation.set(
-			this.constrainRot(Math.floor(((this.rotation.yaw - 180 >= 0 ? this.rotation.yaw - 180 : (this.rotation.yaw - 180) % 360 + 360) % 360 / 360) * 256) - 128), // Yaw
-			this.constrainRot(Math.floor((this.rotation.pitch % 360 * 256) / 360)) // Pitch
+			Math.floor(yaw - Math.floor((yaw + 128) / 256) * 256),
+			Math.floor(pitch - Math.floor((pitch + 128) / 256) * 256)
 		);
 		const diffX = this.absPosition.x - this.lastAbsPosition.x;
 		const diffY = this.absPosition.y - this.lastAbsPosition.y;

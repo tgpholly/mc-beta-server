@@ -1,9 +1,8 @@
-import { World } from "../World";
-import { ItemStack } from "../inventories/ItemStack";
-import { Entity } from "./Entity";
-import { Player } from "./Player";
+import Entity from "./Entity";
+import ItemStack from "../inventories/ItemStack";
+import World from "../World";
 
-export class EntityItem extends Entity {
+export default class EntityItem extends Entity {
 	public age:number;
 	public itemStack:ItemStack;
 

@@ -1,5 +1,5 @@
-import { Chunk } from "../Chunk";
+import Chunk from "../Chunk";
 
-export interface IGenerator {
+export default interface IGenerator {
 	generate: (chunk:Chunk) => void
 }

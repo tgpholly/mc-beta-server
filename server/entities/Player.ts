@@ -1,26 +1,24 @@
-import { Chunk } from "../Chunk";
-import { MPClient } from "../MPClient";
-import { MinecraftServer } from "../MinecraftServer";
-import { World } from "../World";
-import { PacketMapChunk } from "../packets/MapChunk";
-import { EntityLiving } from "./EntityLiving";
-import { PacketPreChunk } from "../packets/PreChunk";
-import { PacketUpdateHealth } from "../packets/UpdateHealth";
-import { Inventory } from "../inventories/Inventory";
-import { ItemStack } from "../inventories/ItemStack";
-import { Block } from "../blocks/Block";
-import PlayerInventory from "../inventories/PlayerInventory";
-import { Item } from "../items/Item";
-import { PacketEntityEquipment } from "../packets/EntityEquipment";
 import { IReader, IWriter } from "bufferstuff";
-import { EntityItem } from "./EntityItem";
-import { Entity } from "./Entity";
-import { PacketCollectItem } from "../packets/CollectItem";
-import { PacketPickupSpawn } from "../packets/PickupSpawn";
+import Block from "../blocks/Block";
+import Chunk from "../Chunk";
+import Entity from "./Entity";
+import EntityItem from "./EntityItem";
+import EntityLiving from "./EntityLiving";
+import Item from "../items/Item";
+import ItemStack from "../inventories/ItemStack";
+import MinecraftServer from "../MinecraftServer";
+import MPClient from "../MPClient";
+import PacketCollectItem from "../packets/CollectItem";
+import PacketEntityEquipment from "../packets/EntityEquipment";
+import PacketMapChunk from "../packets/MapChunk";
+import PacketPreChunk from "../packets/PreChunk";
+import PacketUpdateHealth from "../packets/UpdateHealth";
+import PlayerInventory from "../inventories/PlayerInventory";
+import World from "../World";
 
 const CHUNK_LOAD_RANGE = 15;
 
-export class Player extends EntityLiving {
+export default class Player extends EntityLiving {
 	public username:string;
 	private server:MinecraftServer;
 	private firstUpdate:boolean;

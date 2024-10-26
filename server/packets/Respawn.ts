@@ -1,8 +1,8 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
 
-export class PacketRespawn implements IPacket {
+export default class PacketRespawn implements IPacket {
 	public packetId = Packet.Respawn;
 	public dimension:number;
 

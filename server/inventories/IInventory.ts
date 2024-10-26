@@ -1,5 +1,5 @@
 import { IReader, IWriter } from "bufferstuff";
-import { ItemStack } from "./ItemStack";
+import ItemStack from "./ItemStack";
 
 export default interface IInventory {
 	fromSave:(reader:IReader) => void,

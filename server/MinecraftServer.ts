@@ -1,29 +1,28 @@
-import { Config } from "../config";
-import { Console } from "hsconsole";
 import { createReader, IReader, Endian } from "bufferstuff";
-import FunkyArray from "funky-array";
-import { Server, Socket } from "net";
-import { MPClient } from "./MPClient";
-import { Packet } from "./enums/Packet";
-import { PacketKeepAlive } from "./packets/KeepAlive";
-import { PacketHandshake } from "./packets/Handshake";
-import { PacketLoginRequest } from "./packets/LoginRequest";
-import { PacketChat } from "./packets/Chat";
-import { PacketSpawnPosition } from "./packets/SpawnPosition";
-import { PacketPlayerPositionLook } from "./packets/PlayerPositionLook";
-import { PacketNamedEntitySpawn } from "./packets/NamedEntitySpawn";
-import { PacketDisconnectKick } from "./packets/DisconnectKick";
-import { Player } from "./entities/Player";
-import { SaveCompressionType } from "./enums/SaveCompressionType";
-import { WorldSaveManager } from "./WorldSaveManager";
-import { World } from "./World";
-import { Chunk } from "./Chunk";
-import { PacketTimeUpdate } from "./packets/TimeUpdate";
-import { HillyGenerator } from "./generators/Hilly";
-import { NetherGenerator } from "./generators/Nether";
-import { PacketWindowItems } from "./packets/WindowItems";
 import { getRandomValues } from "crypto";
-import { NewOverworld } from "./generators/NewOverworld";
+import { Console } from "hsconsole";
+import { Server, Socket } from "net";
+import Config from "../config";
+import Chunk from "./Chunk";
+import FunkyArray from "funky-array";
+import HillyGenerator from "./generators/terrain/Hilly";
+import MPClient from "./MPClient";
+import NetherGenerator from "./generators/terrain/Nether";
+import Packet from "./enums/Packet";
+import PacketKeepAlive from "./packets/KeepAlive";
+import PacketHandshake from "./packets/Handshake";
+import PacketLoginRequest from "./packets/LoginRequest";
+import PacketChat from "./packets/Chat";
+import PacketSpawnPosition from "./packets/SpawnPosition";
+import PacketPlayerPositionLook from "./packets/PlayerPositionLook";
+import PacketNamedEntitySpawn from "./packets/NamedEntitySpawn";
+import PacketDisconnectKick from "./packets/DisconnectKick";
+import PacketTimeUpdate from "./packets/TimeUpdate";
+import PacketWindowItems from "./packets/WindowItems";
+import Player from "./entities/Player";
+import SaveCompressionType from "./enums/SaveCompressionType";
+import World from "./World";
+import WorldSaveManager from "./WorldSaveManager";
 
 const chunkFrom = -15;
 const chunkTo = 15;
@@ -34,7 +33,7 @@ function getRandomSeed() {
 	return getRandomValues(arr)[0];
 }
 
-export class MinecraftServer {
+export default class MinecraftServer {
 	private static readonly PROTOCOL_VERSION = 14;
 	private static readonly TICK_RATE = 20;
 	private static readonly TICK_RATE_MS = 1000 / MinecraftServer.TICK_RATE;
@@ -83,6 +82,7 @@ export class MinecraftServer {
 			// Save chunks
 			Console.printInfo("Saving worlds...");
 			// There's a race condition here. oops.
+			const keepRunningInterval = setInterval(() => {}, 1000);
 			let savedWorldCount = 0;
 			let savedChunkCount = 0;
 			await this.worlds.forEach(async (world) => {
@@ -101,6 +101,7 @@ export class MinecraftServer {
 
 			// hsconsole is gone now so we have to use built in.
 			console.log("Goodbye");
+			clearInterval(keepRunningInterval);
 		});
 
 		if (this.config.saveCompression === SaveCompressionType.NONE) {

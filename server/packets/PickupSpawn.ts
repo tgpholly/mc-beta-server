@@ -1,8 +1,8 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
 
-export class PacketPickupSpawn implements IPacket {
+export default class PacketPickupSpawn implements IPacket {
 	public packetId = Packet.PickupSpawn;
 	public entityId:number;
 	public item:number;

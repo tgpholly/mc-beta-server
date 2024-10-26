@@ -1,4 +1,4 @@
-export class Vec2 {
+export default class Vec2 {
 	public x:number;
 	public y:number;
 

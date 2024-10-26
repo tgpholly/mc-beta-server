@@ -1,12 +1,11 @@
-import { Block } from "../blocks/Block";
-import { Chunk } from "../Chunk";
-import { IGenerator } from "./IGenerator";
-import { Noise2D, makeNoise2D } from "../../external/OpenSimplex2D";
-import { Noise3D, makeNoise3D } from "../../external/OpenSimplex3D";
-import { QueuedBlockUpdate } from "../queuedUpdateTypes/BlockUpdate";
-import mulberry32 from "../mulberry32";
+import { Noise2D, makeNoise2D } from "../../../external/OpenSimplex2D";
+import { Noise3D, makeNoise3D } from "../../../external/OpenSimplex3D";
+import Block from "../../blocks/Block";
+import Chunk from "../../Chunk";
+import IGenerator from "../IGenerator";
+import mulberry32 from "../../mulberry32";
 
-export class NetherGenerator implements IGenerator {
+export default class NetherGenerator implements IGenerator {
 	private seed:number;
 	seedGenerator:() => number;
 

@@ -1,8 +1,8 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
 
-export class PacketPreChunk implements IPacket {
+export default class PacketPreChunk implements IPacket {
 	public packetId = Packet.PreChunk;
 	public x:number;
 	public z:number;

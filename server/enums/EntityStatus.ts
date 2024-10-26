@@ -1,4 +1,4 @@
-export enum EntityStatus {
+enum EntityStatus {
 	Unknown0,
 	Unknown1,
 	Hurt,
@@ -6,3 +6,5 @@ export enum EntityStatus {
 	Unknown4,
 	Unknown5
 }
+
+export default EntityStatus;

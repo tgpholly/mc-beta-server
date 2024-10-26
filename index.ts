@@ -1,8 +1,9 @@
-import { Config } from "./config";
-import { Console } from "hsconsole";
 import { readFileSync } from "fs";
-import { MinecraftServer } from "./server/MinecraftServer";
-import { SaveCompressionType } from "./server/enums/SaveCompressionType";
+import { Console } from "hsconsole";
+import Config from "./config";
+import MinecraftServer from "./server/MinecraftServer";
+import SaveCompressionType from "./server/enums/SaveCompressionType";
+
 const tempConfig = JSON.parse(readFileSync("./config.json").toString());
 tempConfig.saveCompression = SaveCompressionType[tempConfig.saveCompression];
 const config:Config = tempConfig as Config;

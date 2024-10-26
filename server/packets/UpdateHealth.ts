@@ -1,8 +1,8 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
 
-export class PacketUpdateHealth implements IPacket {
+export default class PacketUpdateHealth implements IPacket {
 	public packetId = Packet.UpdateHealth;
 	public health:number;
 

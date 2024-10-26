@@ -1,5 +1,5 @@
 // https://wiki.vg/index.php?title=Protocol&oldid=488
-export enum Packet {
+enum Packet {
 	KeepAlive = 0x00,
 	LoginRequest = 0x01,
 	Handshake = 0x02,
@@ -50,3 +50,5 @@ export enum Packet {
 
 	DisconnectKick = 0xff
 }
+
+export default Packet;

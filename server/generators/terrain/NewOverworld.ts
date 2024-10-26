@@ -1,12 +1,12 @@
 
-import { makeNoise2D, Noise2D } from "../../external/OpenSimplex2D";
-import { makeNoise3D, Noise3D } from "../../external/OpenSimplex3D";
-import { Block } from "../blocks/Block";
-import { Chunk } from "../Chunk";
-import mulberry32 from "../mulberry32";
-import { IGenerator } from "./IGenerator";
+import { makeNoise2D, Noise2D } from "../../../external/OpenSimplex2D";
+import { makeNoise3D, Noise3D } from "../../../external/OpenSimplex3D";
+import Block from "../../blocks/Block";
+import Chunk from "../../Chunk";
+import IGenerator from "../IGenerator";
+import mulberry32 from "../../mulberry32";
 
-export class NewOverworld implements IGenerator {
+export default class NewOverworld implements IGenerator {
 	private seed:number;
 	seedGenerator:() => number;
 

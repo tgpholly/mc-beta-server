@@ -1,4 +1,4 @@
-export enum Animation {
+enum Animation {
 	None = 0,
 	SwingArm = 1,
 	Damage = 2,
@@ -7,3 +7,5 @@ export enum Animation {
 	Crouch = 104,
 	Uncrouch = 105,
 }
+
+export default Animation;

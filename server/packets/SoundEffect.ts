@@ -1,9 +1,9 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
-import { SoundEffects } from "../enums/SoundEffects";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
+import SoundEffects from "../enums/SoundEffects";
 
-export class PacketSoundEffect implements IPacket {
+export default class PacketSoundEffect implements IPacket {
 	public packetId = Packet.SoundEffect;
 	public effectId:SoundEffects;
 	public x:number;

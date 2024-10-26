@@ -1,8 +1,8 @@
 import { Endian, IReader, IWriter, createWriter } from "bufferstuff";
-import { ItemStack } from "./ItemStack";
 import IInventory from "./IInventory";
+import ItemStack from "./ItemStack";
 
-export class Inventory implements IInventory {
+export default class Inventory implements IInventory {
 	public itemStacks:Array<ItemStack | null>;
 
 	private size:number;

@@ -1,8 +1,8 @@
 import { createWriter, Endian } from "bufferstuff";
 import FunkyArray from "funky-array";
-import { MetadataFieldType } from "./enums/MetadataFieldType";
+import ItemStack from "./inventories/ItemStack";
+import MetadataFieldType from "./enums/MetadataFieldType";
 import Vec3 from "./Vec3";
-import { ItemStack } from "./inventories/ItemStack";
 
 export class MetadataEntry {
 	public type:MetadataFieldType;

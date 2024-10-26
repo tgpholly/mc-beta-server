@@ -1,1 +1,1 @@
-export interface IQueuedUpdate {}
+export default interface IQueuedUpdate {}

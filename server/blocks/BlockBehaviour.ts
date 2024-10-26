@@ -1,10 +1,10 @@
 import AABB from "../AABB";
+import Block from "./Block";
+import IBlockBehaviour from "./IBlockBehaviour";
 import Random from "../Random";
-import { World } from "../World";
-import { Block } from "./Block";
-import { IBlockBehaviour } from "./IBlockBehaviour";
+import World from "../World";
 
-export class BlockBehaviour implements IBlockBehaviour {
+export default class BlockBehaviour implements IBlockBehaviour {
 	public block!:Block;
 
 	public neighborBlockChange(world:World, x:number, y:number, z:number, blockId:number) {}

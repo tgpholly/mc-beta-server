@@ -1,4 +1,4 @@
-export enum MetadataFieldType {
+enum MetadataFieldType {
 	Byte = 0,
 	Short = 1,
 	Int = 2,
@@ -7,3 +7,5 @@ export enum MetadataFieldType {
 	Item = 5,
 	Vector = 6
 }
+
+export default MetadataFieldType;

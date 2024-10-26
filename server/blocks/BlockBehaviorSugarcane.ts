@@ -1,9 +1,9 @@
 import AABB from "../AABB";
-import { World } from "../World";
-import { Block } from "./Block";
-import { BlockBehaviour } from "./BlockBehaviour";
+import Block from "./Block";
+import BlockBehaviour from "./BlockBehaviour";
+import World from "../World";
 
-export class BlockBehaviourSugarcane extends BlockBehaviour {
+export default class BlockBehaviourSugarcane extends BlockBehaviour {
 	public neighborBlockChange(world:World, x:number, y:number, z:number, blockId:number) {
 		const block = world.getBlockId(x, y - 1, z);
 		if (block === 0 || block !== Block.sugarcane.blockId) {

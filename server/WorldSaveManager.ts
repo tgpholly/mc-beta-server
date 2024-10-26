@@ -1,12 +1,12 @@
-import { readFileSync, readFile, writeFile, existsSync, mkdirSync, writeFileSync, readdirSync, renameSync } from "fs";
 import { createWriter, createReader, Endian, IWriter, IReader } from "bufferstuff";
-import { Config } from "../config";
-import { Chunk } from "./Chunk";
-import { SaveCompressionType } from "./enums/SaveCompressionType";
-import { deflate, inflate } from "zlib";
-import { World } from "./World";
-import FunkyArray from "funky-array";
+import { readFileSync, readFile, writeFile, existsSync, mkdirSync, writeFileSync, readdirSync, renameSync } from "fs";
 import { Console } from "hsconsole";
+import { deflate, inflate } from "zlib";
+import Chunk from "./Chunk";
+import Config from "../config";
+import FunkyArray from "funky-array";
+import SaveCompressionType from "./enums/SaveCompressionType";
+import World from "./World";
 
 enum FileMagic {
 	Chunk = 0xFC,
@@ -14,7 +14,7 @@ enum FileMagic {
 	Player = 0xFE
 }
 
-export class WorldSaveManager {
+export default class WorldSaveManager {
 	private readonly worldFolderPath;
 	private readonly globalDataPath;
 	private readonly worldPlayerDataFolderPath;

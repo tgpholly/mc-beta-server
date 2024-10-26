@@ -1,6 +1,6 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
 
 const MOTION_MAX = 3.9;
 function maxMotion(value:number) {
@@ -13,7 +13,7 @@ function maxMotion(value:number) {
 	return value;
 }
 
-export class PacketEntityVelocity implements IPacket {
+export default class PacketEntityVelocity implements IPacket {
 	public packetId = Packet.EntityVelocity;
 	public entityId:number;
 	public x:number;

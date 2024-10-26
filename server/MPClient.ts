@@ -1,33 +1,33 @@
-import { Console } from "hsconsole";
 import { IReader } from "bufferstuff";
-import { MinecraftServer } from "./MinecraftServer";
-import { Packet } from "./enums/Packet";
-import { PacketAnimation } from "./packets/Animation";
-import { PacketChat } from "./packets/Chat"
-import { PacketEntityAction } from "./packets/EntityAction";
-import { PacketPlayer } from "./packets/Player";
-import { PacketPlayerPosition } from "./packets/PlayerPosition";
-import { PacketPlayerLook } from "./packets/PlayerLook";
-import { PacketPlayerPositionLook } from "./packets/PlayerPositionLook";
-import { PacketPlayerDigging } from "./packets/PlayerDigging";
-import { Player } from "./entities/Player";
+import { Console } from "hsconsole";
 import { Socket } from "net";
-import Vec3 from "./Vec3";
-import { PacketRespawn } from "./packets/Respawn";
-import { PacketPlayerBlockPlacement } from "./packets/PlayerBlockPlacement";
-import { PacketHoldingChange } from "./packets/HoldingChange";
-import { PacketDisconnectKick } from "./packets/DisconnectKick";
-import { ItemStack } from "./inventories/ItemStack";
-import { Block } from "./blocks/Block";
-import { EntityItem } from "./entities/EntityItem";
 import AABB from "./AABB";
-import { PacketSoundEffect } from "./packets/SoundEffect";
-import { SoundEffects } from "./enums/SoundEffects";
-import { PacketUseEntity } from "./packets/UseEntity";
-import { EntityLiving } from "./entities/EntityLiving";
+import Block from "./blocks/Block";
+import EntityLiving from "./entities/EntityLiving";
+import EntityItem from "./entities/EntityItem";
+import ItemStack from "./inventories/ItemStack";
+import MinecraftServer from "./MinecraftServer";
+import Packet from "./enums/Packet";
+import PacketAnimation from "./packets/Animation";
+import PacketChat from "./packets/Chat"
+import PacketEntityAction from "./packets/EntityAction";
+import PacketPlayer from "./packets/Player";
+import PacketPlayerPosition from "./packets/PlayerPosition";
+import PacketPlayerLook from "./packets/PlayerLook";
+import PacketPlayerPositionLook from "./packets/PlayerPositionLook";
+import PacketPlayerDigging from "./packets/PlayerDigging";
+import PacketRespawn from "./packets/Respawn";
+import PacketPlayerBlockPlacement from "./packets/PlayerBlockPlacement";
+import PacketHoldingChange from "./packets/HoldingChange";
+import PacketDisconnectKick from "./packets/DisconnectKick";
+import PacketSoundEffect from "./packets/SoundEffect";
+import PacketUseEntity from "./packets/UseEntity";
+import Player from "./entities/Player";
 import PlayerInventory from "./inventories/PlayerInventory";
+import SoundEffects from "./enums/SoundEffects";
+import Vec3 from "./Vec3";
 
-export class MPClient {
+export default class MPClient {
 	private readonly mcServer:MinecraftServer;
 	private readonly socket:Socket;
 	public entity:Player;

@@ -1,11 +1,11 @@
+import Block from "./blocks/Block";
 import FunkyArray from "funky-array";
-import { NibbleArray } from "../nibbleArray";
-import { Block } from "./blocks/Block";
-import { Player } from "./entities/Player";
-import { QueuedBlockUpdate } from "./queuedUpdateTypes/BlockUpdate";
-import { World } from "./World";
+import NibbleArray from "../nibbleArray";
+import Player from "./entities/Player";
+import QueuedBlockUpdate from "./queuedUpdateTypes/BlockUpdate";
+import World from "./World";
 
-export class Chunk {
+export default class Chunk {
 	private readonly MAX_HEIGHT:number = 128;
 	private readonly FULLBRIGHT = false;
 	public readonly world:World;

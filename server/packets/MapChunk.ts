@@ -1,10 +1,10 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { Chunk } from "../Chunk";
 import { deflate } from "zlib";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
+import Chunk from "../Chunk";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
 
-export class PacketMapChunk implements IPacket {
+export default class PacketMapChunk implements IPacket {
 	public packetId = Packet.MapChunk;
 	public x:number;
 	public y:number;

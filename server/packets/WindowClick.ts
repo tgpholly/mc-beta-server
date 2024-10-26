@@ -1,8 +1,8 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
 
-export class PacketWindowClick implements IPacket {
+export default class PacketWindowClick implements IPacket {
 	public packetId = Packet.WindowClick;
 	public windowId:number;
 	public slot:number;

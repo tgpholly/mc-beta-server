@@ -1,23 +1,21 @@
 import { Endian, createWriter } from "bufferstuff";
-import FunkyArray from "funky-array";
-import { Chunk } from "./Chunk";
-import { WorldSaveManager } from "./WorldSaveManager";
-import { Block } from "./blocks/Block";
-import { EntityItem } from "./entities/EntityItem";
-import { IEntity } from "./entities/IEntity";
-import { Player } from "./entities/Player";
-//import { FlatGenerator } from "./generators/Flat";
-import { HillyGenerator } from "./generators/Hilly";
-import { IGenerator } from "./generators/IGenerator";
-import { PacketBlockChange } from "./packets/BlockChange";
-import { PacketDestroyEntity } from "./packets/DestroyEntity";
-import { PacketPickupSpawn } from "./packets/PickupSpawn";
-import { QueuedBlockUpdate } from "./queuedUpdateTypes/BlockUpdate";
-import { IQueuedUpdate } from "./queuedUpdateTypes/IQueuedUpdate";
 import AABB from "./AABB";
+import Block from "./blocks/Block";
+import Chunk from "./Chunk";
+import EntityItem from "./entities/EntityItem";
+import FunkyArray from "funky-array";
+import IEntity from "./entities/IEntity";
+import IGenerator from "./generators/IGenerator";
+import IQueuedUpdate from "./queuedUpdateTypes/IQueuedUpdate";
+import PacketBlockChange from "./packets/BlockChange";
+import PacketDestroyEntity from "./packets/DestroyEntity";
+import PacketPickupSpawn from "./packets/PickupSpawn";
+import Player from "./entities/Player";
+import QueuedBlockUpdate from "./queuedUpdateTypes/BlockUpdate";
 import Random from "./Random";
+import WorldSaveManager from "./WorldSaveManager";
 
-export class World {
+export default class World {
 	public static ENTITY_MAX_SEND_DISTANCE = 50;
 	private static READ_CHUNKS_FROM_DISK = true;
 
@@ -198,7 +196,7 @@ export class World {
 		chunk.setBlockWithMetadata(blockId, metadata, x & 0xf, y, z & 0xf);
 
 		if (doBlockUpdate) {
-			const blockUpdatePacket = new PacketBlockChange(x, y, z, blockId, metadata).writeData(); // TODO: Handle metadata
+			const blockUpdatePacket = new PacketBlockChange(x, y, z, blockId, metadata).writeData();
 			// Send block update to all players that have this chunk loaded
 			chunk.playersInChunk.forEach(player => {
 				player.mpClient?.send(blockUpdatePacket);

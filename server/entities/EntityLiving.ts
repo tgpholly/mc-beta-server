@@ -1,12 +1,12 @@
 import { IReader, IWriter } from "bufferstuff";
-import { World } from "../World";
-import { Block } from "../blocks/Block";
-import { EntityStatus } from "../enums/EntityStatus";
-import { PacketEntityStatus } from "../packets/EntityStatus";
-import { Entity } from "./Entity";
-import { IEntity } from "./IEntity";
+import Block from "../blocks/Block";
+import Entity from "./Entity";
+import EntityStatus from "../enums/EntityStatus";
+import IEntity from "./IEntity";
+import PacketEntityStatus from "../packets/EntityStatus";
+import World from "../World";
 
-export class EntityLiving extends Entity {
+export default class EntityLiving extends Entity {
 	public timeInWater:number;
 	public headHeight:number;
 	public lastHealth:number;

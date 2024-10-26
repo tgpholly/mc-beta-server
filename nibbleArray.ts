@@ -1,4 +1,4 @@
-export class NibbleArray {
+export default class NibbleArray {
 	private array:Uint8Array;
 
 	public constructor(size:number|ArrayBuffer|Uint8Array) {

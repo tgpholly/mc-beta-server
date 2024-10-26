@@ -1,6 +1,6 @@
-import { SaveCompressionType } from "./server/enums/SaveCompressionType";
+import SaveCompressionType from "./server/enums/SaveCompressionType";
 
-export interface Config {
+export default interface Config {
 	port: number,
 	maxPlayers: number,
 	seed: number|string,

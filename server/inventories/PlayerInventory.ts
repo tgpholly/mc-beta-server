@@ -1,8 +1,8 @@
-import { Player } from "../entities/Player";
-import { PacketSetSlot } from "../packets/SetSlot";
-import { PacketWindowItems } from "../packets/WindowItems";
-import { Inventory } from "./Inventory";
-import { ItemStack } from "./ItemStack";
+import Inventory from "./Inventory";
+import ItemStack from "./ItemStack";
+import PacketSetSlot from "../packets/SetSlot";
+import PacketWindowItems from "../packets/WindowItems";
+import Player from "../entities/Player";
 
 export default class PlayerInventory extends Inventory {
 	private player:Player;

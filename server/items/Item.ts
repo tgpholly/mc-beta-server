@@ -1,6 +1,6 @@
-import { MaxUses } from "../enums/MaxUses";
+import MaxUses from "../enums/MaxUses";
 
-export class Item {
+export default class Item {
 	public static items:Array<Item> = new Array<Item>();
 
 	public maxStackSize:number;

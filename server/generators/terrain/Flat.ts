@@ -1,8 +1,8 @@
-import { Block } from "../blocks/Block";
-import { Chunk } from "../Chunk";
-import { IGenerator } from "./IGenerator";
+import Block from "../../blocks/Block";
+import Chunk from "../../Chunk";
+import IGenerator from "../IGenerator";
 
-export class FlatGenerator implements IGenerator {
+export default class FlatGenerator implements IGenerator {
 	public generate(chunk:Chunk) {
 		for (let x = 0; x < 16; x++) {
 			for (let z = 0; z < 16; z++) {

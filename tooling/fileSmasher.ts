@@ -57,7 +57,7 @@ for (const line of splitLines) {
 	}
 	// Fix up classes, interfaces and such.
 	//resultLines.push(line);
-	resultLines.push(line.replace("export default function", "function").replace("export class", "class").replace("export interface", "interface").replace("export enum", "enum").replace("export type", "type"));
+	resultLines.push(line.replace("export default function", "function").replace("export class", "class").replace("export default class", "class").replace("export interface", "interface").replace("export enum", "enum").replace("export type", "type"));
 }
 
 writeFileSync("./combined.ts", resultLines.join("\n"));

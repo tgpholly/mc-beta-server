@@ -1,9 +1,9 @@
 import AABB from "../AABB";
+import Block from "./Block";
 import Random from "../Random";
-import { World } from "../World";
-import { Block } from "./Block";
+import World from "../World";
 
-export interface IBlockBehaviour {
+export default interface IBlockBehaviour {
 	block:Block,
 
 	neighborBlockChange(world:World, x:number, y:number, z:number, blockId:number): void,

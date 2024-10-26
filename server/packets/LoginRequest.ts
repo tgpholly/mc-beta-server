@@ -1,8 +1,8 @@
 import { createWriter, IReader, Endian } from "bufferstuff";
-import { IPacket } from "./IPacket";
-import { Packet } from "../enums/Packet";
+import IPacket from "./IPacket";
+import Packet from "../enums/Packet";
 
-export class PacketLoginRequest implements IPacket {
+export default class PacketLoginRequest implements IPacket {
 	public packetId = Packet.LoginRequest;
 	public protocolVersion:number;
 	public username:string;
