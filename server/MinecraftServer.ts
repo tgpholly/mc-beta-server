@@ -77,31 +77,33 @@ export default class MinecraftServer {
 			// Disconnect all players
 			const kickPacket = new PacketDisconnectKick("Server shutting down.").writeData();
 			this.sendToAllClients(kickPacket);
-			// Shut down the tcp server
-			this.server.close();
+
 			// Save chunks
 			Console.printInfo("Saving worlds...");
-			// There's a race condition here. oops.
-			const keepRunningInterval = setInterval(() => {}, 1000);
 			let savedWorldCount = 0;
 			let savedChunkCount = 0;
+			const worldsSaveStartTime = Date.now();
 			await this.worlds.forEach(async (world) => {
+				const worldSaveStartTime = Date.now();
 				if (world.chunks.length !== 0) {
 					await world.chunks.forEach(async (chunk) => {
 						await world.unloadChunk(Chunk.CreateCoordPair(chunk.x, chunk.z));
 						savedChunkCount++;
 					});
 				}
+				Console.printInfo(`Saved DIM${world.dimension} to disk. Took ${Date.now() - worldSaveStartTime}ms`);
 				savedWorldCount++;
 			});
-			Console.printInfo(`Saved ${savedChunkCount} chunks from ${savedWorldCount} world(s).`);
+			Console.printInfo(`Saved ${savedChunkCount} chunks from ${savedWorldCount} world(s). Took ${Date.now() - worldsSaveStartTime}ms`);
 
 			// Flush final console log to disk and close all writers
 			Console.cleanup();
 
 			// hsconsole is gone now so we have to use built in.
 			console.log("Goodbye");
-			clearInterval(keepRunningInterval);
+
+			// Shut down the tcp server
+			this.server.close();
 		});
 
 		if (this.config.saveCompression === SaveCompressionType.NONE) {
