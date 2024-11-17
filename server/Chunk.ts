@@ -4,6 +4,7 @@ import NibbleArray from "../nibbleArray";
 import Player from "./entities/Player";
 import QueuedBlockUpdate from "./queuedUpdateTypes/BlockUpdate";
 import World from "./World";
+import TileEntity from "./tileentities/TileEntity";
 
 export default class Chunk {
 	private readonly MAX_HEIGHT:number = 128;
@@ -15,6 +16,8 @@ export default class Chunk {
 
 	public savingToDisk:boolean = false;
 	public forceLoaded:boolean = false;
+
+	private tileEntities:FunkyArray<number, TileEntity>;
 
 	private blocks:Uint8Array;
 	private metadata:NibbleArray;
@@ -30,6 +33,7 @@ export default class Chunk {
 		this.x = x;
 		this.z = z;
 		this.playersInChunk = new FunkyArray<number, Player>();
+		this.tileEntities = new FunkyArray<number, TileEntity>();
 
 		if (generateOrBlockData instanceof Uint8Array && metadata instanceof Uint8Array && blockLight instanceof Uint8Array && skyLight instanceof Uint8Array) {
 			this.blocks = new Uint8Array(generateOrBlockData);
