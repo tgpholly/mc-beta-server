@@ -1,4 +1,5 @@
 enum TileEntityType {
+	Unknown,
 	Chest
 }
 
