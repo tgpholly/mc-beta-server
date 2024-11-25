@@ -6,6 +6,8 @@ import Chunk from "./Chunk";
 import Config from "../config";
 import FunkyArray from "funky-array";
 import SaveCompressionType from "./enums/SaveCompressionType";
+import TileEntityLoader from "./tileentities/TileEntityLoader";
+import UnsupportedError from "./errors/UnsupportedError";
 import World from "./World";
 
 enum FileMagic {
@@ -13,6 +15,8 @@ enum FileMagic {
 	Info = 0xFD,
 	Player = 0xFE
 }
+
+const CHUNK_FILE_VERSION = 2;
 
 export default class WorldSaveManager {
 	private readonly worldFolderPath;
@@ -86,6 +90,18 @@ export default class WorldSaveManager {
 		}
 	}
 
+	private decompressDeflate(buffer:Buffer) {
+		return new Promise<Buffer>((resolve, reject) => {
+			inflate(buffer, (err, data) => {
+				if (err) {
+					return reject(err);
+				}
+
+				resolve(data);
+			});
+		});
+	}
+
 	private createInfoFile(numericalSeed:number) {
 		const infoFileWriter = createWriter(Endian.BE, 26);
 		infoFileWriter.writeUByte(FileMagic.Info); // Info File Magic
@@ -135,22 +151,28 @@ export default class WorldSaveManager {
 	}
 
 	public writeChunkToDisk(chunk:Chunk) {
-		return new Promise<boolean>((resolve, reject) => {
+		return new Promise<boolean>(async (resolve, reject) => {
 			const saveType = this.config.saveCompression;
 			const chunkFileWriter = createWriter(Endian.BE, 10);
 			chunkFileWriter.writeUByte(FileMagic.Chunk); // Chunk File Magic
-			// TODO: Change to 1 when lighting actually works
-			chunkFileWriter.writeUByte(1); // File Version
+			chunkFileWriter.writeUByte(CHUNK_FILE_VERSION); // File Version
 			chunkFileWriter.writeUByte(saveType); // Save compression type
 			chunkFileWriter.writeUByte(16); // Chunk X
 			chunkFileWriter.writeUByte(128); // Chunk Y
 			chunkFileWriter.writeUByte(16); // Chunk Z
 
-			const chunkData = createWriter(Endian.BE)
+			const chunkDataCombined = createWriter(Endian.BE)
 				.writeBuffer(Buffer.from(chunk.getBlockData()))
 				.writeBuffer(chunk.getMetadataBuffer())
 				.writeBuffer(chunk.getBlockLightBuffer())
-				.writeBuffer(chunk.getSkyLightBuffer()).toBuffer();
+				.writeBuffer(chunk.getSkyLightBuffer());
+
+			chunkDataCombined.writeUShort(chunk.tileEntities.length);
+			await chunk.tileEntities.forEach(tileEntity => {
+				tileEntity.toSave(chunkDataCombined);
+			});
+
+			const chunkData = chunkDataCombined.toBuffer();
 
 			const codArr = this.chunksOnDisk.get(chunk.world.dimension);
 			if (saveType === SaveCompressionType.NONE) {
@@ -192,7 +214,7 @@ export default class WorldSaveManager {
 
 	readChunkFromDisk(world:World, x:number, z:number) {
 		return new Promise<Chunk>((resolve, reject) => {
-			readFile(`${this.worldFolderPath}/DIM${world.dimension}/chunks/${Chunk.CreateCoordPair(x, z).toString(16)}.hwc`, (err, data) => {
+			readFile(`${this.worldFolderPath}/DIM${world.dimension}/chunks/${Chunk.CreateCoordPair(x, z).toString(16)}.hwc`, async (err, data) => {
 				if (err) {
 					return reject(err);
 				}
@@ -205,52 +227,53 @@ export default class WorldSaveManager {
 				}
 
 				const fileVersion = chunkFileReader.readUByte();
-				if (fileVersion === 0) {
+				if (fileVersion === 0 || fileVersion === 1 || fileVersion === 2) {
 					const saveCompressionType:SaveCompressionType = chunkFileReader.readUByte();
 					const chunkX = chunkFileReader.readUByte();
 					const chunkY = chunkFileReader.readUByte();
 					const chunkZ = chunkFileReader.readUByte();
-					const totalByteSize = chunkX * chunkZ * chunkY;
+					const chunkDataByteSize = chunkX * chunkZ * chunkY;
 
 					const contentLength = chunkFileReader.readInt();
+					let chunkData: IReader;
 					if (saveCompressionType === SaveCompressionType.NONE) {
-						const chunkData = createReader(Endian.BE, chunkFileReader.readBuffer(contentLength));
-						const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2));
-						resolve(chunk);
+						chunkData = createReader(Endian.BE, chunkFileReader.readBuffer(contentLength));
 					} else if (saveCompressionType === SaveCompressionType.DEFLATE) {
-						inflate(chunkFileReader.readBuffer(contentLength), (err, data) => {
-							if (err) {
-								return reject(err);
-							}
-
-							const chunkData = createReader(Endian.BE, data);
-							const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2));
-							resolve(chunk);
-						});
+						chunkData = createReader(Endian.BE, await this.decompressDeflate(chunkFileReader.readBuffer(contentLength)));
+					} else {
+						throw new UnsupportedError(`Unsupported chunk compression type`);
 					}
-				} else if (fileVersion === 1) {
-					const saveCompressionType:SaveCompressionType = chunkFileReader.readUByte();
-					const chunkX = chunkFileReader.readUByte();
-					const chunkY = chunkFileReader.readUByte();
-					const chunkZ = chunkFileReader.readUByte();
-					const totalByteSize = chunkX * chunkZ * chunkY;
 
-					const contentLength = chunkFileReader.readInt();
-					if (saveCompressionType === SaveCompressionType.NONE) {
-						const chunkData = createReader(Endian.BE, chunkFileReader.readBuffer(contentLength));
-						const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2), chunkData.readUint8Array(totalByteSize / 2), chunkData.readUint8Array(totalByteSize / 2));
-						resolve(chunk);
-					} else if (saveCompressionType === SaveCompressionType.DEFLATE) {
-						inflate(chunkFileReader.readBuffer(contentLength), (err, data) => {
-							if (err) {
-								return reject(err);
-							}
-
-							const chunkData = createReader(Endian.BE, data);
-							const chunk = new Chunk(world, x, z, chunkData.readUint8Array(totalByteSize), chunkData.readUint8Array(totalByteSize / 2), chunkData.readUint8Array(totalByteSize / 2), chunkData.readUint8Array(totalByteSize / 2));
-							resolve(chunk);
-						});
+					let chunk:Chunk;
+					if (fileVersion === 0) {
+						chunk = new Chunk(
+							world, x, z,
+							chunkData.readUint8Array(chunkDataByteSize),    // Block Data
+							chunkData.readUint8Array(chunkDataByteSize / 2) // Block Metadata
+						);
+					} else if (fileVersion === 1 || fileVersion === 2) {
+						chunk = new Chunk(
+							world, x, z,
+							chunkData.readUint8Array(chunkDataByteSize),     // Block Data
+							chunkData.readUint8Array(chunkDataByteSize / 2), // Block Metadata
+							chunkData.readUint8Array(chunkDataByteSize / 2), // Block Light
+							chunkData.readUint8Array(chunkDataByteSize / 2)  // Sky Light
+						);
+					} else {
+						throw new UnsupportedError(`Unsupported save file version: ${fileVersion}`);
 					}
+
+					if (fileVersion === 2) {
+						const tileEntityCount = chunkData.readUShort();
+						for (let i = 0; i < tileEntityCount; i++) {
+							const tileEntity = TileEntityLoader.FromSave(chunkData);
+							chunk.tileEntities.set(tileEntity.pos.x << 11 | tileEntity.pos.z << 7 | tileEntity.pos.y, tileEntity);
+						}
+					}
+
+					resolve(chunk);
+				} else {
+					throw new UnsupportedError(`Unsupported save file version: ${fileVersion}`);
 				}
 			});
 		});

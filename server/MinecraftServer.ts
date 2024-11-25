@@ -23,6 +23,7 @@ import Player from "./entities/Player";
 import SaveCompressionType from "./enums/SaveCompressionType";
 import World from "./World";
 import WorldSaveManager from "./WorldSaveManager";
+import TextColorParser from "./TextColorParser";
 
 const chunkFrom = -15;
 const chunkTo = 15;
@@ -196,7 +197,7 @@ export default class MinecraftServer {
 
 	sendChatMessage(text:string) {
 		this.sendToAllClients(new PacketChat(text).writeData());
-		Console.printInfo(`[CHAT] ${text}`);
+		Console.printInfo(`[CHAT] ${TextColorParser.ParseConsole(text)}`);
 	}
 
 	async handleLoginRequest(reader:IReader, socket:Socket, setMPClient:(mpclient:MPClient) => void) {

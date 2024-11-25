@@ -26,6 +26,7 @@ import Player from "./entities/Player";
 import PlayerInventory from "./inventories/PlayerInventory";
 import SoundEffects from "./enums/SoundEffects";
 import Vec3 from "./Vec3";
+import TextColorParser from "./TextColorParser";
 
 export default class MPClient {
 	private readonly mcServer:MinecraftServer;
@@ -140,7 +141,7 @@ export default class MPClient {
 		}
 
 		packet.message = `<${this.entity.username}> ${packet.message}`;
-		Console.printInfo(`[CHAT] ${packet.message}`);
+		Console.printInfo(`[CHAT] ${TextColorParser.ParseConsole(packet.message)}`);
 		this.mcServer.sendToAllClients(packet.writeData());
 	}
 

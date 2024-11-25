@@ -5,31 +5,21 @@ import Vec3 from "../Vec3";
 import TileEntityChest from "./TileEntityChest";
 
 export default class TileEntity {
-	private readonly type: TileEntityType;
-	private readonly forBlockId: Block;
-	private readonly position: Vec3;
+	public readonly type: TileEntityType;
+	public readonly forBlock: Block;
+	public readonly pos: Vec3;
 
-	public constructor(type: TileEntityType, forBlockId: Block, position: Vec3) {
+	public constructor(type: TileEntityType, forBlock: Block, pos: Vec3) {
 		this.type = type;
-		this.forBlockId = forBlockId;
-		this.position = position;
+		this.forBlock = forBlock;
+		this.pos = pos;
 	}
 
-	public fromSave(reader:IReader) : TileEntity {
-		let tileEntity:TileEntity;
-		const type: TileEntityType = reader.readUByte();
-		const forBlock = Block.blocks[reader.readUByte()];
-		const position = new Vec3(reader.readUByte(), reader.readUByte(), reader.readUByte());
-		if (type === TileEntityType.Chest) {
-			tileEntity = new TileEntityChest(type, forBlock, position);
-		} else {
-			tileEntity = new TileEntity(type, forBlock, position);
-		}
-
-		return tileEntity;
-	}
+	public fromSave(reader:IReader) {}
 
 	public toSave(writer:IWriter) {
-		
+		writer.writeUByte(this.type);
+		writer.writeUByte(this.forBlock.blockId);
+		writer.writeUByte(this.pos.x).writeUByte(this.pos.y).writeUByte(this.pos.z);
 	}
 }

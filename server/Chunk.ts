@@ -17,7 +17,7 @@ export default class Chunk {
 	public savingToDisk:boolean = false;
 	public forceLoaded:boolean = false;
 
-	private tileEntities:FunkyArray<number, TileEntity>;
+	public tileEntities:FunkyArray<number, TileEntity>;
 
 	private blocks:Uint8Array;
 	private metadata:NibbleArray;
