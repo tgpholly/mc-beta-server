@@ -11,6 +11,7 @@ import BlockBehaviourStone from "./BlockBehaviourStone";
 import BlockBehaviourTallGrass from "./BlockBehaviourTallGrass";
 import IBlockBehaviour from "./IBlockBehaviour";
 import World from "../World";
+import BlockBehaviourChest from "./BlockBehaviourChest";
 
 abstract class Behaviour {
 	public static base = new BlockBehaviour();
@@ -22,6 +23,8 @@ abstract class Behaviour {
 
 	public static tallGrass = new BlockBehaviourTallGrass();
 	public static flower = new BlockBehaviourFlower();
+
+	public static chest = new BlockBehaviourChest();
 
 	public static redstoneOre = new BlockBehaviourRedstoneOre();
 
@@ -210,7 +213,7 @@ export default class Block {
 	static readonly fire = new Block(51).setHardness(0).setLightEmission(1).setBlockName("Fire"); // TODO: Behavior script
 	static readonly mobSpawner = new Block(52).setHardness(5).setBlockName("Mob Spawner"); // TODO: Behavior script
 	static readonly woodenStairs = new Block(53).setBlockName("Wooden Stairs"); // TODO: Behavior script
-	static readonly chest = new Block(54).setHardness(2.5).setBlockName("Chest"); // TODO: Behavior script
+	static readonly chest = new Block(54).setHardness(2.5).setBehaviour(Behaviour.chest).setBlockName("Chest"); // TODO: Behavior script
 	static readonly redstoneDust = new Block(55).setHardness(0).setBlockName("Redstone Dust"); // TODO: Behavior script
 	static readonly diamondOre = new Block(56).setHardness(3).setBlockName("Diamond Ore"); // TODO: Behavior script
 	static readonly diamondBlock = new Block(57).setHardness(5).setBlockName("Diamond Block"); // TODO: Behavior script

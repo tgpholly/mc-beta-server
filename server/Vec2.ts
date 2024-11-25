@@ -32,4 +32,8 @@ export default class Vec2 {
 			this.x = this.y = 0;
 		}
 	}
+
+	toString() {
+		return `Vec2(${this.x},${this.y})`;
+	}
 }

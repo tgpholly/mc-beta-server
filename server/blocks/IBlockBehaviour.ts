@@ -6,6 +6,8 @@ import World from "../World";
 export default interface IBlockBehaviour {
 	block:Block,
 
+	placed(world:World, x:number, y:number, z:number): void,
+	destroyed(world:World, x:number, y:number, z:number): void,
 	neighborBlockChange(world:World, x:number, y:number, z:number, blockId:number): void,
 	droppedItem: (blockId:number) => number,
 	droppedCount: (blockId:number) => number,

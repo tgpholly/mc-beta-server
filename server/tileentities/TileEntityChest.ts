@@ -8,8 +8,8 @@ import Inventory from "../inventories/Inventory";
 export default class TileEntityChest extends TileEntity {
 	public inventory:Inventory;
 
-	public constructor(type: TileEntityType, forBlockId: Block, position: Vec3) {
-		super(type, forBlockId, position);
+	public constructor(position: Vec3) {
+		super(TileEntityType.Chest, Block.chest, position);
 
 		this.inventory = new Inventory(9 * 3, "Chest");
 	}

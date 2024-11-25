@@ -196,6 +196,7 @@ export default class MPClient {
 		//this.inventory.addItemStack(new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
 		//this.send(new PacketWindowItems(0, this.inventory.getInventorySize(), this.inventory.constructInventoryPayload()).writeData());
 		const blockBehaviour = Block.blockBehaviours[brokenBlockId];
+		blockBehaviour?.destroyed(this.entity.world, x, y, z);
 		const itemId = blockBehaviour.droppedItem(brokenBlockId);
 		if (itemId !== -1) {
 			const itemCount = blockBehaviour.droppedCount(brokenBlockId);
@@ -277,6 +278,7 @@ export default class MPClient {
 			if (this.entity.world.getBlockId(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z) === 0) {
 				itemStack.size--;
 				this.entity.world.setBlockAndMetadataWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, itemStack.itemID, itemStack.damage);
+				Block.blockBehaviours[itemStack.itemID]?.placed(this.entity.world, this.diggingAt.x, this.diggingAt.y, this.diggingAt.z);
 				this.inventory.dropEmptyItemStacks();
 			}
 		} else {

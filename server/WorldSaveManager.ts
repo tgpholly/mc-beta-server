@@ -9,6 +9,7 @@ import SaveCompressionType from "./enums/SaveCompressionType";
 import TileEntityLoader from "./tileentities/TileEntityLoader";
 import UnsupportedError from "./errors/UnsupportedError";
 import World from "./World";
+import Block from "./blocks/Block";
 
 enum FileMagic {
 	Chunk = 0xFC,
@@ -267,7 +268,12 @@ export default class WorldSaveManager {
 						const tileEntityCount = chunkData.readUShort();
 						for (let i = 0; i < tileEntityCount; i++) {
 							const tileEntity = TileEntityLoader.FromSave(chunkData);
-							chunk.tileEntities.set(tileEntity.pos.x << 11 | tileEntity.pos.z << 7 | tileEntity.pos.y, tileEntity);
+							const blockAtTileEntity = chunk.getBlockId(tileEntity.pos.x, tileEntity.pos.y, tileEntity.pos.z);
+							if (blockAtTileEntity === tileEntity.forBlock.blockId) {
+								chunk.tileEntities.set(tileEntity.pos.x << 11 | tileEntity.pos.z << 7 | tileEntity.pos.y, tileEntity);
+							} else {
+								Console.printWarn(`Tile entity in chunk ${chunk.x},${chunk.z} block ${tileEntity.pos} has no associated block of type ${tileEntity.forBlock.blockName}, instead found ${Block.blockNames[blockAtTileEntity] ?? "Air"}. Skipping...`);
+							}
 						}
 					}
 

@@ -16,4 +16,8 @@ export default class Rotation extends Vec2 {
 	public set pitch(value:number) {
 		this.y = value;
 	}
+
+	toString() {
+		return `Rotation(${this.x},${this.y})`;
+	}
 }

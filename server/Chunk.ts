@@ -172,6 +172,18 @@ export default class Chunk {
 		return this.skyLight.set(x << 11 | z << 7 | y, value);
 	}
 
+	public getTileEntity(x:number, y:number, z:number) {
+		return this.tileEntities.get((x & 0xf) << 11 | (z & 0xf) << 7 | y);
+	}
+
+	public setTileEntity(tileEntity:TileEntity, x:number, y:number, z:number) {
+		return this.tileEntities.set((x & 0xf) << 11 | (z & 0xf) << 7 | y, tileEntity);
+	}
+
+	public removeTileEntity(x:number, y:number, z:number) {
+		return this.tileEntities.remove((x & 0xf) << 11 | (z & 0xf) << 7 | y);
+	}
+
 	public getBlockBuffer() {
 		return Buffer.from(this.blocks);
 	}

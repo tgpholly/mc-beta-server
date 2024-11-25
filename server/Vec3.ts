@@ -72,4 +72,8 @@ export default class Vec3 {
 	toAbs() {
 		return new Vec3(Math.round(this.x * 32), Math.round(this.y * 32), Math.round(this.z * 32));
 	}
+
+	toString() {
+		return `Vec3(${this.x},${this.y},${this.z})`;
+	}
 }
