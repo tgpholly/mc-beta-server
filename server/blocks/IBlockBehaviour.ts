@@ -8,6 +8,7 @@ export default interface IBlockBehaviour {
 
 	placed(world:World, x:number, y:number, z:number): void,
 	destroyed(world:World, x:number, y:number, z:number): void,
+	interactable(): boolean,
 	neighborBlockChange(world:World, x:number, y:number, z:number, blockId:number): void,
 	droppedItem: (blockId:number) => number,
 	droppedCount: (blockId:number) => number,

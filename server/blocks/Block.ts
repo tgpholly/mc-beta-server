@@ -159,6 +159,11 @@ export default class Block {
 		return this.behaviour.getBoundingBox(x, y, z);
 	}
 
+	// Comparison
+	public is(otherBlock: Block) {
+		return this.blockId === otherBlock.blockId;
+	}
+
 	// Define statics here
 	static readonly stone = new Block(1).setHardness(1.5).setBehaviour(Behaviour.stone).setBlockName("Stone");
 	static readonly grass = new Block(2).setHardness(0.6).setBehaviour(Behaviour.grass).setBlockName("Grass");

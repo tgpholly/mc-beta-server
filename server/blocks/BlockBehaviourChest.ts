@@ -13,4 +13,8 @@ export default class BlockBehaviourChest extends BlockBehaviour {
 		const chunk = world.getChunk(x >> 4, z >> 4);
 		chunk.removeTileEntity(x, y, z);
 	}
+
+	public interactable() {
+		return true;
+	}
 }

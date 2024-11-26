@@ -27,6 +27,10 @@ import PlayerInventory from "./inventories/PlayerInventory";
 import SoundEffects from "./enums/SoundEffects";
 import Vec3 from "./Vec3";
 import TextColorParser from "./TextColorParser";
+import FunkyArray from "funky-array";
+import Window from "./windows/Window";
+import WindowChest from "./windows/WindowChest";
+import TileEntityChest from "./tileentities/TileEntityChest";
 
 export default class MPClient {
 	private readonly mcServer:MinecraftServer;
@@ -38,6 +42,8 @@ export default class MPClient {
 	private holdingIndex:number = 36; // First hotbar slot.
 	private diggingAt:Vec3;
 
+	private windows: FunkyArray<number, Window>;
+
 	public constructor(mcServer:MinecraftServer, socket:Socket, entity:Player) {
 		this.mcServer = mcServer;
 		this.socket = socket;
@@ -46,6 +52,7 @@ export default class MPClient {
 		this.dimension = 0;
 
 		this.diggingAt = new Vec3();
+		this.windows = new FunkyArray<number, Window>();
 	}
 
 	private mapCoordsFromFace(pos:Vec3, face:number) {
@@ -264,6 +271,20 @@ export default class MPClient {
 	private handlePacketBlockPlacement(packet:PacketPlayerBlockPlacement) {
 		this.diggingAt.set(packet.x, packet.y, packet.z);
 		this.mapCoordsFromFace(this.diggingAt, packet.face);
+
+		const blockClicked = Block.blocks[this.entity.world.getBlockId(packet.x, packet.y, packet.z)];
+		if (!this.entity.crouching && blockClicked && blockClicked.behaviour.interactable()) {
+			if (blockClicked.is(Block.chest)) {
+				const tileEntity = this.entity.world.getChunk(packet.x >> 4, packet.z >> 4).getTileEntity(packet.x, packet.y, packet.z);
+				if (tileEntity && tileEntity instanceof TileEntityChest) {
+					const window = new WindowChest(tileEntity.inventory);
+					this.windows.set(window.windowId, window);
+					window.openWindow(this);
+				}
+			}
+
+			return;
+		}
 
 		if (this.entity.entityAABB.intersects(AABB.getAABB(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, this.diggingAt.x + 1, this.diggingAt.y + 1, this.diggingAt.z + 1))) {
 			return;

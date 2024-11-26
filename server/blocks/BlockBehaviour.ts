@@ -9,6 +9,7 @@ export default class BlockBehaviour implements IBlockBehaviour {
 
 	public placed(world:World, x:number, y:number, z:number) {}
 	public destroyed(world:World, x:number, y:number, z:number) {}
+	public interactable() { return false; }
 	public neighborBlockChange(world:World, x:number, y:number, z:number, blockId:number) {}
 	public droppedItem(blockId:number) { return blockId; }
 	public droppedCount(blockId:number) { return 1; }

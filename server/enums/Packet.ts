@@ -43,6 +43,7 @@ enum Packet {
 	EntityLookRelativeMove = 0x21,
 	EntityTeleport = 0x22,
 
+	OpenWindow = 0x64,
 	CloseWindow = 0x65,
 	WindowClick = 0x66,
 	SetSlot = 0x67,
