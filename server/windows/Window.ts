@@ -1,5 +1,6 @@
 import InventoryType from "../enums/InventoryType";
 import Inventory from "../inventories/Inventory";
+import ItemStack from "../inventories/ItemStack";
 import MPClient from "../MPClient";
 import PacketOpenWindow from "../packets/OpenWindow";
 
@@ -9,6 +10,8 @@ export default abstract class Window {
 	public windowId = Window.WINDOW_GLOBAL_COUNTER++;
 	public inventoryType: InventoryType;
 	public inventory: Inventory;
+
+	public cursorItemStack?: ItemStack;
 
 	public constructor(inventoryType: InventoryType, inventory: Inventory) {
 		this.inventoryType = inventoryType;

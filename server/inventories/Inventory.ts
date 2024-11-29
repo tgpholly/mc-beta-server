@@ -1,14 +1,19 @@
 import { Endian, IReader, IWriter, createWriter } from "bufferstuff";
+import FunkyArray from "funky-array";
 import IInventory from "./IInventory";
 import ItemStack from "./ItemStack";
 
 export default class Inventory implements IInventory {
+	private static CHANGE_HANDLER_ROLLING_HANDLE_ID = 0;
+
+	public changeHandlers:FunkyArray<number, (itemStack: ItemStack) => void>;
 	public itemStacks:Array<ItemStack | null>;
 
 	private size:number;
 	private name:string;
 
 	public constructor(size:number, name:string) {
+		this.changeHandlers = new FunkyArray<number, (itemStack: ItemStack) => void>();
 		this.itemStacks = new Array<ItemStack | null>();
 		for (let i = 0; i < size; i++) {
 			this.itemStacks.push(null);
@@ -16,6 +21,18 @@ export default class Inventory implements IInventory {
 
 		this.size = size;
 		this.name = name;
+	}
+
+	registerChangeHandler(changeHandler: (itemStack: ItemStack) => void) {
+		const changeHandlerHandle = Inventory.CHANGE_HANDLER_ROLLING_HANDLE_ID++;
+		this.changeHandlers.set(changeHandlerHandle, changeHandler);
+		return changeHandlerHandle;
+	}
+
+	unregisterChangeHandler(changeHandlerHandle: number) {
+		if (this.changeHandlers.has(changeHandlerHandle)) {
+			this.changeHandlers.remove(changeHandlerHandle);
+		}
 	}
 
 	public fromSave(reader:IReader) {

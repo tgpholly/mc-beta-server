@@ -31,6 +31,8 @@ import FunkyArray from "funky-array";
 import Window from "./windows/Window";
 import WindowChest from "./windows/WindowChest";
 import TileEntityChest from "./tileentities/TileEntityChest";
+import WindowCrafting from "./windows/WindowCrafting";
+import PacketWindowClick from "./packets/WindowClick";
 
 export default class MPClient {
 	private readonly mcServer:MinecraftServer;
@@ -95,8 +97,9 @@ export default class MPClient {
 			//case Packets.UseBed: break;
 			case Packet.Animation:            this.handlePacketAnimation(new PacketAnimation().readData(reader)); break;
 			case Packet.EntityAction:         this.handlePacketEntityAction(new PacketEntityAction().readData(reader)); break;
+			case Packet.WindowClick:		  this.handleWindowClick(new PacketWindowClick().readData(reader)); break;
 			case Packet.DisconnectKick:       this.handleDisconnectKick(); break;
-			default: return Console.printWarn(`UNIMPLEMENTED PACKET: ${Packet[packetId]}`);
+			default: return Console.printWarn(`UNIMPLEMENTED PACKET: ${Packet[packetId]} 0x${packetId < 10 ? `0${packetId.toString(16).toUpperCase()}` : packetId.toString(16).toUpperCase()}`);
 		}
 
 		if (reader.readOffset < reader.length - 1) {
@@ -281,6 +284,10 @@ export default class MPClient {
 					this.windows.set(window.windowId, window);
 					window.openWindow(this);
 				}
+			} else if (blockClicked.is(Block.craftingTable)) {
+				const window = new WindowCrafting(this);
+				this.windows.set(window.windowId, window);
+				window.openWindow(this);
 			}
 
 			return;
@@ -348,6 +355,10 @@ export default class MPClient {
 		this.send(new PacketPlayerPositionLook(8, 70, 70.62, 8, 0, 0, false).writeData());
 
 		this.entity.forceUpdatePlayerChunks();
+	}
+
+	private handleWindowClick(windowClick: PacketWindowClick) {
+		console.log(windowClick);
 	}
 
 	private handleDisconnectKick() {

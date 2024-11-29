@@ -12,6 +12,7 @@ import BlockBehaviourTallGrass from "./BlockBehaviourTallGrass";
 import IBlockBehaviour from "./IBlockBehaviour";
 import World from "../World";
 import BlockBehaviourChest from "./BlockBehaviourChest";
+import BlockBehaviourCraftingTable from "./BlockBehaviourCraftingTable";
 
 abstract class Behaviour {
 	public static base = new BlockBehaviour();
@@ -25,6 +26,8 @@ abstract class Behaviour {
 	public static flower = new BlockBehaviourFlower();
 
 	public static chest = new BlockBehaviourChest();
+
+	public static craftingTable = new BlockBehaviourCraftingTable();
 
 	public static redstoneOre = new BlockBehaviourRedstoneOre();
 
@@ -222,7 +225,7 @@ export default class Block {
 	static readonly redstoneDust = new Block(55).setHardness(0).setBlockName("Redstone Dust"); // TODO: Behavior script
 	static readonly diamondOre = new Block(56).setHardness(3).setBlockName("Diamond Ore"); // TODO: Behavior script
 	static readonly diamondBlock = new Block(57).setHardness(5).setBlockName("Diamond Block"); // TODO: Behavior script
-	static readonly craftingTable = new Block(58).setHardness(2.5).setBlockName("Crafting Table"); // TODO: Behavior script
+	static readonly craftingTable = new Block(58).setHardness(2.5).setBehaviour(Behaviour.craftingTable).setBlockName("Crafting Table"); // TODO: Behavior script
 	static readonly wheatCrop = new Block(59).setHardness(0).setBlockName("Wheet Crop"); // TODO: Behavior script
 	static readonly farmland = new Block(60).setHardness(0.6).setBlockName("Farmland"); // TODO: Behavior script
 	static readonly furnaceIdle = new Block(61).setHardness(3.5).setBlockName("Furnace"); // TODO: Behavior script

@@ -1,6 +1,7 @@
 enum TileEntityType {
 	Unknown,
-	Chest
+	Chest,
+	CraftingTable
 }
 
 export default TileEntityType;

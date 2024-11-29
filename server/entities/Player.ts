@@ -42,6 +42,7 @@ export default class Player extends EntityLiving {
 		this.inventory.setSlotItemStack(37, new ItemStack(Item.ironPickaxe, 1));
 		this.inventory.setSlotItemStack(38, new ItemStack(Item.ironShovel, 1));
 		this.inventory.setSlotItemStack(39, new ItemStack(Item.ironAxe, 1));
+		this.inventory.setSlotItemStack(41, new ItemStack(Block.craftingTable, 1));
 		this.inventory.setSlotItemStack(42, new ItemStack(Block.chest, 32));
 		this.inventory.setSlotItemStack(43, new ItemStack(Block.dirt, 32));
 

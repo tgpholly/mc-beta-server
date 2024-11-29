@@ -1,6 +1,6 @@
 enum InventoryType {
 	Chest = 0,
-	Workbench = 1,
+	CraftingTable = 1,
 	Furnace = 2,
 	Dispenser = 3
 }

@@ -42,13 +42,19 @@ export default class PacketWindowClick implements IPacket {
 		this.actionNumber = reader.readShort();
 		this.shift = reader.readBool();
 		this.itemId = reader.readShort();
-		this.itemCount = reader.readByte();
-		this.itemUses = reader.readShort();
+		if (this.itemId !== -1) {
+			this.itemCount = reader.readByte();
+			this.itemUses = reader.readShort();
+		}
 
 		return this;
 	}
 
 	public writeData() {
-		return createWriter(Endian.BE, 4).writeUByte(this.packetId).writeByte(this.windowId).writeShort(this.slot).writeBool(this.rightClick).writeShort(this.actionNumber).writeShort(this.itemId).writeByte(this.itemCount).writeShort(this.itemUses).toBuffer();
+		const writer = createWriter(Endian.BE, 4).writeUByte(this.packetId).writeByte(this.windowId).writeShort(this.slot).writeBool(this.rightClick).writeShort(this.actionNumber).writeShort(this.itemId);
+		if (this.itemId !== -1) {
+			writer.writeByte(this.itemCount).writeShort(this.itemUses);
+		}
+		return writer.toBuffer();
 	}
 }
