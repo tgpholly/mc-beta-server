@@ -248,7 +248,7 @@ export default class MinecraftServer {
 			socket.write(new PacketPlayerPositionLook(clientEntity.position.x, clientEntity.position.y, clientEntity.position.y + 0.62, clientEntity.position.z, 0, 0, false).writeData());
 
 			const playerInventory = clientEntity.inventory;
-			socket.write(new PacketWindowItems(0, playerInventory.getInventorySize(), playerInventory.constructInventoryPayload()).writeData());
+			socket.write(new PacketWindowItems(0, playerInventory.getInventorySize(), playerInventory.constructInventoryPayload(0)).writeData());
 		} else {
 			socket.write(new PacketDisconnectKick("Failed to find world to put player in.").writeData());
 		}

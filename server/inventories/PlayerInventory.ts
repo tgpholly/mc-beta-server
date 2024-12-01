@@ -3,6 +3,7 @@ import ItemStack from "./ItemStack";
 import PacketSetSlot from "../packets/SetSlot";
 import PacketWindowItems from "../packets/WindowItems";
 import Player from "../entities/Player";
+import { createWriter, Endian } from "bufferstuff";
 
 export default class PlayerInventory extends Inventory {
 	private player:Player;

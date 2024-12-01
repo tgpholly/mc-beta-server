@@ -33,6 +33,7 @@ import WindowChest from "./windows/WindowChest";
 import TileEntityChest from "./tileentities/TileEntityChest";
 import WindowCrafting from "./windows/WindowCrafting";
 import PacketWindowClick from "./packets/WindowClick";
+import PlayerCombinedInventory from "./inventories/PlayerCombinedInventory";
 
 export default class MPClient {
 	private readonly mcServer:MinecraftServer;
@@ -280,12 +281,12 @@ export default class MPClient {
 			if (blockClicked.is(Block.chest)) {
 				const tileEntity = this.entity.world.getChunk(packet.x >> 4, packet.z >> 4).getTileEntity(packet.x, packet.y, packet.z);
 				if (tileEntity && tileEntity instanceof TileEntityChest) {
-					const window = new WindowChest(tileEntity.inventory);
+					const window = new WindowChest(PlayerCombinedInventory.FromExisting(this, tileEntity.inventory, tileEntity.inventory.name));
 					this.windows.set(window.windowId, window);
 					window.openWindow(this);
 				}
 			} else if (blockClicked.is(Block.craftingTable)) {
-				const window = new WindowCrafting(this);
+				const window = new WindowCrafting(new PlayerCombinedInventory(this, 10, "Crafting"));
 				this.windows.set(window.windowId, window);
 				window.openWindow(this);
 			}

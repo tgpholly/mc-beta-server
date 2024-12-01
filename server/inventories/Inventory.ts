@@ -9,8 +9,8 @@ export default class Inventory implements IInventory {
 	public changeHandlers:FunkyArray<number, (itemStack: ItemStack) => void>;
 	public itemStacks:Array<ItemStack | null>;
 
-	private size:number;
-	private name:string;
+	public readonly size:number;
+	public readonly name:string;
 
 	public constructor(size:number, name:string) {
 		this.changeHandlers = new FunkyArray<number, (itemStack: ItemStack) => void>();
@@ -55,18 +55,13 @@ export default class Inventory implements IInventory {
 	}
 
 	addItemStack(itemStack:ItemStack) {
-		throw new Error("Adding items to non player inventories is unimplemented.");
-		// Check bottom inventory row (hotbar) first.
-		/*let workingItemStack:ItemStack | null;
-		for (let slotId = 9; slotId <= 35; slotId++) {
+		for (let slotId = 0; slotId < this.itemStacks.length; slotId++) {
 			if (itemStack.size === 0) {
 				break;
 			}
 
-			if ((workingItemStack = this.itemStacks[slotId]) != null) {
-				workingItemStack.insert(itemStack);
-			}
-		}*/
+			this.itemStacks[slotId]?.insert(itemStack);
+		}
 	}
 
 	getInventoryName() {
@@ -100,9 +95,10 @@ export default class Inventory implements IInventory {
 		return this;
 	}
 
-	private calculateInventoryPayloadSize() {
+	public calculateInventoryPayloadSize(skip: number) {
 		let bufferSize = 0;
-		for (const stack of this.itemStacks) {
+		for (let i = skip; i < this.itemStacks.length; i++) {
+			const stack = this.itemStacks[i];
 			if (stack) {
 				bufferSize += 5; // short + byte + short
 			} else {
@@ -112,9 +108,10 @@ export default class Inventory implements IInventory {
 		return bufferSize;
 	}
 
-	constructInventoryPayload() {
-		const writer = createWriter(Endian.BE, this.calculateInventoryPayloadSize());
-		for (const stack of this.itemStacks) {
+	constructInventoryPayload(skip: number) {
+		const writer = createWriter(Endian.BE, this.calculateInventoryPayloadSize(skip));
+		for (let i = skip; i < this.itemStacks.length; i++) {
+			const stack = this.itemStacks[i];
 			writer.writeShort(stack == null ? -1 : stack.itemID);
 			if (stack != null) {
 				writer.writeByte(stack.size);
