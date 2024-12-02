@@ -4,7 +4,7 @@ import Inventory from "./Inventory";
 import ItemStack from "./ItemStack";
 
 export default class PlayerCombinedInventory extends Inventory {
-	private static PLAYER_INVENTORY_OFFSET = 10;
+	private static PLAYER_INVENTORY_OFFSET = 9;
 
 	private mpClient: MPClient;
 
@@ -16,7 +16,7 @@ export default class PlayerCombinedInventory extends Inventory {
 
 	private getSlotId(slotId: number) {
 		if (slotId > this.size - 1) {
-			return slotId + PlayerCombinedInventory.PLAYER_INVENTORY_OFFSET;
+			return (slotId - this.size) + PlayerCombinedInventory.PLAYER_INVENTORY_OFFSET;
 		} else {
 			return slotId;
 		}
@@ -25,6 +25,7 @@ export default class PlayerCombinedInventory extends Inventory {
 	static FromExisting(mpClient: MPClient, inventory: Inventory, name: string) {
 		const linkedInventory = new PlayerCombinedInventory(mpClient, inventory.size, name);
 		linkedInventory.itemStacks = inventory.itemStacks;
+		linkedInventory.changeHandlers = inventory.changeHandlers;
 		return linkedInventory;
 	}
 
@@ -55,7 +56,11 @@ export default class PlayerCombinedInventory extends Inventory {
 	// }
 
 	getSlotItemStack(slotId:number) {
-		return this.itemStacks[slotId] ?? this.mpClient.entity.inventory.itemStacks[this.getSlotId(slotId)];
+		if (slotId > this.size - 1) {
+			return this.mpClient.entity.inventory.itemStacks[this.getSlotId(slotId)];
+		}
+
+		return this.itemStacks[slotId];
 	}
 
 	dropEmptyItemStacks() {

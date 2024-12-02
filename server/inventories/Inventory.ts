@@ -6,14 +6,14 @@ import ItemStack from "./ItemStack";
 export default class Inventory implements IInventory {
 	private static CHANGE_HANDLER_ROLLING_HANDLE_ID = 0;
 
-	public changeHandlers:FunkyArray<number, (itemStack: ItemStack) => void>;
+	public changeHandlers:FunkyArray<number, (itemStack: number) => void>;
 	public itemStacks:Array<ItemStack | null>;
 
 	public readonly size:number;
 	public readonly name:string;
 
 	public constructor(size:number, name:string) {
-		this.changeHandlers = new FunkyArray<number, (itemStack: ItemStack) => void>();
+		this.changeHandlers = new FunkyArray<number, (itemStack: number) => void>();
 		this.itemStacks = new Array<ItemStack | null>();
 		for (let i = 0; i < size; i++) {
 			this.itemStacks.push(null);
@@ -23,7 +23,7 @@ export default class Inventory implements IInventory {
 		this.name = name;
 	}
 
-	registerChangeHandler(changeHandler: (itemStack: ItemStack) => void) {
+	registerChangeHandler(changeHandler: (slotId: number) => void) {
 		const changeHandlerHandle = Inventory.CHANGE_HANDLER_ROLLING_HANDLE_ID++;
 		this.changeHandlers.set(changeHandlerHandle, changeHandler);
 		return changeHandlerHandle;
@@ -54,6 +54,10 @@ export default class Inventory implements IInventory {
 		}
 	}
 
+	sendSlotUpdate(slotId: number) {
+		this.changeHandlers.forEach(handler => handler(slotId));
+	}
+
 	addItemStack(itemStack:ItemStack) {
 		for (let slotId = 0; slotId < this.itemStacks.length; slotId++) {
 			if (itemStack.size === 0) {
@@ -61,6 +65,7 @@ export default class Inventory implements IInventory {
 			}
 
 			this.itemStacks[slotId]?.insert(itemStack);
+			this.changeHandlers.forEach(handler => handler(slotId));
 		}
 	}
 
@@ -81,6 +86,7 @@ export default class Inventory implements IInventory {
 			const itemStack = this.itemStacks[i];
 			if (itemStack?.size === 0) {
 				this.itemStacks[i] = null;
+				this.changeHandlers.forEach(handler => handler(i));
 			}
 		}
 	}
@@ -91,6 +97,7 @@ export default class Inventory implements IInventory {
 		}
 
 		this.itemStacks[slotId] = itemStack;
+		this.changeHandlers.forEach(handler => handler(slotId));
 
 		return this;
 	}

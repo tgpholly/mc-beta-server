@@ -5,7 +5,7 @@ import MPClient from "../MPClient";
 import Window from "./Window";
 
 export default class WindowCrafting extends Window {
-	public constructor(inventory: PlayerCombinedInventory) {
-		super(InventoryType.CraftingTable, inventory, 45);
+	public constructor(mpClient: MPClient, inventory: PlayerCombinedInventory) {
+		super(InventoryType.CraftingTable, inventory, mpClient, 45);
 	}
 }

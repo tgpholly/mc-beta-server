@@ -128,7 +128,7 @@ export default class MinecraftServer {
 		this.worlds = new FunkyArray<number, World>();
 		//this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new NewOverworld(worldSeed)));
 		this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new HillyGenerator(worldSeed)));
-		this.worlds.set(-1, new World(this.saveManager, -1, worldSeed, new NetherGenerator(worldSeed)));
+		//this.worlds.set(-1, new World(this.saveManager, -1, worldSeed, new NetherGenerator(worldSeed)));
 		
 		(async () => {
 			const generateStartTime = Date.now();

@@ -34,6 +34,7 @@ import TileEntityChest from "./tileentities/TileEntityChest";
 import WindowCrafting from "./windows/WindowCrafting";
 import PacketWindowClick from "./packets/WindowClick";
 import PlayerCombinedInventory from "./inventories/PlayerCombinedInventory";
+import PacketCloseWindow from "./packets/CloseWindow";
 
 export default class MPClient {
 	private readonly mcServer:MinecraftServer;
@@ -98,6 +99,7 @@ export default class MPClient {
 			//case Packets.UseBed: break;
 			case Packet.Animation:            this.handlePacketAnimation(new PacketAnimation().readData(reader)); break;
 			case Packet.EntityAction:         this.handlePacketEntityAction(new PacketEntityAction().readData(reader)); break;
+			case Packet.CloseWindow:		  this.handleWindowClose(new PacketCloseWindow().readData(reader)); break;
 			case Packet.WindowClick:		  this.handleWindowClick(new PacketWindowClick().readData(reader)); break;
 			case Packet.DisconnectKick:       this.handleDisconnectKick(); break;
 			default: return Console.printWarn(`UNIMPLEMENTED PACKET: ${Packet[packetId]} 0x${packetId < 10 ? `0${packetId.toString(16).toUpperCase()}` : packetId.toString(16).toUpperCase()}`);
@@ -221,6 +223,26 @@ export default class MPClient {
 		}
 	}
 
+	private throwItemStack(itemStack: ItemStack) {
+		const itemEntity = new EntityItem(this.entity.world, new ItemStack(itemStack.itemID, 1, itemStack.damage));
+		itemEntity.pickupDelay = 10;
+		itemEntity.position.set(this.entity.position.x, this.entity.position.y + 1.50, this.entity.position.z);
+		itemEntity.motion.set(
+			-Math.sin((this.entity.rotation.yaw / 180) * Math.PI) * Math.cos((this.entity.rotation.pitch / 180) * Math.PI) * 0.3,
+			-Math.sin((this.entity.rotation.pitch / 180) * Math.PI) * 0.3 + 0.1,
+			Math.cos((this.entity.rotation.yaw / 180) * Math.PI) * Math.cos((this.entity.rotation.pitch / 180) * Math.PI) * 0.3
+		);
+		// Add random motion vector
+		const twoPIRandomised = Math.random() * Math.PI * 2;
+		const rngMult = 0.02 * Math.random();
+		itemEntity.motion.add(
+			Math.cos(twoPIRandomised) * rngMult,
+			(Math.random() - Math.random()) * 0.1,
+			Math.sin(twoPIRandomised) * rngMult
+		);
+		this.entity.world.addEntity(itemEntity);
+	}
+
 	// TODO: Cap how far away a player is able to break blocks
 	private handlePacketPlayerDigging(packet:PacketPlayerDigging) {
 
@@ -228,24 +250,7 @@ export default class MPClient {
 		if (packet.status === 4) {
 			const itemStack = this.getHeldItemStack();
 			if (itemStack !== null && itemStack.size > 0) {
-				itemStack.size--;
-				const itemEntity = new EntityItem(this.entity.world, new ItemStack(itemStack.itemID, 1, itemStack.damage));
-				itemEntity.pickupDelay = 10;
-				itemEntity.position.set(this.entity.position.x, this.entity.position.y + 1.50, this.entity.position.z);
-				itemEntity.motion.set(
-					-Math.sin((this.entity.rotation.yaw / 180) * Math.PI) * Math.cos((this.entity.rotation.pitch / 180) * Math.PI) * 0.3,
-					-Math.sin((this.entity.rotation.pitch / 180) * Math.PI) * 0.3 + 0.1,
-					Math.cos((this.entity.rotation.yaw / 180) * Math.PI) * Math.cos((this.entity.rotation.pitch / 180) * Math.PI) * 0.3
-				);
-				// Add random motion vector
-				const twoPIRandomised = Math.random() * Math.PI * 2;
-				const rngMult = 0.02 * Math.random();
-				itemEntity.motion.add(
-					Math.cos(twoPIRandomised) * rngMult,
-					(Math.random() - Math.random()) * 0.1,
-					Math.sin(twoPIRandomised) * rngMult
-				);
-				this.entity.world.addEntity(itemEntity);
+				this.throwItemStack(itemStack.split(1));
 
 				this.inventory.dropEmptyItemStacks();
 				this.inventory.sendUpdatedStacks([this.holdingIndex]);
@@ -281,14 +286,14 @@ export default class MPClient {
 			if (blockClicked.is(Block.chest)) {
 				const tileEntity = this.entity.world.getChunk(packet.x >> 4, packet.z >> 4).getTileEntity(packet.x, packet.y, packet.z);
 				if (tileEntity && tileEntity instanceof TileEntityChest) {
-					const window = new WindowChest(PlayerCombinedInventory.FromExisting(this, tileEntity.inventory, tileEntity.inventory.name));
+					const window = new WindowChest(this, PlayerCombinedInventory.FromExisting(this, tileEntity.inventory, tileEntity.inventory.name));
 					this.windows.set(window.windowId, window);
-					window.openWindow(this);
+					window.openWindow();
 				}
 			} else if (blockClicked.is(Block.craftingTable)) {
-				const window = new WindowCrafting(new PlayerCombinedInventory(this, 10, "Crafting"));
+				const window = new WindowCrafting(this, new PlayerCombinedInventory(this, 10, "Crafting"));
 				this.windows.set(window.windowId, window);
-				window.openWindow(this);
+				window.openWindow();
 			}
 
 			return;
@@ -359,7 +364,28 @@ export default class MPClient {
 	}
 
 	private handleWindowClick(windowClick: PacketWindowClick) {
-		console.log(windowClick);
+		const window = this.windows.get(windowClick.windowId);
+		if (!window) {
+			return this.send(new PacketDisconnectKick("Attempted to perform action on window that does not exist.").writeData());
+		}
+
+		window.clickedWindow(windowClick.slot, windowClick.rightClick);
+	}
+
+	private handleWindowClose(closeWindow: PacketCloseWindow) {
+		if (closeWindow.windowId === 0) {
+			return;
+		}
+
+		const window = this.windows.get(closeWindow.windowId);
+		if (window) {
+			window.closeWindow();
+			if (window.cursorItemStack && window.cursorItemStack.size > 0) {
+				this.throwItemStack(window.cursorItemStack);
+				window.cursorItemStack = null;
+			}
+			this.windows.remove(window.windowId);
+		}
 	}
 
 	private handleDisconnectKick() {

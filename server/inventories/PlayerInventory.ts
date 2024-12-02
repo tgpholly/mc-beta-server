@@ -24,6 +24,7 @@ export default class PlayerInventory extends Inventory {
 			} else {
 				buffer = new PacketSetSlot(0, slotId, slotItem.itemID, slotItem.size, slotItem.damage).writeData();
 			}
+			this.changeHandlers.forEach(handler => handler(slotId));
 
 			updateBuffer = Buffer.concat([updateBuffer, buffer], updateBuffer.length + buffer.length);
 		}
