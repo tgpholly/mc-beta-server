@@ -45,6 +45,6 @@ export default class PacketPlayerPositionLook implements IPacket {
 	}
 
 	public writeData() {
-		return createWriter(Endian.BE, 42).writeUByte(this.packetId).writeDouble(this.x).writeDouble(this.y).writeDouble(this.stance).writeDouble(this.z).writeFloat(this.yaw).writeFloat(this.pitch).writeBool(this.onGround).toBuffer();
+		return createWriter(Endian.BE, 42).writeUByte(this.packetId).writeDouble(this.x).writeDouble(this.stance).writeDouble(this.y).writeDouble(this.z).writeFloat(this.yaw).writeFloat(this.pitch).writeBool(this.onGround).toBuffer();
 	}
 }
