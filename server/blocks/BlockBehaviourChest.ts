@@ -11,6 +11,10 @@ export default class BlockBehaviourChest extends BlockBehaviour {
 
 	public destroyed(world:World, x:number, y:number, z:number) {
 		const chunk = world.getChunk(x >> 4, z >> 4);
+		const tileEntity = chunk.getTileEntity(x, y, z);
+		if (tileEntity != null) {
+			// TODO: Drop items
+		}
 		chunk.removeTileEntity(x, y, z);
 	}
 

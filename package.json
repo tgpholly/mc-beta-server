@@ -4,10 +4,9 @@
 	"description": "",
 	"main": "index.ts",
 	"scripts": {
-		"dev:updateCheck": "check-outdated",
-		"dev:run": "nodemon --watch './**/*.ts' index.ts",
-		"build": "ncc build index.ts -o build",
-		"_clean": "tsc --build --clean"
+		"updateCheck": "check-outdated",
+		"dev": "bun --watch index.ts",
+		"build": "ncc build index.ts -o build"
 	},
 	"repository": {
 		"type": "git",
@@ -24,15 +23,12 @@
 		"bufferstuff": "^1.8.0",
 		"dyetty": "^1.0.1",
 		"funky-array": "^1.0.0",
-		"hsconsole": "^1.0.2"
+		"hsconsole": "^1.1.0"
 	},
 	"devDependencies": {
-		"@types/node": "^22.10.2",
+		"@types/bun": "^1.2.8",
 		"@vercel/ncc": "^0.38.3",
-		"check-outdated": "^2.12.0",
-		"nodemon": "^3.1.9",
-		"ts-loader": "^9.5.1",
-		"ts-node": "^10.9.2",
-		"typescript": "^5.7.2"
+		"check-outdated": "^2.13.0",
+		"typescript": "^5.8.2"
 	}
 }

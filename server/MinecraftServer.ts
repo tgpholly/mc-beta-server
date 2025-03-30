@@ -42,7 +42,7 @@ export default class MinecraftServer {
 
 	private config:Config;
 	private server:Server;
-	private readonly serverClock:NodeJS.Timeout;
+	private readonly serverClock:NodeJS.Timer;
 	private tickCounter:number = 0;
 	private clients:FunkyArray<string, MPClient>;
 	public worlds:FunkyArray<number, World>;
@@ -269,7 +269,7 @@ export default class MinecraftServer {
 			mpClient.entity.world.removeEntity(mpClient.entity);
 			this.clients.remove(mpClient.entity.username);
 			this.sendChatMessage(`\u00a7e${mpClient.entity.username} left the game`);
-			if (typeof(err) !== "boolean") {
+			if (err) {
 				Console.printError(`Client disconnected with error: ${err.message}`);
 			}
 		}

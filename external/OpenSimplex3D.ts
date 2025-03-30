@@ -75,8 +75,10 @@ export function makeNoise3D(clientSeed: number): Noise3D {
   for (let i = 0; i < 256; i++) source[i] = i;
   let seed = new Uint32Array(1);
   seed[0] = clientSeed;
+  // @ts-ignore
   seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
   for (let i = 255; i >= 0; i--) {
+    // @ts-ignore
     seed = shuffleSeed(seed);
     const r = new Uint32Array(1);
     r[0] = (seed[0] + 31) % (i + 1);
