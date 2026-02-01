@@ -4,21 +4,20 @@
 	"description": "",
 	"main": "index.ts",
 	"scripts": {
-		"updateCheck": "check-outdated",
 		"dev": "tsx watch index.ts",
 		"build": "ncc build index.ts -o build"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tgpholly/mc-beta-server.git"
+		"url": "git+https://git.eusv.net/tgpholly/mc-beta-server.git"
 	},
 	"keywords": [],
 	"author": "tgpholly",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/tgpholly/mc-beta-server/issues"
+		"url": "https://git.eusv.net/tgpholly/mc-beta-server/issues"
 	},
-	"homepage": "https://github.com/tgpholly/mc-beta-server#readme",
+	"homepage": "https://git.eusv.net/tgpholly/mc-beta-server#readme",
 	"dependencies": {
 		"bufferstuff": "^1.9.2",
 		"dyetty": "^1.0.1",
