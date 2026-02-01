@@ -24,6 +24,8 @@ import SaveCompressionType from "./enums/SaveCompressionType";
 import World from "./World";
 import WorldSaveManager from "./WorldSaveManager";
 import TextColorParser from "./TextColorParser";
+import NewOverworld from "./generators/terrain/NewOverworld";
+import ExperimentalGenerator from "./generators/terrain/ExperimentalGenerators";
 
 const chunkFrom = -15;
 const chunkTo = 15;
@@ -42,7 +44,7 @@ export default class MinecraftServer {
 
 	private config:Config;
 	private server:Server;
-	private readonly serverClock:NodeJS.Timer;
+	private readonly serverClock: NodeJS.Timeout;
 	private tickCounter:number = 0;
 	private clients:FunkyArray<string, MPClient>;
 	public worlds:FunkyArray<number, World>;
@@ -126,7 +128,7 @@ export default class MinecraftServer {
 		}
 
 		this.worlds = new FunkyArray<number, World>();
-		//this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new NewOverworld(worldSeed)));
+		//this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new ExperimentalGenerator(worldSeed)));
 		this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new HillyGenerator(worldSeed)));
 		//this.worlds.set(-1, new World(this.saveManager, -1, worldSeed, new NetherGenerator(worldSeed)));
 		
@@ -260,7 +262,7 @@ export default class MinecraftServer {
 	}
 
 	onConnection(socket:Socket) {
-		let mpClient:MPClient;
+		let mpClient: MPClient;
 		const setMPClient = (mpclient:MPClient) => {
 			mpClient = mpclient;
 		}
@@ -277,10 +279,10 @@ export default class MinecraftServer {
 		socket.on("error", playerDisconnect.bind(this));
 
 		socket.on("data", chunk => {
-			const reader = createReader(Endian.BE, chunk);
+			const reader = createReader(Endian.BE, chunk as Buffer);
 
 			// Let mpClient take over if it exists
-			if (mpClient instanceof MPClient) {
+			if (mpClient !== undefined) {
 				mpClient.handlePacket(reader);
 				return;
 			}

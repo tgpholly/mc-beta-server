@@ -27,7 +27,6 @@ export default class World {
 	public players:FunkyArray<number, Player>;
 	public playerHitboxes:FunkyArray<number, AABB>;
 
-	public queuedChunkBlocks:Array<IQueuedUpdate>;
 	public queuedUpdates:Array<IQueuedUpdate>;
 	public generator:IGenerator;
 
@@ -44,7 +43,6 @@ export default class World {
 		this.entites = new FunkyArray<number, IEntity>();
 		this.players = new FunkyArray<number, Player>();
 		this.playerHitboxes = new  FunkyArray<number, AABB>();
-		this.queuedChunkBlocks = new Array<IQueuedUpdate>();
 		this.queuedUpdates = new Array<IQueuedUpdate>();
 		this.generator = generator;
 	}

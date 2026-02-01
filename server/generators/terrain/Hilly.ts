@@ -136,13 +136,13 @@ export default class HillyGenerator implements IGenerator {
 					}
 				}
 
-				const queuedChunkBlocks = chunk.world.queuedChunkBlocks;
-				if (queuedChunkBlocks.length > 0) {
+				const queuedUpdates = chunk.world.queuedUpdates;
+				if (queuedUpdates.length > 0) {
 					const thisCoordPair = Chunk.CreateCoordPair(chunk.x, chunk.z);
-					for (let i = queuedChunkBlocks.length - 1; i >= 0; i--) {
-						const blockUpdate = queuedChunkBlocks[i];
+					for (let i = queuedUpdates.length - 1; i >= 0; i--) {
+						const blockUpdate = queuedUpdates[i];
 						if (blockUpdate instanceof QueuedBlockUpdate && blockUpdate.coordPair === thisCoordPair) {
-							queuedChunkBlocks.splice(i, 1);
+							queuedUpdates.splice(i, 1);
 							chunk.setBlockWithMetadata(blockUpdate.blockId, blockUpdate.metadata, blockUpdate.x, blockUpdate.y, blockUpdate.z);
 						}
 					}

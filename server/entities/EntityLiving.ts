@@ -11,11 +11,14 @@ export default class EntityLiving extends Entity {
 	public headHeight:number;
 	public lastHealth:number;
 
+	public invulnerable:boolean;
+
 	public constructor(world:World, isPlayer:boolean = false) {
 		super(world, isPlayer);
 
 		this.timeInWater = 0;
 		this.headHeight = 1.62;
+		this.invulnerable = false;
 
 		this.lastHealth = this.health;
 	}
@@ -33,6 +36,9 @@ export default class EntityLiving extends Entity {
 	}
 
 	damageFrom(damage:number, entity?:IEntity) {
+		if (this.invulnerable) {
+			return;
+		}
 		super.damageFrom(damage, entity);
 		if (this.health <= 0) {
 			this.isDead = true;

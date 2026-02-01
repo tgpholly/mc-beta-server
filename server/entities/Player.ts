@@ -36,6 +36,8 @@ export default class Player extends EntityLiving {
 		this.loadedChunks = new Array<number>();
 		this.justUnloaded = new Array<number>();
 
+		this.invulnerable = false;
+
 		this.inventory = new PlayerInventory(this);
 
 		this.inventory.setSlotItemStack(36, new ItemStack(Item.ironSword, 1));
@@ -178,6 +180,12 @@ export default class Player extends EntityLiving {
 		if (!this.motion.isZero) {
 			this.entityAABB.move(this.position);
 		}
+
+		// if (Math.floor(this.position.x) !== Math.floor(this.lastPosition.x) ||
+		// 	Math.floor(this.position.z) !== Math.floor(this.lastPosition.z)) {
+		// 	// @ts-ignore
+		// 	this.world.generator.getInfluence(Math.floor(this.position.x), Math.floor(this.position.z));
+		// }
 
 		super.onTick();
 

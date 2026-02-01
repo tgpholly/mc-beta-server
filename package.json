@@ -5,7 +5,7 @@
 	"main": "index.ts",
 	"scripts": {
 		"updateCheck": "check-outdated",
-		"dev": "bun --watch index.ts",
+		"dev": "tsx watch index.ts",
 		"build": "ncc build index.ts -o build"
 	},
 	"repository": {
@@ -20,15 +20,17 @@
 	},
 	"homepage": "https://github.com/tgpholly/mc-beta-server#readme",
 	"dependencies": {
-		"bufferstuff": "^1.8.0",
+		"bufferstuff": "^1.9.2",
 		"dyetty": "^1.0.1",
 		"funky-array": "^1.0.0",
-		"hsconsole": "^1.1.0"
+		"hsconsole": "^1.1.0",
+		"typescript-cubic-spline": "^1.0.1"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.2.8",
-		"@vercel/ncc": "^0.38.3",
-		"check-outdated": "^2.13.0",
-		"typescript": "^5.8.2"
+		"@types/node": "^25.2.0",
+		"@vercel/ncc": "^0.38.4",
+		"node": "^25.5.0",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3"
 	}
 }

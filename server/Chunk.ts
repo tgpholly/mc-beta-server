@@ -111,11 +111,7 @@ export default class Chunk {
 
 	public queueBlockUpdateForOuterChunkBlock(blockId:number, metadata:number, x:number, y:number, z:number) {
 		const cPair = Chunk.CreateCoordPair(this.x + (x >> 4), this.z + (z >> 4));
-		if (this.world.chunks.keys.includes(cPair)) {
-			this.world.queuedUpdates.push(new QueuedBlockUpdate(cPair, x & 0xf, y, z & 0xf, blockId, metadata));
-		} else {
-			this.world.queuedChunkBlocks.push(new QueuedBlockUpdate(cPair, x & 0xf, y, z & 0xf, blockId, metadata));
-		}
+		this.world.queuedUpdates.push(new QueuedBlockUpdate(cPair, x & 0xf, y, z & 0xf, blockId, metadata));
 	}
 
 	public setBlock(blockId:number, x:number, y:number, z:number) {
