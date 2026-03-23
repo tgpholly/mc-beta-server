@@ -33,12 +33,6 @@ export default class PacketMapChunk implements IPacket {
 
 	public writeData() {
 		return new Promise<Buffer>((resolve, reject) => {
-			// TODO: Use block and sky nibble array buffers
-			/*const fakeLighting = createWriter(Endian.BE, 16384);
-			for (let i = 0; i < 16384; i++) {
-				fakeLighting.writeUByte(0xFF);
-			}*/
-
 			const data = createWriter(Endian.BE)
 				// Write Chunk Blocks
 				.writeBuffer(this.chunk.getBlockBuffer())
