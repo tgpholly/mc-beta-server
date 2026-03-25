@@ -1,5 +1,4 @@
 import InventoryType from "../enums/InventoryType";
-import Inventory from "../inventories/Inventory";
 import ItemStack from "../inventories/ItemStack";
 import PlayerCombinedInventory from "../inventories/PlayerCombinedInventory";
 import MPClient from "../MPClient";

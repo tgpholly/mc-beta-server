@@ -6,7 +6,6 @@ import EntityItem from "./EntityItem";
 import EntityLiving from "./EntityLiving";
 import Item from "../items/Item";
 import ItemStack from "../inventories/ItemStack";
-import MinecraftServer from "../MinecraftServer";
 import MPClient from "../MPClient";
 import PacketCollectItem from "../packets/CollectItem";
 import PacketEntityEquipment from "../packets/EntityEquipment";
@@ -19,19 +18,17 @@ import World from "../World";
 const CHUNK_LOAD_RANGE = 15;
 
 export default class Player extends EntityLiving {
-	public username:string;
-	private server:MinecraftServer;
-	private firstUpdate:boolean;
-	public loadedChunks:Array<number>;
-	public justUnloaded:Array<number>;
-	public mpClient?:MPClient;
-	public inventory:PlayerInventory;
+	public username: string;
+	private firstUpdate: boolean;
+	public loadedChunks: Array<number>;
+	public justUnloaded:  Array<number>;
+	public mpClient?: MPClient;
+	public inventory: PlayerInventory;
 
-	public trackedEquipment:Array<ItemStack | null>;
+	public trackedEquipment: Array<ItemStack | null>;
 
-	public constructor(server:MinecraftServer, world:World, username:string) {
+	public constructor(world: World, username: string) {
 		super(world, true);
-		this.server = server;
 		this.firstUpdate = true;
 		this.loadedChunks = new Array<number>();
 		this.justUnloaded = new Array<number>();
@@ -57,13 +54,13 @@ export default class Player extends EntityLiving {
 		this.position.set(8, 64, 8);
 	}
 
-	public fromSave(reader:IReader) {
+	public fromSave(reader: IReader) {
 		super.fromSave(reader);
 
 		this.inventory.fromSave(reader);
 	}
 	
-	public toSave(writer:IWriter) {
+	public toSave(writer: IWriter) {
 		super.toSave(writer);
 
 		this.inventory.toSave(writer);
@@ -74,7 +71,7 @@ export default class Player extends EntityLiving {
 		this.firstUpdate = true;
 	}
 
-	public itemPickup(entity:Entity, stackSize:number) {
+	public itemPickup(entity: Entity, _stackSize: number) {
 		if (!this.isDead) {
 			if (entity instanceof EntityItem) {
 				this.sendToAllNearby(new PacketCollectItem(entity.entityId, this.entityId).writeData());
@@ -136,7 +133,7 @@ export default class Player extends EntityLiving {
 		}
 	}
 
-	private getEquipmentForVirtualSlot(slot:number) {
+	private getEquipmentForVirtualSlot(slot: number) {
 		if (slot === 0) {
 			return this.mpClient?.getHeldItemStack() ?? null;
 		} else {
@@ -146,16 +143,16 @@ export default class Player extends EntityLiving {
 		return null;
 	}
 
-	private sendEquipment(equipmentId:number, itemStack:ItemStack | null) {
+	private sendEquipment(equipmentId: number, itemStack: ItemStack | null) {
 		this.sendToNearby(new PacketEntityEquipment(this.entityId, equipmentId, itemStack == null ? -1 : itemStack.itemID, itemStack == null ? 0 : itemStack.damage).writeData());
 	}
 
-	private sendEquipmentPlayer(mpClient:MPClient, equipmentId:number, itemStack:ItemStack | null) {
+	private sendEquipmentPlayer(mpClient: MPClient, equipmentId: number, itemStack: ItemStack | null) {
 		mpClient.send(new PacketEntityEquipment(this.entityId, equipmentId, itemStack == null ? -1 : itemStack.itemID, itemStack == null ? 0 : itemStack.damage).writeData());
 	}
 
 	// For login.
-	public sendPlayerEquipment(playerToSendTo:Player) {
+	public sendPlayerEquipment(playerToSendTo: Player) {
 		const mpClient = playerToSendTo.mpClient;
 		if (mpClient == null) {
 			return;

@@ -36,24 +36,27 @@ export class MetadataWriter {
 				case MetadataFieldType.Float: size += 4; break;
 				case MetadataFieldType.String:
 					if (typeof(entry.value) === "string") {
-						size += 2 + entry.value.length * 2; break;
+						size += 2 + entry.value.length * 2;
 					} else {
 						throw "Non-string value assigned to a String MetadataEntry";
 					}
+					break;
 				case MetadataFieldType.Item:
 					if (entry.value instanceof ItemStack) {
 						size += 5;
 					} else {
 						throw "Non-ItemStack value assigned to an ItemStack MetadataEntry";
 					}
+					break;
 				case MetadataFieldType.Vector:
 					if (entry.value instanceof Vec3) {
 						size += 12;
 					} else {
 						throw "Non-Vec3 value assigned to an Vec3 MetadataEntry";
 					}
+					break;
 			}
-		})
+		});
 
 		return size;
 	}

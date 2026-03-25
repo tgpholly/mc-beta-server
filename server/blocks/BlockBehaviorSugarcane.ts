@@ -4,7 +4,7 @@ import BlockBehaviour from "./BlockBehaviour";
 import World from "../World";
 
 export default class BlockBehaviourSugarcane extends BlockBehaviour {
-	public neighborBlockChange(world:World, x:number, y:number, z:number, blockId:number) {
+	public neighborBlockChange(world:World, x:number, y:number, z:number, _blockId:number) {
 		const block = world.getBlockId(x, y - 1, z);
 		if (block === 0 || block !== Block.sugarcane.blockId) {
 			world.setBlockWithNotify(x, y, z, 0);

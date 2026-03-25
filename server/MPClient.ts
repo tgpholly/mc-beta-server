@@ -37,29 +37,27 @@ import PlayerCombinedInventory from "./inventories/PlayerCombinedInventory";
 import PacketCloseWindow from "./packets/CloseWindow";
 
 export default class MPClient {
-	private readonly mcServer:MinecraftServer;
-	private readonly socket:Socket;
-	public entity:Player;
-	private inventory:PlayerInventory;
-	private dimension:number;
+	private readonly mcServer: MinecraftServer;
+	private readonly socket: Socket;
+	public entity: Player;
+	private inventory: PlayerInventory;
 
-	private holdingIndex:number = 36; // First hotbar slot.
-	private diggingAt:Vec3;
+	private holdingIndex: number = 36; // First hotbar slot.
+	private diggingAt: Vec3;
 
 	private windows: FunkyArray<number, Window>;
 
-	public constructor(mcServer:MinecraftServer, socket:Socket, entity:Player) {
+	public constructor(mcServer: MinecraftServer, socket: Socket, entity: Player) {
 		this.mcServer = mcServer;
 		this.socket = socket;
 		this.entity = entity;
 		this.inventory = entity.inventory;
-		this.dimension = 0;
 
 		this.diggingAt = new Vec3();
 		this.windows = new FunkyArray<number, Window>();
 	}
 
-	private mapCoordsFromFace(pos:Vec3, face:number) {
+	private mapCoordsFromFace(pos: Vec3, face: number) {
 		switch (face) {
 			case 0:
 				pos.y--;
@@ -82,7 +80,7 @@ export default class MPClient {
 		}
 	}
 
-	public handlePacket(reader:IReader) {
+	public handlePacket(reader: IReader) {
 		const packetId = reader.readUByte();
 
 		switch (packetId) {
@@ -110,7 +108,7 @@ export default class MPClient {
 		}
 	}
 	
-	private handleUseEntity(packet:PacketUseEntity) {
+	private handleUseEntity(packet: PacketUseEntity) {
 		const attacker = this.entity.world.entites.get(packet.userId);
 		const target = this.entity.world.entites.get(packet.targetId);
 		if (attacker && target && target instanceof EntityLiving) {
@@ -120,7 +118,7 @@ export default class MPClient {
 		}
 	}
 
-	private handleChat(packet:PacketChat) {
+	private handleChat(packet: PacketChat) {
 		const message = packet.message.split(" ");
 		if (message[0].startsWith("/")) {
 			packet.message = "";
@@ -158,7 +156,7 @@ export default class MPClient {
 		this.mcServer.sendToAllClients(packet.writeData());
 	}
 
-	private handlePacketRespawn(packet:PacketRespawn) {
+	private handlePacketRespawn(packet: PacketRespawn) {
 		if (!this.entity.isDead && packet.dimension === this.entity.world.dimension) {
 			return;
 		}
@@ -171,7 +169,7 @@ export default class MPClient {
 		this.entity.world.removeEntity(this.entity);
 		const oldPlayerEntity = this.entity;
 
-		this.entity = new Player(this.mcServer, world, oldPlayerEntity.username);
+		this.entity = new Player(world, oldPlayerEntity.username);
 		this.entity.position.set(8, 70, 8);
 		world.addEntity(this.entity);
 
@@ -183,27 +181,27 @@ export default class MPClient {
 		this.entity.forceUpdatePlayerChunks();
 	}
 
-	private handlePacketPlayer(packet:PacketPlayer) {
+	private handlePacketPlayer(packet: PacketPlayer) {
 		this.entity.onGround = packet.onGround;
 	}
 
-	private handlePacketPlayerPosition(packet:PacketPlayerPosition) {
+	private handlePacketPlayerPosition(packet: PacketPlayerPosition) {
 		this.entity.onGround = packet.onGround;
 		this.entity.position.set(packet.x, packet.y, packet.z);
 	}
 
-	private handlePacketPlayerLook(packet:PacketPlayerLook) {
+	private handlePacketPlayerLook(packet: PacketPlayerLook) {
 		this.entity.onGround = packet.onGround;
 		this.entity.rotation.set(packet.yaw, packet.pitch);
 	}
 
-	private handlePacketPlayerPositionLook(packet:PacketPlayerPositionLook) {
+	private handlePacketPlayerPositionLook(packet: PacketPlayerPositionLook) {
 		this.entity.onGround = packet.onGround;
 		this.entity.position.set(packet.x, packet.y, packet.z);
 		this.entity.rotation.set(packet.yaw, packet.pitch);
 	}
 
-	private breakBlock(brokenBlockId:number, x:number, y:number, z:number) {
+	private breakBlock(brokenBlockId: number, x: number, y: number, z: number) {
 		const metadata = this.entity.world.getBlockMetadata(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z);
 		this.entity.world.setBlockWithNotify(this.diggingAt.x, this.diggingAt.y, this.diggingAt.z, 0);
 		//this.inventory.addItemStack(new ItemStack(Block.blockBehaviours[brokenBlockId].droppedItem(brokenBlockId), 1, metadata));
@@ -244,7 +242,7 @@ export default class MPClient {
 	}
 
 	// TODO: Cap how far away a player is able to break blocks
-	private handlePacketPlayerDigging(packet:PacketPlayerDigging) {
+	private handlePacketPlayerDigging(packet: PacketPlayerDigging) {
 
 		// Special drop item case
 		if (packet.status === 4) {
@@ -277,7 +275,7 @@ export default class MPClient {
 		return this.inventory.getSlotItemStack(this.holdingIndex);
 	}
 
-	private handlePacketBlockPlacement(packet:PacketPlayerBlockPlacement) {
+	private handlePacketBlockPlacement(packet: PacketPlayerBlockPlacement) {
 		this.diggingAt.set(packet.x, packet.y, packet.z);
 		this.mapCoordsFromFace(this.diggingAt, packet.face);
 
@@ -320,7 +318,7 @@ export default class MPClient {
 		}
 	}
 
-	private handlePacketHoldingChange(packet:PacketHoldingChange) {
+	private handlePacketHoldingChange(packet: PacketHoldingChange) {
 		if (packet.slotId < 0 || packet.slotId > 8) {
 			this.send(new PacketDisconnectKick("Out of Bounds Holding Index!").writeData());
 			this.socket.end();
@@ -331,12 +329,12 @@ export default class MPClient {
 	}
 
 	// Animation start
-	private handlePacketAnimation(packet:PacketAnimation) {
+	private handlePacketAnimation(packet: PacketAnimation) {
 		// Forward this packet to all nearby clients
 		this.entity.world.sendToNearbyClients(this.entity, packet.writeData());
 	}
 
-	private handlePacketEntityAction(packet:PacketEntityAction) {
+	private handlePacketEntityAction(packet: PacketEntityAction) {
 		// Forward this packet to all nearby clients
 		switch (packet.action) {
 			case 1: this.entity.crouching = true; break;
@@ -345,7 +343,7 @@ export default class MPClient {
 		}
 	}
 
-	private switchDimension(dimension:number) {
+	private switchDimension(dimension: number) {
 		const world = this.mcServer.worlds.get(dimension);
 		if (world == undefined) {
 			return;
@@ -392,7 +390,7 @@ export default class MPClient {
 		this.socket.end();
 	}
 
-	public send(buffer:Buffer) {
+	public send(buffer: Buffer) {
 		this.socket.write(buffer);
 	}
 }

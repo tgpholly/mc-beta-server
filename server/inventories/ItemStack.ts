@@ -107,7 +107,7 @@ export default class ItemStack {
 		}
 	}
 
-	public damageItem(damageAmount:number, entity:IEntity) {
+	public damageItem(damageAmount: number, _entity: IEntity) {
 		if (!this.canBeDamaged) {
 			return;
 		}

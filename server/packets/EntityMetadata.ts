@@ -19,7 +19,7 @@ export default class PacketEntityMetadata implements IPacket {
 		}
 	}
 
-	public readData(reader:IReader) {
+	public readData(_reader: IReader) {
 		// TODO: EntityMetadata reading
 
 		return this;

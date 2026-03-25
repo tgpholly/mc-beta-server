@@ -114,7 +114,7 @@ export default class Entity implements IEntity {
 			  .writeByte(this.health);
 	}
 
-	async collidesWithPlayer(aabb:AABB) {
+	async collidesWithPlayer(_aabb:AABB) {
 		let collidedWith:Player | undefined;
 		await this.world.players.forEach(player => {
 			if (this.entityAABB.intersects(player.entityAABB) && collidedWith == undefined) {
@@ -186,9 +186,9 @@ export default class Entity implements IEntity {
 		}
 	}
 
-	private constrainRot(rot:number) {
-		return Math.min(Math.max(rot, -128), 127);
-	}
+	// private constrainRot(rot:number) {
+	// 	return Math.min(Math.max(rot, -128), 127);
+	// }
 
 	private sendPositionUpdate() {
 		this.absPosition.set(Math.floor(this.position.x * 32), Math.floor(this.position.y * 32), Math.floor(this.position.z * 32));
@@ -229,7 +229,7 @@ export default class Entity implements IEntity {
 		}
 	}
 
-	fall(distance:number) {
+	fall(_distance:number) {
 		// TODO: Entity falling mount transfer
 	}
 

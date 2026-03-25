@@ -10,7 +10,7 @@ export default class EntityMetadata {
 
 	private static readonly ENTITY_ON_FIRE = 1 << 0;
 	private static readonly ENTITY_CROUCHING = 1 << 1;
-	private static readonly ENTITY_RIDING = 1 << 2;
+	// TODO: private static readonly ENTITY_RIDING = 1 << 2;
 
 	writeMetadata() {
 		const metadataWriter = new MetadataWriter();

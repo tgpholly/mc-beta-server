@@ -20,21 +20,21 @@ export default class World {
 	private static READ_CHUNKS_FROM_DISK = true;
 
 	private readonly saveManager;
-	private readonly chunksOnDisk:Array<number>;
+	private readonly chunksOnDisk: Array<number>;
 
-	public chunks:FunkyArray<number, Chunk>;
-	public entites:FunkyArray<number, IEntity>;
-	public players:FunkyArray<number, Player>;
-	public playerHitboxes:FunkyArray<number, AABB>;
+	public chunks: FunkyArray<number, Chunk>;
+	public entites: FunkyArray<number, IEntity>;
+	public players: FunkyArray<number, Player>;
+	public playerHitboxes: FunkyArray<number, AABB>;
 
-	public queuedUpdates:Array<IQueuedUpdate>;
-	public generator:IGenerator;
+	public queuedUpdates: Array<IQueuedUpdate>;
+	public generator: IGenerator;
 
 	public random:Random = new Random();
 
 	public readonly dimension:number;
 
-	public constructor(saveManager:WorldSaveManager, dimension:number, seed:number, generator:IGenerator) {
+	public constructor(saveManager: WorldSaveManager, dimension: number, generator: IGenerator) {
 		this.dimension = dimension;
 		this.saveManager = saveManager;
 		this.chunksOnDisk = this.saveManager.chunksOnDisk.get(dimension) ?? new Array<number>;
@@ -243,7 +243,7 @@ export default class World {
 		this.notifyNeighborBlockOfChange(x, y, z + 1, blockId);
 	}
 
-	private notifyNeighborBlockOfChange(x:number, y:number, z:number, blockId:number) {
+	private notifyNeighborBlockOfChange(x:number, y:number, z:number, _blockId:number) {
 		const block = Block.blocks[this.getBlockId(x, y, z)];
 		if (block != null && block.blockId !== 0) {
 			block.neighborBlockChange(this, x, y, z, block.blockId);

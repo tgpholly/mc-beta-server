@@ -8,15 +8,15 @@ export default abstract class TileEntity {
 	public readonly forBlock: Block;
 	public readonly pos: Vec3;
 
-	public constructor(type: TileEntityType, forBlock: Block, pos: Vec3) {
+	protected constructor(type: TileEntityType, forBlock: Block, pos: Vec3) {
 		this.type = type;
 		this.forBlock = forBlock;
 		this.pos = pos;
 	}
 
-	public fromSave(reader:IReader) {}
+	public fromSave(_reader: IReader) {}
 
-	public toSave(writer:IWriter) {
+	public toSave(writer: IWriter) {
 		writer.writeUByte(this.type);
 		writer.writeUByte(this.pos.x).writeUByte(this.pos.y).writeUByte(this.pos.z);
 	}

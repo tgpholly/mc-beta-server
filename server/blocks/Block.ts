@@ -79,6 +79,7 @@ export default class Block {
 		Block.hardness[this.blockId] = value;
 	}
 
+	// @ts-ignore
 	private get blockAABB() {
 		return Block.blockAABBs[this.blockId];
 	}

@@ -1,4 +1,3 @@
-import { Noise2D, makeNoise2D } from "../../../external/OpenSimplex2D";
 import { Noise3D, makeNoise3D } from "../../../external/OpenSimplex3D";
 import Block from "../../blocks/Block";
 import Chunk from "../../Chunk";
@@ -26,10 +25,6 @@ export default class NetherGenerator implements IGenerator {
 		this.generator3 = this.createGenerator3D();
 		this.generator4 = this.createGenerator3D();
 		this.generator5 = this.createGenerator3D();
-	}
-
-	private createGenerator2D() {
-		return makeNoise2D(this.seedGenerator() * Number.MAX_SAFE_INTEGER);
 	}
 
 	private createGenerator3D() {

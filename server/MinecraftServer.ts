@@ -7,7 +7,6 @@ import Chunk from "./Chunk";
 import FunkyArray from "funky-array";
 import HillyGenerator from "./generators/terrain/Hilly";
 import MPClient from "./MPClient";
-import NetherGenerator from "./generators/terrain/Nether";
 import Packet from "./enums/Packet";
 import PacketKeepAlive from "./packets/KeepAlive";
 import PacketHandshake from "./packets/Handshake";
@@ -24,8 +23,6 @@ import SaveCompressionType from "./enums/SaveCompressionType";
 import World from "./World";
 import WorldSaveManager from "./WorldSaveManager";
 import TextColorParser from "./TextColorParser";
-import NewOverworld from "./generators/terrain/NewOverworld";
-import ExperimentalGenerator from "./generators/terrain/ExperimentalGenerators";
 
 const chunkFrom = -15;
 const chunkTo = 15;
@@ -69,7 +66,7 @@ export default class MinecraftServer {
 		this.config = config;
 
 		let shuttingDown = false;
-		process.on("SIGINT", async (signal) => {
+		process.on("SIGINT", async (_signal) => {
 			if (shuttingDown) {
 				return;
 			}
@@ -129,7 +126,7 @@ export default class MinecraftServer {
 
 		this.worlds = new FunkyArray<number, World>();
 		//this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new ExperimentalGenerator(worldSeed)));
-		this.worlds.set(0, new World(this.saveManager, 0, worldSeed, new HillyGenerator(worldSeed)));
+		this.worlds.set(0, new World(this.saveManager, 0, new HillyGenerator(worldSeed)));
 		//this.worlds.set(-1, new World(this.saveManager, -1, worldSeed, new NetherGenerator(worldSeed)));
 		
 		(async () => {
@@ -216,7 +213,7 @@ export default class MinecraftServer {
 		const dimension = 0;
 		const world = this.worlds.get(dimension);
 		if (world instanceof World) {
-			const clientEntity = new Player(this, world, loginPacket.username);
+			const clientEntity = new Player(world, loginPacket.username);
 			if (this.saveManager.playerDataOnDisk.includes(clientEntity.username)) {
 				clientEntity.fromSave(await this.saveManager.readPlayerDataFromDisk(clientEntity.username));
 			} else {
