@@ -16,16 +16,19 @@ jobs:
         node-version: [25.x]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
+    - name: Check for outdated dependencies
+      continue-on-error: true
+      run: npm outdated
     - run: npm run build
     - name: Upload build artifact
       uses: actions/upload-artifact@v3
       with:
-        name: 'mc-beta-server'
+        name: 'server.js'
         path: 'build/index.js'
